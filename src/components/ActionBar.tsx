@@ -4,13 +4,15 @@ import {
   X, 
   ArrowRight, 
   ChevronLeft, 
-  ChevronRight 
+  ChevronRight,
+  ShieldX
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 type ActionBarProps = {
   onApprove: () => void;
   onDeny: () => void;
+  onQuarantine: () => void;
   onForward: () => void;
   currentInvoice: number;
   totalInvoices: number;
@@ -21,6 +23,7 @@ type ActionBarProps = {
 export const ActionBar = ({
   onApprove,
   onDeny,
+  onQuarantine,
   onForward,
   currentInvoice,
   totalInvoices,
@@ -32,19 +35,27 @@ export const ActionBar = ({
       <div className="flex space-x-2">
         <Button 
           onClick={onApprove} 
-          className="bg-green-500 hover:bg-green-600 text-white"
+          className="bg-green-500 hover:bg-green-600 text-white min-w-[100px]"
         >
           <Check className="h-4 w-4 mr-2" /> Approve
         </Button>
         <Button 
           onClick={onDeny}
           variant="destructive"
+          className="min-w-[100px]"
         >
           <X className="h-4 w-4 mr-2" /> Deny
         </Button>
         <Button 
+          onClick={onQuarantine}
+          className="bg-[#FEF7CD] hover:bg-[#F6E68E] text-amber-800 min-w-[100px]"
+        >
+          <ShieldX className="h-4 w-4 mr-2" /> Quarantine
+        </Button>
+        <Button 
           onClick={onForward}
           variant="outline"
+          className="min-w-[100px]"
         >
           <ArrowRight className="h-4 w-4 mr-2" /> Forward
         </Button>

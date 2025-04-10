@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Check, AlertTriangle, X, Lock, Pencil } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -196,7 +195,7 @@ export const InvoiceData = () => {
                 </button>
               </div>
             ) : (
-              <>
+              <div className="flex justify-between items-center">
                 <div 
                   className="text-base text-slate-900 mt-1"
                   onClick={() => !field.locked && startEditing(field)}
@@ -204,26 +203,24 @@ export const InvoiceData = () => {
                   {field.value}
                 </div>
 
-                <div className="mt-2 flex items-center">
+                <div className="flex items-center mt-1">
                   <div className="text-xs text-slate-500 mr-2">Confidence:</div>
-                  <div className="flex-1 flex items-center">
-                    <div className="relative w-20 h-6 border border-slate-300 rounded overflow-hidden mr-2">
-                      <div 
-                        className={cn(
-                          "absolute inset-0 h-full",
-                          field.confidence >= 90 ? "bg-green-500" :
-                          field.confidence >= 75 ? "bg-blue-500" :
-                          "bg-amber-500"
-                        )}
-                        style={{ width: `${field.confidence}%` }}
-                      ></div>
-                      <div className="absolute inset-0 flex items-center justify-center text-xs font-medium text-white">
-                        {field.confidence}%
-                      </div>
+                  <div className="relative w-20 h-6 border border-slate-300 rounded overflow-hidden">
+                    <div 
+                      className={cn(
+                        "absolute inset-0 h-full",
+                        field.confidence >= 90 ? "bg-green-500" :
+                        field.confidence >= 75 ? "bg-blue-500" :
+                        "bg-amber-500"
+                      )}
+                      style={{ width: `${field.confidence}%` }}
+                    ></div>
+                    <div className="absolute inset-0 flex items-center justify-center text-xs font-medium text-white">
+                      {field.confidence}%
                     </div>
                   </div>
                 </div>
-              </>
+              </div>
             )}
           </div>
         ))}

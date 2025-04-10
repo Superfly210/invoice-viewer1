@@ -35,6 +35,14 @@ const Index = () => {
     });
   };
 
+  const handleQuarantine = () => {
+    toast({
+      title: "Invoice Quarantined",
+      description: "The invoice has been placed in quarantine for further review.",
+      variant: "warning",
+    });
+  };
+
   const handleForward = () => {
     toast({
       title: "Invoice Forwarded",
@@ -61,6 +69,7 @@ const Index = () => {
         <ActionBar 
           onApprove={handleApprove}
           onDeny={handleDeny}
+          onQuarantine={handleQuarantine}
           onForward={handleForward}
           currentInvoice={currentInvoice}
           totalInvoices={totalInvoices}
