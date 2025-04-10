@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { ActionBar } from "@/components/ActionBar";
@@ -39,7 +38,8 @@ const Index = () => {
     toast({
       title: "Invoice Quarantined",
       description: "The invoice has been placed in quarantine for further review.",
-      variant: "warning",
+      // Fix the type error by using default variant
+      variant: "default",
     });
   };
 
