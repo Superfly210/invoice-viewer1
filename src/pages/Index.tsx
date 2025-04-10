@@ -4,17 +4,19 @@ import { Sidebar } from "@/components/Sidebar";
 import { ActionBar } from "@/components/ActionBar";
 import { InvoiceData } from "@/components/InvoiceData";
 import { PDFViewer } from "@/components/PDFViewer";
+import { EmailViewer } from "@/components/EmailViewer";
 import { MetadataPanel } from "@/components/MetadataPanel";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
-import { FileTextIcon, TableIcon } from "lucide-react";
+import { FileTextIcon, TableIcon, MailIcon, FileIcon } from "lucide-react";
 
 const Index = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [currentInvoice, setCurrentInvoice] = useState(3);
   const [totalInvoices, setTotalInvoices] = useState(12);
   const [activeTab, setActiveTab] = useState("data");
+  const [activeDocTab, setActiveDocTab] = useState("pdf");
   const { toast } = useToast();
 
   const handleApprove = () => {
@@ -91,7 +93,24 @@ const Index = () => {
           <ResizableHandle withHandle />
           <ResizablePanel defaultSize={50} minSize={30}>
             <div className="h-full overflow-auto p-4">
-              <PDFViewer />
+              <Tabs value={activeDocTab} onValueChange={setActiveDocTab} className="w-full">
+                <TabsList className="grid w-full grid-cols-2 mb-4">
+                  <TabsTrigger value="pdf" className="flex items-center">
+                    <FileIcon className="h-4 w-4 mr-2" />
+                    Invoice PDF
+                  </TabsTrigger>
+                  <TabsTrigger value="email" className="flex items-center">
+                    <MailIcon className="h-4 w-4 mr-2" />
+                    Email Message
+                  </TabsTrigger>
+                </TabsList>
+                <TabsContent value="pdf" className="mt-0">
+                  <PDFViewer />
+                </TabsContent>
+                <TabsContent value="email" className="mt-0">
+                  <EmailViewer />
+                </TabsContent>
+              </Tabs>
             </div>
           </ResizablePanel>
         </ResizablePanelGroup>

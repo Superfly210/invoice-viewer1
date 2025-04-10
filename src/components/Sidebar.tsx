@@ -28,7 +28,7 @@ export const Sidebar = ({ collapsed, setCollapsed }: SidebarProps) => {
     >
       <div className="p-4 border-b border-slate-200 flex justify-between items-center">
         {!collapsed && (
-          <h2 className="font-bold text-slate-800 text-lg">Invoice Eye</h2>
+          <h2 className="font-bold text-slate-800 text-lg">Invoice Viewer</h2>
         )}
         <button
           onClick={toggleSidebar}
@@ -65,7 +65,7 @@ export const Sidebar = ({ collapsed, setCollapsed }: SidebarProps) => {
       <div className="p-4 border-t border-slate-200">
         {!collapsed && (
           <div className="text-xs text-slate-500">
-            InvoiceEye Verify v1.0
+            Invoice Viewer v1.0
           </div>
         )}
       </div>

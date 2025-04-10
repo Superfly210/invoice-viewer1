@@ -206,18 +206,22 @@ export const InvoiceData = () => {
 
                 <div className="mt-2 flex items-center">
                   <div className="text-xs text-slate-500 mr-2">Confidence:</div>
-                  <div className="flex-1 bg-slate-200 h-1.5 rounded-full overflow-hidden">
-                    <div 
-                      className={cn(
-                        "h-full rounded-full",
-                        field.confidence >= 90 ? "bg-green-500" :
-                        field.confidence >= 75 ? "bg-blue-500" :
-                        "bg-amber-500"
-                      )}
-                      style={{ width: `${field.confidence}%` }}
-                    ></div>
+                  <div className="flex-1 flex items-center">
+                    <div className="relative w-20 h-6 border border-slate-300 rounded overflow-hidden mr-2">
+                      <div 
+                        className={cn(
+                          "absolute inset-0 h-full",
+                          field.confidence >= 90 ? "bg-green-500" :
+                          field.confidence >= 75 ? "bg-blue-500" :
+                          "bg-amber-500"
+                        )}
+                        style={{ width: `${field.confidence}%` }}
+                      ></div>
+                      <div className="absolute inset-0 flex items-center justify-center text-xs font-medium text-white">
+                        {field.confidence}%
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-xs text-slate-500 ml-2">{field.confidence}%</div>
                 </div>
               </>
             )}
