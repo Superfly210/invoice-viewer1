@@ -6,11 +6,15 @@ import { InvoiceData } from "@/components/InvoiceData";
 import { PDFViewer } from "@/components/PDFViewer";
 import { MetadataPanel } from "@/components/MetadataPanel";
 import { useToast } from "@/hooks/use-toast";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
+import { FileTextIcon, TableIcon } from "lucide-react";
 
 const Index = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [currentInvoice, setCurrentInvoice] = useState(3);
   const [totalInvoices, setTotalInvoices] = useState(12);
+  const [activeTab, setActiveTab] = useState("data");
   const { toast } = useToast();
 
   const handleApprove = () => {
@@ -61,17 +65,36 @@ const Index = () => {
           onPrevious={handlePrevious}
           onNext={handleNext}
         />
-        <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
-          <div className="w-full lg:w-1/2 p-4 overflow-auto border-r border-slate-200">
-            <InvoiceData />
-          </div>
-          <div className="w-full lg:w-1/2 p-4 overflow-auto border-l border-slate-200">
-            <PDFViewer />
-          </div>
-        </div>
-        <div className="p-4 border-t border-slate-200 h-64 overflow-auto">
-          <MetadataPanel />
-        </div>
+        <ResizablePanelGroup direction="horizontal" className="flex-1">
+          <ResizablePanel defaultSize={50} minSize={30}>
+            <div className="h-full overflow-auto p-4">
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <TabsList className="grid w-full grid-cols-2 mb-4">
+                  <TabsTrigger value="data" className="flex items-center">
+                    <TableIcon className="h-4 w-4 mr-2" />
+                    Invoice Data
+                  </TabsTrigger>
+                  <TabsTrigger value="metadata" className="flex items-center">
+                    <FileTextIcon className="h-4 w-4 mr-2" />
+                    Metadata
+                  </TabsTrigger>
+                </TabsList>
+                <TabsContent value="data" className="mt-0">
+                  <InvoiceData />
+                </TabsContent>
+                <TabsContent value="metadata" className="mt-0">
+                  <MetadataPanel />
+                </TabsContent>
+              </Tabs>
+            </div>
+          </ResizablePanel>
+          <ResizableHandle withHandle />
+          <ResizablePanel defaultSize={50} minSize={30}>
+            <div className="h-full overflow-auto p-4">
+              <PDFViewer />
+            </div>
+          </ResizablePanel>
+        </ResizablePanelGroup>
       </main>
     </div>
   );
