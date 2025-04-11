@@ -12,9 +12,16 @@ import { useTheme } from "./ThemeProvider";
 type SidebarProps = {
   collapsed: boolean;
   setCollapsed: (collapsed: boolean) => void;
+  activeSection: string;
+  onSectionChange: (section: string) => void;
 };
 
-export const Sidebar = ({ collapsed, setCollapsed }: SidebarProps) => {
+export const Sidebar = ({ 
+  collapsed, 
+  setCollapsed, 
+  activeSection,
+  onSectionChange 
+}: SidebarProps) => {
   const { theme, toggleTheme } = useTheme();
   
   const toggleSidebar = () => {
@@ -24,9 +31,9 @@ export const Sidebar = ({ collapsed, setCollapsed }: SidebarProps) => {
   const [adminOpen, setAdminOpen] = useState(false);
 
   const menuItems = [
-    { label: "Invoice Signer", icon: FileCheck, active: false },
-    { label: "Invoice Reviewer", icon: FileText, active: true },
-    { label: "Invoice Summary", icon: FilePieChart, active: false },
+    { id: "signer", label: "Invoice Signer", icon: FileCheck, active: activeSection === "signer" },
+    { id: "reviewer", label: "Invoice Reviewer", icon: FileText, active: activeSection === "reviewer" },
+    { id: "summary", label: "Invoice Summary", icon: FilePieChart, active: activeSection === "summary" },
   ];
 
   return (
@@ -60,11 +67,11 @@ export const Sidebar = ({ collapsed, setCollapsed }: SidebarProps) => {
       <nav className="flex-1 py-4 overflow-y-auto">
         <ul className="space-y-1">
           {menuItems.map((item) => (
-            <li key={item.label}>
-              <a
-                href="#"
+            <li key={item.id}>
+              <button
+                onClick={() => onSectionChange(item.id)}
                 className={cn(
-                  "flex items-center px-4 py-3 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors",
+                  "w-full flex items-center px-4 py-3 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors",
                   item.active && 
                   "bg-blue-50 dark:bg-blue-900/30 border-l-4 border-blue-500 font-semibold text-blue-700 dark:text-blue-400"
                 )}
@@ -78,7 +85,7 @@ export const Sidebar = ({ collapsed, setCollapsed }: SidebarProps) => {
                   )} 
                 />
                 {!collapsed && <span className="ml-3">{item.label}</span>}
-              </a>
+              </button>
             </li>
           ))}
         </ul>

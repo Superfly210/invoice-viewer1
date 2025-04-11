@@ -97,33 +97,34 @@ export const PDFViewer = () => {
             transformOrigin: 'top center'
           }}
         >
+          {/* Invoice content - always using light theme styles */}
           <div className="p-8 min-h-[1100px]">
             <div className="border-b-2 border-slate-300 pb-4 mb-8">
-              <div className="text-2xl font-bold mb-1">INVOICE</div>
+              <div className="text-2xl font-bold mb-1 text-black">INVOICE</div>
               <div className="text-lg font-semibold text-slate-600">Norbridge Supply Inc.</div>
             </div>
             
             <div className="grid grid-cols-2 gap-8 mb-8">
               <div>
                 <div className="text-sm text-slate-500 mb-1">BILL TO:</div>
-                <div className="font-medium">Alberta Field Operations</div>
-                <div>123 Energy Way</div>
-                <div>Calgary, AB T2P 0L4</div>
-                <div>Canada</div>
+                <div className="font-medium text-black">Alberta Field Operations</div>
+                <div className="text-black">123 Energy Way</div>
+                <div className="text-black">Calgary, AB T2P 0L4</div>
+                <div className="text-black">Canada</div>
               </div>
               
               <div className="space-y-2">
                 <div className="flex justify-between">
-                  <span className="font-medium">Invoice Number:</span>
-                  <span>INV-009876</span>
+                  <span className="font-medium text-black">Invoice Number:</span>
+                  <span className="text-black">INV-009876</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="font-medium">Invoice Date:</span>
-                  <span>2024-11-18</span>
+                  <span className="font-medium text-black">Invoice Date:</span>
+                  <span className="text-black">2024-11-18</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="font-medium">Due Date:</span>
-                  <span>2024-12-18</span>
+                  <span className="font-medium text-black">Due Date:</span>
+                  <span className="text-black">2024-12-18</span>
                 </div>
               </div>
             </div>
@@ -131,34 +132,34 @@ export const PDFViewer = () => {
             <table className="w-full mb-8 border-collapse">
               <thead>
                 <tr className="bg-slate-100">
-                  <th className="text-left p-2 border border-slate-300">Item</th>
-                  <th className="text-left p-2 border border-slate-300">Description</th>
-                  <th className="text-right p-2 border border-slate-300">Quantity</th>
-                  <th className="text-right p-2 border border-slate-300">Unit Price</th>
-                  <th className="text-right p-2 border border-slate-300">Amount</th>
+                  <th className="text-left p-2 border border-slate-300 text-black">Item</th>
+                  <th className="text-left p-2 border border-slate-300 text-black">Description</th>
+                  <th className="text-right p-2 border border-slate-300 text-black">Quantity</th>
+                  <th className="text-right p-2 border border-slate-300 text-black">Unit Price</th>
+                  <th className="text-right p-2 border border-slate-300 text-black">Amount</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td className="p-2 border border-slate-300">1</td>
-                  <td className="p-2 border border-slate-300">Heavy Equipment Rental - Excavator</td>
-                  <td className="text-right p-2 border border-slate-300">5 days</td>
-                  <td className="text-right p-2 border border-slate-300">$1,250.00</td>
-                  <td className="text-right p-2 border border-slate-300">$6,250.00</td>
+                  <td className="p-2 border border-slate-300 text-black">1</td>
+                  <td className="p-2 border border-slate-300 text-black">Heavy Equipment Rental - Excavator</td>
+                  <td className="text-right p-2 border border-slate-300 text-black">5 days</td>
+                  <td className="text-right p-2 border border-slate-300 text-black">$1,250.00</td>
+                  <td className="text-right p-2 border border-slate-300 text-black">$6,250.00</td>
                 </tr>
                 <tr>
-                  <td className="p-2 border border-slate-300">2</td>
-                  <td className="p-2 border border-slate-300">Field Maintenance Services</td>
-                  <td className="text-right p-2 border border-slate-300">1 service</td>
-                  <td className="text-right p-2 border border-slate-300">$4,500.00</td>
-                  <td className="text-right p-2 border border-slate-300">$4,500.00</td>
+                  <td className="p-2 border border-slate-300 text-black">2</td>
+                  <td className="p-2 border border-slate-300 text-black">Field Maintenance Services</td>
+                  <td className="text-right p-2 border border-slate-300 text-black">1 service</td>
+                  <td className="text-right p-2 border border-slate-300 text-black">$4,500.00</td>
+                  <td className="text-right p-2 border border-slate-300 text-black">$4,500.00</td>
                 </tr>
                 <tr>
-                  <td className="p-2 border border-slate-300">3</td>
-                  <td className="p-2 border border-slate-300">Supply Materials</td>
-                  <td className="text-right p-2 border border-slate-300">1 package</td>
-                  <td className="text-right p-2 border border-slate-300">$2,100.00</td>
-                  <td className="text-right p-2 border border-slate-300">$2,100.00</td>
+                  <td className="p-2 border border-slate-300 text-black">3</td>
+                  <td className="p-2 border border-slate-300 text-black">Supply Materials</td>
+                  <td className="text-right p-2 border border-slate-300 text-black">1 package</td>
+                  <td className="text-right p-2 border border-slate-300 text-black">$2,100.00</td>
+                  <td className="text-right p-2 border border-slate-300 text-black">$2,100.00</td>
                 </tr>
               </tbody>
             </table>
@@ -166,16 +167,16 @@ export const PDFViewer = () => {
             <div className="flex justify-end mb-8">
               <div className="w-64">
                 <div className="flex justify-between py-2">
-                  <span className="font-medium">Subtotal:</span>
-                  <span>$12,850.00</span>
+                  <span className="font-medium text-black">Subtotal:</span>
+                  <span className="text-black">$12,850.00</span>
                 </div>
                 <div className="flex justify-between py-2">
-                  <span className="font-medium">GST (5%):</span>
-                  <span>$642.50</span>
+                  <span className="font-medium text-black">GST (5%):</span>
+                  <span className="text-black">$642.50</span>
                 </div>
                 <div className="flex justify-between py-2 border-t border-slate-300 font-bold">
-                  <span>Total:</span>
-                  <span>$13,492.50</span>
+                  <span className="text-black">Total:</span>
+                  <span className="text-black">$13,492.50</span>
                 </div>
               </div>
             </div>

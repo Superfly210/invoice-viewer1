@@ -3,13 +3,11 @@ import {
   CheckCircle, 
   XCircle, 
   CornerUpRight, 
-  ArrowRight, 
   ChevronLeft, 
   ChevronRight,
   PauseCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ThemeToggle } from "./ThemeToggle";
 
 type ActionBarProps = {
   onApprove: () => void;
@@ -55,7 +53,6 @@ export const ActionBarWithThemeToggle = ({
       </div>
       
       <div className="flex items-center space-x-3">
-        <ThemeToggle />
         <Button 
           onClick={onApprove}
           className="bg-green-500 hover:bg-green-600 text-white min-w-[100px]"
@@ -79,12 +76,6 @@ export const ActionBarWithThemeToggle = ({
           className="min-w-[100px]"
         >
           <CornerUpRight className="h-4 w-4 mr-2" /> Forward
-        </Button>
-        <Button 
-          variant="outline"
-          className="ml-2"
-        >
-          <ArrowRight className="h-4 w-4" />
         </Button>
       </div>
     </div>
