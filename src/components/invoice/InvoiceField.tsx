@@ -46,14 +46,14 @@ export const InvoiceField = ({ field, onEdit, onToggleLock }: InvoiceFieldProps)
     <div 
       className={cn(
         "p-3 rounded-md border",
-        field.validation === "error" && "bg-red-50 border-red-200",
-        field.validation === "warning" && "bg-amber-50 border-amber-200",
-        field.validation === "success" && "bg-white border-slate-200",
-        field.validation === "none" && "bg-white border-slate-200"
+        field.validation === "error" && "bg-red-50 border-red-200 dark:bg-red-950/50 dark:border-red-800",
+        field.validation === "warning" && "bg-amber-50 border-amber-200 dark:bg-amber-950/50 dark:border-amber-800",
+        field.validation === "success" && "bg-white border-slate-200 dark:bg-slate-800 dark:border-slate-700",
+        field.validation === "none" && "bg-white border-slate-200 dark:bg-slate-800 dark:border-slate-700"
       )}
     >
       <div className="flex justify-between items-center mb-1">
-        <label className="text-sm font-medium text-slate-700">{field.label}</label>
+        <label className="text-sm font-medium text-slate-700 dark:text-slate-300">{field.label}</label>
         <div className="flex items-center space-x-2">
           {field.validation !== "none" && (
             <TooltipProvider>
@@ -77,7 +77,7 @@ export const InvoiceField = ({ field, onEdit, onToggleLock }: InvoiceFieldProps)
                 <TooltipTrigger asChild>
                   <button 
                     onClick={() => onToggleLock(field.id)}
-                    className="text-slate-400 hover:text-slate-600"
+                    className="text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300"
                   >
                     {field.locked ? 
                       <Lock className="h-4 w-4" /> : 
@@ -101,7 +101,7 @@ export const InvoiceField = ({ field, onEdit, onToggleLock }: InvoiceFieldProps)
             type="text"
             value={editValue}
             onChange={e => setEditValue(e.target.value)}
-            className="flex-1 px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="flex-1 px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:border-slate-600 dark:text-white"
             autoFocus
           />
           <button
@@ -112,13 +112,13 @@ export const InvoiceField = ({ field, onEdit, onToggleLock }: InvoiceFieldProps)
           </button>
           <button
             onClick={cancelEdit}
-            className="bg-slate-200 text-slate-700 p-2 rounded-md hover:bg-slate-300"
+            className="bg-slate-200 text-slate-700 p-2 rounded-md hover:bg-slate-300 dark:bg-slate-600 dark:text-slate-200 dark:hover:bg-slate-500"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
       ) : (
-        <div className="text-base text-slate-900 mt-1">
+        <div className="text-base text-slate-900 dark:text-slate-200 mt-1">
           {field.value}
         </div>
       )}

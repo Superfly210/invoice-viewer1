@@ -1,6 +1,7 @@
+
 import { useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
-import { ActionBar } from "@/components/ActionBar";
+import { ActionBarWithThemeToggle } from "@/components/ActionBarWithThemeToggle";
 import { InvoiceData } from "@/components/InvoiceData";
 import { PDFViewer } from "@/components/PDFViewer";
 import { EmailViewer } from "@/components/EmailViewer";
@@ -63,10 +64,10 @@ const Index = () => {
   };
 
   return (
-    <div className="flex h-screen bg-slate-50">
+    <div className="flex h-screen bg-slate-50 dark:bg-slate-900">
       <Sidebar collapsed={sidebarCollapsed} setCollapsed={setSidebarCollapsed} />
       <main className="flex flex-col flex-1 overflow-hidden">
-        <ActionBar 
+        <ActionBarWithThemeToggle 
           onApprove={handleApprove}
           onDeny={handleDeny}
           onQuarantine={handleQuarantine}

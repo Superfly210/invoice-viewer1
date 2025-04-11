@@ -8,7 +8,7 @@ type ConfidenceDisplayProps = {
 export const ConfidenceDisplay = ({ confidence }: ConfidenceDisplayProps) => {
   return (
     <div className="flex items-center">
-      <div className="relative w-16 h-5 border border-slate-300 rounded-sm overflow-hidden">
+      <div className="relative w-16 h-5 border border-slate-300 dark:border-slate-600 rounded-sm overflow-hidden">
         <div 
           className={cn(
             "absolute inset-0 h-full",

@@ -20,9 +20,9 @@ export const InvoiceData = () => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-4">
+    <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-4">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold text-slate-800">Invoice Data</h2>
+        <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-200">Invoice Data</h2>
         <IssuesSummary fields={fields} />
       </div>
 

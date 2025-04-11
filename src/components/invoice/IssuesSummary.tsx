@@ -14,7 +14,7 @@ export const IssuesSummary = ({ fields }: IssuesSummaryProps) => {
   if (issuesCount === 0) return null;
 
   return (
-    <div className="bg-amber-50 text-amber-700 px-3 py-1 rounded-full text-xs flex items-center">
+    <div className="bg-amber-50 text-amber-700 dark:bg-amber-800/50 dark:text-amber-200 px-3 py-1 rounded-full text-xs flex items-center">
       <AlertTriangle className="h-3 w-3 mr-1" />
       {issuesCount} {issuesCount === 1 ? "Issue" : "Issues"} Found
     </div>
