@@ -7,9 +7,8 @@ type ConfidenceDisplayProps = {
 
 export const ConfidenceDisplay = ({ confidence }: ConfidenceDisplayProps) => {
   return (
-    <div className="flex items-center mt-1">
-      <div className="text-xs text-slate-500 mr-2">Confidence:</div>
-      <div className="relative w-20 h-6 border border-slate-300 rounded overflow-hidden">
+    <div className="flex items-center">
+      <div className="relative w-16 h-5 border border-slate-300 rounded-sm overflow-hidden">
         <div 
           className={cn(
             "absolute inset-0 h-full",
@@ -19,7 +18,7 @@ export const ConfidenceDisplay = ({ confidence }: ConfidenceDisplayProps) => {
           )}
           style={{ width: `${confidence}%` }}
         ></div>
-        <div className="absolute inset-0 flex items-center justify-center text-xs font-medium text-white">
+        <div className="absolute inset-0 flex items-center justify-center text-[10px] font-medium text-white">
           {confidence}%
         </div>
       </div>

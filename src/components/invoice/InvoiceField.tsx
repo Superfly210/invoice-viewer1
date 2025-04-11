@@ -91,6 +91,7 @@ export const InvoiceField = ({ field, onEdit, onToggleLock }: InvoiceFieldProps)
               </Tooltip>
             </TooltipProvider>
           )}
+          <ConfidenceDisplay confidence={field.confidence} />
         </div>
       </div>
 
@@ -117,14 +118,8 @@ export const InvoiceField = ({ field, onEdit, onToggleLock }: InvoiceFieldProps)
           </button>
         </div>
       ) : (
-        <div className="flex justify-between items-center">
-          <div 
-            className="text-base text-slate-900 mt-1"
-            onClick={() => !field.locked && startEditing()}
-          >
-            {field.value}
-          </div>
-          <ConfidenceDisplay confidence={field.confidence} />
+        <div className="text-base text-slate-900 mt-1">
+          {field.value}
         </div>
       )}
     </div>

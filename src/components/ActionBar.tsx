@@ -5,7 +5,7 @@ import {
   ArrowRight, 
   ChevronLeft, 
   ChevronRight,
-  ShieldX
+  PauseCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -50,7 +50,7 @@ export const ActionBar = ({
           onClick={onQuarantine}
           className="bg-[#FEF7CD] hover:bg-[#F6E68E] text-amber-800 min-w-[100px]"
         >
-          <ShieldX className="h-4 w-4 mr-2" /> Quarantine
+          <PauseCircle className="h-4 w-4 mr-2" /> Hold
         </Button>
         <Button 
           onClick={onForward}
