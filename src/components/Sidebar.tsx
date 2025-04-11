@@ -1,7 +1,13 @@
 
 import { useState } from "react";
-import { FileCheck, FileText, FilePieChart, ChevronLeft, ChevronRight } from "lucide-react";
+import { 
+  FileCheck, FileText, FilePieChart, ChevronLeft, ChevronRight,
+  UserCog, Settings, Shield, PauseCircle
+} from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ThemeToggle } from "./ThemeToggle";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "./ui/collapsible";
+import { useTheme } from "./ThemeProvider";
 
 type SidebarProps = {
   collapsed: boolean;
@@ -9,9 +15,13 @@ type SidebarProps = {
 };
 
 export const Sidebar = ({ collapsed, setCollapsed }: SidebarProps) => {
+  const { theme, toggleTheme } = useTheme();
+  
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
   };
+
+  const [adminOpen, setAdminOpen] = useState(false);
 
   const menuItems = [
     { label: "Invoice Signer", icon: FileCheck, active: false },
@@ -22,39 +32,51 @@ export const Sidebar = ({ collapsed, setCollapsed }: SidebarProps) => {
   return (
     <aside
       className={cn(
-        "bg-white border-r border-slate-200 transition-all duration-300 ease-in-out flex flex-col h-screen relative",
+        "transition-all duration-300 ease-in-out flex flex-col h-screen relative",
+        "bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700",
         collapsed ? "w-16" : "w-64"
       )}
     >
-      <div className="p-4 border-b border-slate-200 flex justify-between items-center">
+      <div className={cn(
+        "p-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center",
+        collapsed ? "justify-center" : "justify-between"
+      )}>
         {!collapsed && (
-          <h2 className="font-bold text-slate-800 text-lg">Invoice Viewer</h2>
+          <h2 className="font-bold text-slate-800 dark:text-slate-200 text-lg">Invoice Viewer</h2>
         )}
         <button
           onClick={toggleSidebar}
-          className="p-2 rounded-full hover:bg-slate-100 transition-colors"
+          className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {collapsed ? (
-            <ChevronRight className="h-5 w-5 text-slate-500" />
+            <ChevronRight className="h-5 w-5 text-slate-500 dark:text-slate-400" />
           ) : (
-            <ChevronLeft className="h-5 w-5 text-slate-500" />
+            <ChevronLeft className="h-5 w-5 text-slate-500 dark:text-slate-400" />
           )}
         </button>
       </div>
 
-      <nav className="flex-1 py-4">
+      <nav className="flex-1 py-4 overflow-y-auto">
         <ul className="space-y-1">
           {menuItems.map((item) => (
             <li key={item.label}>
               <a
                 href="#"
                 className={cn(
-                  "flex items-center px-4 py-3 text-slate-600 hover:bg-slate-100 transition-colors",
-                  item.active && "bg-blue-50 border-l-4 border-blue-500 font-semibold text-blue-700"
+                  "flex items-center px-4 py-3 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors",
+                  item.active && 
+                  "bg-blue-50 dark:bg-blue-900/30 border-l-4 border-blue-500 font-semibold text-blue-700 dark:text-blue-400"
                 )}
               >
-                <item.icon className={cn("h-5 w-5", item.active ? "text-blue-600" : "text-slate-500")} />
+                <item.icon 
+                  className={cn(
+                    "h-5 w-5", 
+                    item.active 
+                      ? "text-blue-600 dark:text-blue-400" 
+                      : "text-slate-500 dark:text-slate-400"
+                  )} 
+                />
                 {!collapsed && <span className="ml-3">{item.label}</span>}
               </a>
             </li>
@@ -62,12 +84,91 @@ export const Sidebar = ({ collapsed, setCollapsed }: SidebarProps) => {
         </ul>
       </nav>
 
-      <div className="p-4 border-t border-slate-200">
-        {!collapsed && (
-          <div className="text-xs text-slate-500">
-            Invoice Viewer v1.0
-          </div>
+      <div className="mt-auto border-t border-slate-200 dark:border-slate-700">
+        {!collapsed ? (
+          <Collapsible
+            open={adminOpen}
+            onOpenChange={setAdminOpen}
+            className="w-full"
+          >
+            <CollapsibleTrigger asChild>
+              <button
+                className="flex items-center w-full px-4 py-3 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+              >
+                <UserCog className="h-5 w-5 text-slate-500 dark:text-slate-400" />
+                <span className="ml-3 font-medium">Administrator</span>
+                <ChevronRight
+                  className={cn(
+                    "ml-auto h-5 w-5 text-slate-500 dark:text-slate-400 transition-transform",
+                    adminOpen && "rotate-90"
+                  )}
+                />
+              </button>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <div className="pl-6 pr-4 pb-2">
+                <ul className="space-y-1 pt-1">
+                  <li>
+                    <a
+                      href="#"
+                      className="flex items-center py-2 px-3 text-sm text-slate-600 dark:text-slate-300 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700"
+                    >
+                      <Settings className="h-4 w-4 mr-2 text-slate-500 dark:text-slate-400" />
+                      Settings
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="#"
+                      className="flex items-center py-2 px-3 text-sm text-slate-600 dark:text-slate-300 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700"
+                    >
+                      <Shield className="h-4 w-4 mr-2 text-slate-500 dark:text-slate-400" />
+                      Permissions
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="#"
+                      className="flex items-center py-2 px-3 text-sm text-slate-600 dark:text-slate-300 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700"
+                    >
+                      <PauseCircle className="h-4 w-4 mr-2 text-slate-500 dark:text-slate-400" />
+                      Hold Management
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+        ) : (
+          <button
+            className="w-full py-3 flex justify-center hover:bg-slate-100 dark:hover:bg-slate-700"
+            onClick={() => setCollapsed(false)}
+            title="Administrator"
+          >
+            <UserCog className="h-5 w-5 text-slate-500 dark:text-slate-400" />
+          </button>
         )}
+
+        <div className={cn(
+          "p-4 flex justify-center border-t border-slate-200 dark:border-slate-700",
+          collapsed ? "px-2" : "px-4"
+        )}>
+          {collapsed ? (
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700"
+              aria-label="Toggle theme"
+            >
+              {theme === "dark" ? (
+                <MoonIcon className="h-5 w-5 text-slate-500 dark:text-slate-400" />
+              ) : (
+                <SunIcon className="h-5 w-5 text-slate-500 dark:text-slate-400" />
+              )}
+            </button>
+          ) : (
+            <ThemeToggle />
+          )}
+        </div>
       </div>
     </aside>
   );

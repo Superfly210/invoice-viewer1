@@ -1,20 +1,24 @@
 
 import { MoonIcon, SunIcon } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
-import { Switch } from "./ui/switch";
+import { Toggle } from "./ui/toggle";
 
 export function ThemeToggle() {
   const { theme, toggleTheme } = useTheme();
   
   return (
     <div className="flex items-center space-x-2">
-      <SunIcon className="h-4 w-4 text-slate-500 dark:text-slate-400" />
-      <Switch 
-        checked={theme === "dark"} 
-        onCheckedChange={toggleTheme}
-        aria-label="Toggle dark mode"
-      />
-      <MoonIcon className="h-4 w-4 text-slate-500 dark:text-slate-400" />
+      {theme === "dark" ? (
+        <Toggle pressed aria-label="Switch to light mode" onClick={toggleTheme} size="sm">
+          <MoonIcon className="h-4 w-4" />
+          <span className="ml-2">Dark Mode</span>
+        </Toggle>
+      ) : (
+        <Toggle aria-label="Switch to dark mode" onClick={toggleTheme} size="sm">
+          <SunIcon className="h-4 w-4" />
+          <span className="ml-2">Light Mode</span>
+        </Toggle>
+      )}
     </div>
   );
 }
