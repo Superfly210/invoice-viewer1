@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { 
   FileCheck, FileText, FilePieChart, ChevronLeft, ChevronRight,
-  UserCog, Settings, Shield, PauseCircle
+  UserCog, Settings, Shield, PauseCircle, MoonIcon, SunIcon
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "./ThemeToggle";
