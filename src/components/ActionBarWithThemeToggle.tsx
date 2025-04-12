@@ -3,8 +3,7 @@ import {
   CheckCircle, 
   XCircle, 
   CornerUpRight, 
-  ChevronLeft, 
-  ChevronRight,
+  ChevronLeft,
   PauseCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -43,13 +42,6 @@ export const ActionBarWithThemeToggle = ({
         <div className="text-sm font-medium">
           Invoice {currentInvoice} of {totalInvoices}
         </div>
-        <Button 
-          onClick={onNext}
-          variant="outline"
-          disabled={currentInvoice >= totalInvoices}
-        >
-          <ChevronRight className="h-4 w-4" />
-        </Button>
       </div>
       
       <div className="flex items-center space-x-3">
