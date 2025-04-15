@@ -26,7 +26,7 @@ type Profile = {
 type AFE = {
   id: string;
   afe_number: string;
-  responsible_user_id: string;
+  responsible_user_id: string | null;
   afe_estimate: number;
   approved_amount: number;
   awaiting_approval_amount: number;
@@ -54,7 +54,12 @@ export function AFETable() {
         .from('afe')
         .select('*');
       if (error) throw error;
-      return data as AFE[];
+      
+      // Transform the data to include invoices_awaiting_approval with a default value of 0
+      return (data || []).map(afe => ({
+        ...afe,
+        invoices_awaiting_approval: 0 // Default value since it's not in the database
+      })) as AFE[];
     },
   });
 

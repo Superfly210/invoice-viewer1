@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { ActionBarWithThemeToggle } from "@/components/ActionBarWithThemeToggle";
@@ -10,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { FileTextIcon, TableIcon, MailIcon, FileIcon } from "lucide-react";
+import AFE from "@/pages/AFE";
 
 const Index = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
