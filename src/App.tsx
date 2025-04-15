@@ -9,6 +9,8 @@ import { AuthProvider } from "./components/AuthProvider";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import AFE from "./pages/AFE";
+import CostCenters from "./pages/CostCenters";
+import Permissions from "./pages/Permissions";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,6 +27,8 @@ const App = () => (
               <Route path="/auth" element={<Auth />} />
               <Route path="/" element={<Index />} />
               <Route path="/afe" element={<AFE />} />
+              <Route path="/cost-centers" element={<CostCenters />} />
+              <Route path="/permissions" element={<Permissions />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

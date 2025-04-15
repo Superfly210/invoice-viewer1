@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import {
   Table,
@@ -15,8 +14,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Plus, Upload } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 type Profile = {
   id: string;
@@ -74,8 +76,26 @@ export function AFETable() {
     }
   };
 
+  const handleImportAFE = () => {
+    // TODO: Implement AFE data import functionality
+    console.log("Import AFE Data");
+  };
+
+  const handleAddAFE = () => {
+    // TODO: Implement Add AFE functionality
+    console.log("Add AFE");
+  };
+
   return (
     <div className="rounded-md border">
+      <div className="flex justify-end p-4 space-x-2">
+        <Button variant="outline" onClick={handleImportAFE}>
+          <Upload className="mr-2 h-4 w-4" /> Import AFE Data
+        </Button>
+        <Button onClick={handleAddAFE}>
+          <Plus className="mr-2 h-4 w-4" /> Add AFE
+        </Button>
+      </div>
       <Table>
         <TableHeader>
           <TableRow>

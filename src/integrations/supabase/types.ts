@@ -109,6 +109,30 @@ export type Database = {
           },
         ]
       }
+      cost_centers: {
+        Row: {
+          code: string
+          created_at: string | null
+          description: string
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          description: string
+          id?: string
+          updated_at?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          description?: string
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       "Email Information": {
         Row: {
           created_at: string
@@ -178,6 +202,7 @@ export type Database = {
           full_name: string | null
           id: string
           updated_at: string | null
+          user_permission: string
           username: string | null
         }
         Insert: {
@@ -186,6 +211,7 @@ export type Database = {
           full_name?: string | null
           id: string
           updated_at?: string | null
+          user_permission?: string
           username?: string | null
         }
         Update: {
@@ -194,6 +220,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           updated_at?: string | null
+          user_permission?: string
           username?: string | null
         }
         Relationships: []

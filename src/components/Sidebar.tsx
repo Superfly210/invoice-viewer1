@@ -1,8 +1,7 @@
-
 import { useState } from "react";
 import { 
   FileCheck, FileText, FilePieChart, ChevronLeft, ChevronRight,
-  UserCog, Settings, Shield, PauseCircle, MoonIcon, SunIcon, FileSpreadsheet
+  UserCog, Settings, Shield, PauseCircle, FileSpreadsheet, Building, Table as TableIcon
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "./ThemeToggle";
@@ -35,6 +34,11 @@ export const Sidebar = ({
     { id: "reviewer", label: "Invoice Reviewer", icon: FileText, active: activeSection === "reviewer" },
     { id: "summary", label: "Invoice Summary", icon: FilePieChart, active: activeSection === "summary" },
     { id: "afe", label: "AFE", icon: FileSpreadsheet, active: activeSection === "afe" },
+  ];
+
+  const adminMenuItems = [
+    { id: "cost-centers", label: "Cost Centers", icon: Building, active: activeSection === "cost-centers" },
+    { id: "permissions", label: "Permissions", icon: Shield, active: activeSection === "permissions" },
   ];
 
   return (
@@ -116,33 +120,20 @@ export const Sidebar = ({
             <CollapsibleContent>
               <div className="pl-6 pr-4 pb-2">
                 <ul className="space-y-1 pt-1">
-                  <li>
-                    <a
-                      href="#"
-                      className="flex items-center py-2 px-3 text-sm text-slate-600 dark:text-slate-300 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700"
-                    >
-                      <Settings className="h-4 w-4 mr-2 text-slate-500 dark:text-slate-400" />
-                      Settings
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="#"
-                      className="flex items-center py-2 px-3 text-sm text-slate-600 dark:text-slate-300 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700"
-                    >
-                      <Shield className="h-4 w-4 mr-2 text-slate-500 dark:text-slate-400" />
-                      Permissions
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="#"
-                      className="flex items-center py-2 px-3 text-sm text-slate-600 dark:text-slate-300 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700"
-                    >
-                      <PauseCircle className="h-4 w-4 mr-2 text-slate-500 dark:text-slate-400" />
-                      Hold Management
-                    </a>
-                  </li>
+                  {adminMenuItems.map((item) => (
+                    <li key={item.id}>
+                      <button
+                        onClick={() => onSectionChange(item.id)}
+                        className={cn(
+                          "flex items-center w-full py-2 px-3 text-sm text-slate-600 dark:text-slate-300 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700",
+                          item.active && "bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400"
+                        )}
+                      >
+                        <item.icon className="h-4 w-4 mr-2 text-slate-500 dark:text-slate-400" />
+                        {item.label}
+                      </button>
+                    </li>
+                  ))}
                 </ul>
               </div>
             </CollapsibleContent>

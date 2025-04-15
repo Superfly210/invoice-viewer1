@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { ActionBarWithThemeToggle } from "@/components/ActionBarWithThemeToggle";
@@ -12,6 +11,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { FileTextIcon, TableIcon, MailIcon, FileIcon } from "lucide-react";
 import AFE from "@/pages/AFE";
+import CostCenters from "@/pages/CostCenters";
+import Permissions from "@/pages/Permissions";
 
 const Index = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -154,6 +155,10 @@ const Index = () => {
         )}
 
         {activeSection === "afe" && <AFE />}
+        
+        {activeSection === "cost-centers" && <CostCenters />}
+        
+        {activeSection === "permissions" && <Permissions />}
       </main>
     </div>
   );
