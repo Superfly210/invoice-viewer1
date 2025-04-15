@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { 
   FileCheck, FileText, FilePieChart, ChevronLeft, ChevronRight,
-  UserCog, Settings, Shield, PauseCircle, MoonIcon, SunIcon
+  UserCog, Settings, Shield, PauseCircle, MoonIcon, SunIcon, FileSpreadsheet
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "./ThemeToggle";
@@ -34,6 +34,7 @@ export const Sidebar = ({
     { id: "signer", label: "Invoice Signer", icon: FileCheck, active: activeSection === "signer" },
     { id: "reviewer", label: "Invoice Reviewer", icon: FileText, active: activeSection === "reviewer" },
     { id: "summary", label: "Invoice Summary", icon: FilePieChart, active: activeSection === "summary" },
+    { id: "afe", label: "AFE", icon: FileSpreadsheet, active: activeSection === "afe" },
   ];
 
   return (

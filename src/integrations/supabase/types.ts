@@ -9,6 +9,47 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      afe: {
+        Row: {
+          afe_estimate: number
+          afe_number: string
+          approved_amount: number
+          awaiting_approval_amount: number
+          created_at: string | null
+          id: string
+          responsible_user_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          afe_estimate?: number
+          afe_number: string
+          approved_amount?: number
+          awaiting_approval_amount?: number
+          created_at?: string | null
+          id?: string
+          responsible_user_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          afe_estimate?: number
+          afe_number?: string
+          approved_amount?: number
+          awaiting_approval_amount?: number
+          created_at?: string | null
+          id?: string
+          responsible_user_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "afe_responsible_user_id_fkey"
+            columns: ["responsible_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       "Attachment Info": {
         Row: {
           AFE_number: string | null

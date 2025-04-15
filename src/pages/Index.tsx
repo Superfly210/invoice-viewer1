@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { ActionBarWithThemeToggle } from "@/components/ActionBarWithThemeToggle";
@@ -64,7 +63,6 @@ const Index = () => {
     }
   };
 
-  // Update active section based on sidebar selection
   const handleSectionChange = (section: string) => {
     setActiveSection(section);
   };
@@ -152,6 +150,8 @@ const Index = () => {
             </div>
           </div>
         )}
+
+        {activeSection === "afe" && <AFE />}
       </main>
     </div>
   );
