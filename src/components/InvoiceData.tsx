@@ -2,8 +2,9 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Loader2 } from "lucide-react";
+import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
+import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 type AttachmentInfo = {
   id: number;
@@ -23,6 +24,7 @@ type AttachmentInfo = {
 
 export const InvoiceData = () => {
   const [invoices, setInvoices] = useState<AttachmentInfo[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
@@ -35,7 +37,8 @@ export const InvoiceData = () => {
       setIsLoading(true);
       const { data, error } = await supabase
         .from('Attachment Info')
-        .select('*');
+        .select('*')
+        .order('id', { ascending: true });
 
       if (error) throw error;
 
@@ -50,6 +53,14 @@ export const InvoiceData = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handlePrevious = () => {
+    setCurrentIndex((prev) => (prev > 0 ? prev - 1 : prev));
+  };
+
+  const handleNext = () => {
+    setCurrentIndex((prev) => (prev < invoices.length - 1 ? prev + 1 : prev));
   };
 
   if (isLoading) {
@@ -72,47 +83,89 @@ export const InvoiceData = () => {
     );
   }
 
+  const currentInvoice = invoices[currentIndex];
+
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-4 overflow-hidden">
-      <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-200 mb-4">Invoice Data</h2>
-      
+    <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-4">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-200">
+          Invoice {currentIndex + 1} of {invoices.length}
+        </h2>
+        <div className="flex space-x-2">
+          <Button
+            variant="outline"
+            onClick={handlePrevious}
+            disabled={currentIndex === 0}
+          >
+            <ChevronLeft className="h-4 w-4" />
+            Previous
+          </Button>
+          <Button
+            variant="outline"
+            onClick={handleNext}
+            disabled={currentIndex === invoices.length - 1}
+          >
+            Next
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+
       <div className="overflow-x-auto">
         <Table>
-          <TableCaption>A list of all invoices in the database</TableCaption>
-          <TableHeader>
-            <TableRow>
-              <TableHead>ID</TableHead>
-              <TableHead>Invoice Number</TableHead>
-              <TableHead>Company Name</TableHead>
-              <TableHead>Company Address</TableHead>
-              <TableHead>GST Number</TableHead>
-              <TableHead>WCB Number</TableHead>
-              <TableHead>Subtotal</TableHead>
-              <TableHead>GST Total</TableHead>
-              <TableHead>Total</TableHead>
-              <TableHead>Created At</TableHead>
-            </TableRow>
-          </TableHeader>
           <TableBody>
-            {invoices.map((invoice) => (
-              <TableRow key={invoice.id}>
-                <TableCell>{invoice.id}</TableCell>
-                <TableCell>{invoice.Invoice_Number || 'N/A'}</TableCell>
-                <TableCell>{invoice.Invoicing_Comp_Name || 'N/A'}</TableCell>
-                <TableCell>
-                  {`${JSON.stringify(invoice.Invoicing_Comp_Street) || ''} 
-                    ${invoice.Invoicing_Comp_City || ''} 
-                    ${invoice.Invoicing_Comp_State_Prov || ''} 
-                    ${invoice.Invoicing_Comp_Postal_Code || ''}`.trim() || 'N/A'}
-                </TableCell>
-                <TableCell>{invoice.GST_Number ? JSON.stringify(invoice.GST_Number) : 'N/A'}</TableCell>
-                <TableCell>{invoice.WCB_Number ? JSON.stringify(invoice.WCB_Number) : 'N/A'}</TableCell>
-                <TableCell>{invoice.Sub_Total?.toFixed(2) || 'N/A'}</TableCell>
-                <TableCell>{invoice.GST_Total?.toFixed(2) || 'N/A'}</TableCell>
-                <TableCell>{invoice.Total?.toFixed(2) || 'N/A'}</TableCell>
-                <TableCell>{new Date(invoice.created_at).toLocaleString()}</TableCell>
-              </TableRow>
-            ))}
+            <TableRow>
+              <TableCell className="font-medium w-1/3">ID</TableCell>
+              <TableCell>{currentInvoice.id}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell className="font-medium">Invoice Number</TableCell>
+              <TableCell>{currentInvoice.Invoice_Number || 'N/A'}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell className="font-medium">Company Name</TableCell>
+              <TableCell>{currentInvoice.Invoicing_Comp_Name || 'N/A'}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell className="font-medium">Company Street</TableCell>
+              <TableCell>{JSON.stringify(currentInvoice.Invoicing_Comp_Street) || 'N/A'}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell className="font-medium">Company City</TableCell>
+              <TableCell>{currentInvoice.Invoicing_Comp_City || 'N/A'}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell className="font-medium">Company State/Province</TableCell>
+              <TableCell>{currentInvoice.Invoicing_Comp_State_Prov || 'N/A'}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell className="font-medium">Postal Code</TableCell>
+              <TableCell>{currentInvoice.Invoicing_Comp_Postal_Code || 'N/A'}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell className="font-medium">GST Number</TableCell>
+              <TableCell>{currentInvoice.GST_Number ? JSON.stringify(currentInvoice.GST_Number) : 'N/A'}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell className="font-medium">WCB Number</TableCell>
+              <TableCell>{currentInvoice.WCB_Number ? JSON.stringify(currentInvoice.WCB_Number) : 'N/A'}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell className="font-medium">Subtotal</TableCell>
+              <TableCell>{currentInvoice.Sub_Total?.toFixed(2) || 'N/A'}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell className="font-medium">GST Total</TableCell>
+              <TableCell>{currentInvoice.GST_Total?.toFixed(2) || 'N/A'}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell className="font-medium">Total</TableCell>
+              <TableCell>{currentInvoice.Total?.toFixed(2) || 'N/A'}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell className="font-medium">Created At</TableCell>
+              <TableCell>{new Date(currentInvoice.created_at).toLocaleString()}</TableCell>
+            </TableRow>
           </TableBody>
         </Table>
       </div>
