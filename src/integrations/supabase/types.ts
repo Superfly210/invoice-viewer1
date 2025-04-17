@@ -11,6 +11,7 @@ export type Database = {
     Tables: {
       afe: {
         Row: {
+          AFE_Description: Json | null
           afe_estimate: number
           afe_number: string
           approved_amount: number
@@ -21,6 +22,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          AFE_Description?: Json | null
           afe_estimate?: number
           afe_number: string
           approved_amount?: number
@@ -31,6 +33,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          AFE_Description?: Json | null
           afe_estimate?: number
           afe_number?: string
           approved_amount?: number
@@ -52,11 +55,10 @@ export type Database = {
       }
       "Attachment Info": {
         Row: {
-          AFE_number: string | null
-          Cost_Center: string | null
-          Cost_Code: string | null
+          Attach_Markdown: Json | null
           created_at: string
           Email_ID: number | null
+          GST_Number: Json | null
           GST_Total: number | null
           id: number
           Invoice_Number: string | null
@@ -64,15 +66,16 @@ export type Database = {
           Invoicing_Comp_Name: string | null
           Invoicing_Comp_Postal_Code: string | null
           Invoicing_Comp_State_Prov: string | null
+          Invoicing_Comp_Street: Json | null
           Sub_Total: number | null
           Total: number | null
+          WCB_Number: Json | null
         }
         Insert: {
-          AFE_number?: string | null
-          Cost_Center?: string | null
-          Cost_Code?: string | null
+          Attach_Markdown?: Json | null
           created_at?: string
           Email_ID?: number | null
+          GST_Number?: Json | null
           GST_Total?: number | null
           id?: number
           Invoice_Number?: string | null
@@ -80,15 +83,16 @@ export type Database = {
           Invoicing_Comp_Name?: string | null
           Invoicing_Comp_Postal_Code?: string | null
           Invoicing_Comp_State_Prov?: string | null
+          Invoicing_Comp_Street?: Json | null
           Sub_Total?: number | null
           Total?: number | null
+          WCB_Number?: Json | null
         }
         Update: {
-          AFE_number?: string | null
-          Cost_Center?: string | null
-          Cost_Code?: string | null
+          Attach_Markdown?: Json | null
           created_at?: string
           Email_ID?: number | null
+          GST_Number?: Json | null
           GST_Total?: number | null
           id?: number
           Invoice_Number?: string | null
@@ -96,8 +100,10 @@ export type Database = {
           Invoicing_Comp_Name?: string | null
           Invoicing_Comp_Postal_Code?: string | null
           Invoicing_Comp_State_Prov?: string | null
+          Invoicing_Comp_Street?: Json | null
           Sub_Total?: number | null
           Total?: number | null
+          WCB_Number?: Json | null
         }
         Relationships: [
           {
@@ -108,6 +114,24 @@ export type Database = {
             referencedColumns: ["id_"]
           },
         ]
+      }
+      "Cost Code": {
+        Row: {
+          Cost_Code: string | null
+          created_at: string
+          id: number
+        }
+        Insert: {
+          Cost_Code?: string | null
+          created_at?: string
+          id?: number
+        }
+        Update: {
+          Cost_Code?: string | null
+          created_at?: string
+          id?: number
+        }
+        Relationships: []
       }
       cost_centers: {
         Row: {
@@ -171,19 +195,43 @@ export type Database = {
       }
       "Line Items": {
         Row: {
+          AFE_number: Json | null
+          Cost_Center: Json | null
+          Cost_Code: Json | null
           created_at: string
+          Description: Json | null
           id: number
           invoice_id: number
+          Qauntity: Json | null
+          Rate: Json | null
+          Total: Json | null
+          Unit_of_Measure: Json | null
         }
         Insert: {
+          AFE_number?: Json | null
+          Cost_Center?: Json | null
+          Cost_Code?: Json | null
           created_at?: string
+          Description?: Json | null
           id?: number
           invoice_id: number
+          Qauntity?: Json | null
+          Rate?: Json | null
+          Total?: Json | null
+          Unit_of_Measure?: Json | null
         }
         Update: {
+          AFE_number?: Json | null
+          Cost_Center?: Json | null
+          Cost_Code?: Json | null
           created_at?: string
+          Description?: Json | null
           id?: number
           invoice_id?: number
+          Qauntity?: Json | null
+          Rate?: Json | null
+          Total?: Json | null
+          Unit_of_Measure?: Json | null
         }
         Relationships: [
           {

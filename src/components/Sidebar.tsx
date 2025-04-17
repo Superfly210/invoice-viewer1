@@ -1,7 +1,9 @@
+
 import { useState } from "react";
 import { 
   FileCheck, FileText, FilePieChart, ChevronLeft, ChevronRight,
-  UserCog, Settings, Shield, PauseCircle, FileSpreadsheet, Building, Table as TableIcon
+  UserCog, Settings, Shield, PauseCircle, FileSpreadsheet, Building, Table as TableIcon,
+  Sun, Moon // Import the correct icons from lucide-react
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "./ThemeToggle";
@@ -159,9 +161,9 @@ export const Sidebar = ({
               aria-label="Toggle theme"
             >
               {theme === "dark" ? (
-                <MoonIcon className="h-5 w-5 text-slate-500 dark:text-slate-400" />
+                <Moon className="h-5 w-5 text-slate-500 dark:text-slate-400" />
               ) : (
-                <SunIcon className="h-5 w-5 text-slate-500 dark:text-slate-400" />
+                <Sun className="h-5 w-5 text-slate-500 dark:text-slate-400" />
               )}
             </button>
           ) : (
