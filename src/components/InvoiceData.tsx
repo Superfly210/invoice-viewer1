@@ -29,65 +29,81 @@ export const InvoiceData = () => {
             id: "invoice_number",
             label: "Invoice Number",
             value: data.Invoice_Number || "",
-            confidence: 0.95,
+            validation: "none",
+            validationMessage: "",
+            editable: true,
             locked: false,
-            issues: []
+            confidence: 0.95
           },
           {
             id: "company_name",
             label: "Company Name",
             value: data.Invoicing_Comp_Name || "",
-            confidence: 0.9,
+            validation: "none",
+            validationMessage: "",
+            editable: true,
             locked: false,
-            issues: []
+            confidence: 0.9
           },
           {
             id: "company_address",
             label: "Company Address",
             value: `${data.Invoicing_Comp_Street || ''} ${data.Invoicing_Comp_City || ''} ${data.Invoicing_Comp_State_Prov || ''} ${data.Invoicing_Comp_Postal_Code || ''}`.trim(),
-            confidence: 0.85,
+            validation: "none",
+            validationMessage: "",
+            editable: true,
             locked: false,
-            issues: []
+            confidence: 0.85
           },
           {
             id: "gst_number",
             label: "GST Number",
             value: data.GST_Number ? JSON.stringify(data.GST_Number) : "",
-            confidence: 0.95,
+            validation: "none",
+            validationMessage: "",
+            editable: true,
             locked: false,
-            issues: []
+            confidence: 0.95
           },
           {
             id: "wcb_number",
             label: "WCB Number",
             value: data.WCB_Number ? JSON.stringify(data.WCB_Number) : "",
-            confidence: 0.92,
+            validation: "none",
+            validationMessage: "",
+            editable: true,
             locked: false,
-            issues: []
+            confidence: 0.92
           },
           {
             id: "subtotal",
             label: "Subtotal",
             value: data.Sub_Total?.toString() || "",
-            confidence: 0.98,
+            validation: "none",
+            validationMessage: "",
+            editable: true,
             locked: false,
-            issues: []
+            confidence: 0.98
           },
           {
             id: "gst_total",
             label: "GST Total",
             value: data.GST_Total?.toString() || "",
-            confidence: 0.98,
+            validation: "none",
+            validationMessage: "",
+            editable: true,
             locked: false,
-            issues: []
+            confidence: 0.98
           },
           {
             id: "total",
             label: "Total",
             value: data.Total?.toString() || "",
-            confidence: 0.98,
+            validation: "none",
+            validationMessage: "",
+            editable: true,
             locked: false,
-            issues: []
+            confidence: 0.98
           }
         ];
 
