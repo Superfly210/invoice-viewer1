@@ -131,9 +131,11 @@ export const InvoiceData = () => {
             <Collapsible open={companyDetailsOpen} onOpenChange={setCompanyDetailsOpen}>
               <TableRow>
                 <TableCell className="font-medium">Company Name</TableCell>
-                <TableCell>
-                  <div className="flex justify-between items-center w-full">
-                    <span>{currentInvoice.Invoicing_Comp_Name || 'N/A'}</span>
+                <TableCell>{currentInvoice.Invoicing_Comp_Name || 'N/A'}</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell colSpan={2} className="p-0">
+                  <div className="flex justify-end px-4 py-1">
                     <CollapsibleTrigger asChild>
                       <Button variant="ghost" size="sm" className="p-1 h-auto">
                         {companyDetailsOpen ? (
