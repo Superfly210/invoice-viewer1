@@ -134,15 +134,18 @@ export const InvoiceData = () => {
                 <TableCell>{currentInvoice.Invoicing_Comp_Name || 'N/A'}</TableCell>
               </TableRow>
               <TableRow>
-                <TableCell colSpan={2} className="p-0">
-                  <div className="flex justify-end px-4 py-1">
+                <TableCell colSpan={2} className="p-2 bg-slate-50 dark:bg-slate-900/50">
+                  <div className="flex justify-center w-full">
                     <CollapsibleTrigger asChild>
-                      <Button variant="ghost" size="sm" className="p-1 h-auto">
+                      <Button variant="ghost" size="sm" className="h-6 w-full flex justify-center items-center">
                         {companyDetailsOpen ? (
                           <ChevronDown className="h-4 w-4" />
                         ) : (
                           <Plus className="h-4 w-4" />
                         )}
+                        <span className="ml-2 text-xs text-slate-500 dark:text-slate-400">
+                          {companyDetailsOpen ? "Hide details" : "Show company details"}
+                        </span>
                       </Button>
                     </CollapsibleTrigger>
                   </div>
