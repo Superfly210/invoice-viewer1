@@ -128,27 +128,24 @@ export const InvoiceData = () => {
               <TableCell className="font-medium">Invoice Number</TableCell>
               <TableCell>{currentInvoice.Invoice_Number || 'N/A'}</TableCell>
             </TableRow>
-            <TableRow>
-              <TableCell className="font-medium">Company Name</TableCell>
-              <TableCell>
-                <div className="flex justify-between items-center w-full">
-                  <span>{currentInvoice.Invoicing_Comp_Name || 'N/A'}</span>
-                  <CollapsibleTrigger
-                    asChild
-                    onClick={() => setCompanyDetailsOpen(!companyDetailsOpen)}
-                  >
-                    <Button variant="ghost" size="sm" className="p-1 h-auto">
-                      {companyDetailsOpen ? (
-                        <ChevronDown className="h-4 w-4" />
-                      ) : (
-                        <Plus className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </CollapsibleTrigger>
-                </div>
-              </TableCell>
-            </TableRow>
             <Collapsible open={companyDetailsOpen} onOpenChange={setCompanyDetailsOpen}>
+              <TableRow>
+                <TableCell className="font-medium">Company Name</TableCell>
+                <TableCell>
+                  <div className="flex justify-between items-center w-full">
+                    <span>{currentInvoice.Invoicing_Comp_Name || 'N/A'}</span>
+                    <CollapsibleTrigger asChild>
+                      <Button variant="ghost" size="sm" className="p-1 h-auto">
+                        {companyDetailsOpen ? (
+                          <ChevronDown className="h-4 w-4" />
+                        ) : (
+                          <Plus className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </CollapsibleTrigger>
+                  </div>
+                </TableCell>
+              </TableRow>
               <CollapsibleContent>
                 <TableRow>
                   <TableCell className="font-medium">Company Street</TableCell>
