@@ -3,8 +3,9 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
-import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Loader2, ChevronLeft, ChevronRight, Plus, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 type AttachmentInfo = {
   id: number;
@@ -26,6 +27,7 @@ export const InvoiceData = () => {
   const [invoices, setInvoices] = useState<AttachmentInfo[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [companyDetailsOpen, setCompanyDetailsOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -57,10 +59,14 @@ export const InvoiceData = () => {
 
   const handlePrevious = () => {
     setCurrentIndex((prev) => (prev > 0 ? prev - 1 : prev));
+    // Reset collapsible state when navigating to new invoice
+    setCompanyDetailsOpen(false);
   };
 
   const handleNext = () => {
     setCurrentIndex((prev) => (prev < invoices.length - 1 ? prev + 1 : prev));
+    // Reset collapsible state when navigating to new invoice
+    setCompanyDetailsOpen(false);
   };
 
   if (isLoading) {
@@ -124,32 +130,52 @@ export const InvoiceData = () => {
             </TableRow>
             <TableRow>
               <TableCell className="font-medium">Company Name</TableCell>
-              <TableCell>{currentInvoice.Invoicing_Comp_Name || 'N/A'}</TableCell>
+              <TableCell>
+                <div className="flex justify-between items-center w-full">
+                  <span>{currentInvoice.Invoicing_Comp_Name || 'N/A'}</span>
+                  <CollapsibleTrigger
+                    asChild
+                    onClick={() => setCompanyDetailsOpen(!companyDetailsOpen)}
+                  >
+                    <Button variant="ghost" size="sm" className="p-1 h-auto">
+                      {companyDetailsOpen ? (
+                        <ChevronDown className="h-4 w-4" />
+                      ) : (
+                        <Plus className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </CollapsibleTrigger>
+                </div>
+              </TableCell>
             </TableRow>
-            <TableRow>
-              <TableCell className="font-medium">Company Street</TableCell>
-              <TableCell>{JSON.stringify(currentInvoice.Invoicing_Comp_Street) || 'N/A'}</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell className="font-medium">Company City</TableCell>
-              <TableCell>{currentInvoice.Invoicing_Comp_City || 'N/A'}</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell className="font-medium">Company State/Province</TableCell>
-              <TableCell>{currentInvoice.Invoicing_Comp_State_Prov || 'N/A'}</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell className="font-medium">Postal Code</TableCell>
-              <TableCell>{currentInvoice.Invoicing_Comp_Postal_Code || 'N/A'}</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell className="font-medium">GST Number</TableCell>
-              <TableCell>{currentInvoice.GST_Number ? JSON.stringify(currentInvoice.GST_Number) : 'N/A'}</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell className="font-medium">WCB Number</TableCell>
-              <TableCell>{currentInvoice.WCB_Number ? JSON.stringify(currentInvoice.WCB_Number) : 'N/A'}</TableCell>
-            </TableRow>
+            <Collapsible open={companyDetailsOpen} onOpenChange={setCompanyDetailsOpen}>
+              <CollapsibleContent>
+                <TableRow>
+                  <TableCell className="font-medium">Company Street</TableCell>
+                  <TableCell>{JSON.stringify(currentInvoice.Invoicing_Comp_Street) || 'N/A'}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">Company City</TableCell>
+                  <TableCell>{currentInvoice.Invoicing_Comp_City || 'N/A'}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">Company State/Province</TableCell>
+                  <TableCell>{currentInvoice.Invoicing_Comp_State_Prov || 'N/A'}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">Postal Code</TableCell>
+                  <TableCell>{currentInvoice.Invoicing_Comp_Postal_Code || 'N/A'}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">GST Number</TableCell>
+                  <TableCell>{currentInvoice.GST_Number ? JSON.stringify(currentInvoice.GST_Number) : 'N/A'}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">WCB Number</TableCell>
+                  <TableCell>{currentInvoice.WCB_Number ? JSON.stringify(currentInvoice.WCB_Number) : 'N/A'}</TableCell>
+                </TableRow>
+              </CollapsibleContent>
+            </Collapsible>
             <TableRow>
               <TableCell className="font-medium">Subtotal</TableCell>
               <TableCell>{currentInvoice.Sub_Total?.toFixed(2) || 'N/A'}</TableCell>

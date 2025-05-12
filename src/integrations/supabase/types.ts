@@ -55,7 +55,10 @@ export type Database = {
       }
       "Attachment Info": {
         Row: {
+          AFE_Numbers: Json | null
           Attach_Markdown: Json | null
+          "Cost Centers": Json | null
+          "Cost Codes": Json | null
           created_at: string
           Email_ID: number | null
           GST_Number: Json | null
@@ -67,12 +70,18 @@ export type Database = {
           Invoicing_Comp_Postal_Code: string | null
           Invoicing_Comp_State_Prov: string | null
           Invoicing_Comp_Street: Json | null
+          Number_Of_Pages: Json | null
+          Page_Field_Ticket_Starts_On: Json | null
           Sub_Total: number | null
           Total: number | null
+          Type_of_Document: Json | null
           WCB_Number: Json | null
         }
         Insert: {
+          AFE_Numbers?: Json | null
           Attach_Markdown?: Json | null
+          "Cost Centers"?: Json | null
+          "Cost Codes"?: Json | null
           created_at?: string
           Email_ID?: number | null
           GST_Number?: Json | null
@@ -84,12 +93,18 @@ export type Database = {
           Invoicing_Comp_Postal_Code?: string | null
           Invoicing_Comp_State_Prov?: string | null
           Invoicing_Comp_Street?: Json | null
+          Number_Of_Pages?: Json | null
+          Page_Field_Ticket_Starts_On?: Json | null
           Sub_Total?: number | null
           Total?: number | null
+          Type_of_Document?: Json | null
           WCB_Number?: Json | null
         }
         Update: {
+          AFE_Numbers?: Json | null
           Attach_Markdown?: Json | null
+          "Cost Centers"?: Json | null
+          "Cost Codes"?: Json | null
           created_at?: string
           Email_ID?: number | null
           GST_Number?: Json | null
@@ -101,8 +116,11 @@ export type Database = {
           Invoicing_Comp_Postal_Code?: string | null
           Invoicing_Comp_State_Prov?: string | null
           Invoicing_Comp_Street?: Json | null
+          Number_Of_Pages?: Json | null
+          Page_Field_Ticket_Starts_On?: Json | null
           Sub_Total?: number | null
           Total?: number | null
+          Type_of_Document?: Json | null
           WCB_Number?: Json | null
         }
         Relationships: [
@@ -157,6 +175,77 @@ export type Database = {
         }
         Relationships: []
       }
+      document_metadata: {
+        Row: {
+          created_at: string | null
+          id: string
+          schema: string | null
+          title: string | null
+          url: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id: string
+          schema?: string | null
+          title?: string | null
+          url?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          schema?: string | null
+          title?: string | null
+          url?: string | null
+        }
+        Relationships: []
+      }
+      document_rows: {
+        Row: {
+          dataset_id: string | null
+          id: number
+          row_data: Json | null
+        }
+        Insert: {
+          dataset_id?: string | null
+          id?: number
+          row_data?: Json | null
+        }
+        Update: {
+          dataset_id?: string | null
+          id?: number
+          row_data?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_rows_dataset_id_fkey"
+            columns: ["dataset_id"]
+            isOneToOne: false
+            referencedRelation: "document_metadata"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      documents: {
+        Row: {
+          content: string | null
+          embedding: string | null
+          id: number
+          metadata: Json | null
+        }
+        Insert: {
+          content?: string | null
+          embedding?: string | null
+          id?: number
+          metadata?: Json | null
+        }
+        Update: {
+          content?: string | null
+          embedding?: string | null
+          id?: number
+          metadata?: Json | null
+        }
+        Relationships: []
+      }
       "Email Information": {
         Row: {
           created_at: string
@@ -199,11 +288,13 @@ export type Database = {
           Cost_Center: Json | null
           Cost_Code: Json | null
           created_at: string
+          Date_of_Work: Json | null
           Description: Json | null
           id: number
           invoice_id: number
           Qauntity: Json | null
           Rate: Json | null
+          Ticket_Work_Order: Json | null
           Total: Json | null
           Unit_of_Measure: Json | null
         }
@@ -212,11 +303,13 @@ export type Database = {
           Cost_Center?: Json | null
           Cost_Code?: Json | null
           created_at?: string
+          Date_of_Work?: Json | null
           Description?: Json | null
           id?: number
           invoice_id: number
           Qauntity?: Json | null
           Rate?: Json | null
+          Ticket_Work_Order?: Json | null
           Total?: Json | null
           Unit_of_Measure?: Json | null
         }
@@ -225,11 +318,13 @@ export type Database = {
           Cost_Center?: Json | null
           Cost_Code?: Json | null
           created_at?: string
+          Date_of_Work?: Json | null
           Description?: Json | null
           id?: number
           invoice_id?: number
           Qauntity?: Json | null
           Rate?: Json | null
+          Ticket_Work_Order?: Json | null
           Total?: Json | null
           Unit_of_Measure?: Json | null
         }
@@ -242,6 +337,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      n8n_chat_histories: {
+        Row: {
+          id: number
+          message: Json
+          session_id: string
+        }
+        Insert: {
+          id?: number
+          message: Json
+          session_id: string
+        }
+        Update: {
+          id?: number
+          message?: Json
+          session_id?: string
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -278,7 +391,107 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      binary_quantize: {
+        Args: { "": string } | { "": unknown }
+        Returns: unknown
+      }
+      halfvec_avg: {
+        Args: { "": number[] }
+        Returns: unknown
+      }
+      halfvec_out: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      halfvec_send: {
+        Args: { "": unknown }
+        Returns: string
+      }
+      halfvec_typmod_in: {
+        Args: { "": unknown[] }
+        Returns: number
+      }
+      hnsw_bit_support: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      hnsw_halfvec_support: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      hnsw_sparsevec_support: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      hnswhandler: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      ivfflat_bit_support: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      ivfflat_halfvec_support: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      ivfflathandler: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      l2_norm: {
+        Args: { "": unknown } | { "": unknown }
+        Returns: number
+      }
+      l2_normalize: {
+        Args: { "": string } | { "": unknown } | { "": unknown }
+        Returns: string
+      }
+      match_documents: {
+        Args: { query_embedding: string; match_count?: number; filter?: Json }
+        Returns: {
+          id: number
+          content: string
+          metadata: Json
+          similarity: number
+        }[]
+      }
+      sparsevec_out: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      sparsevec_send: {
+        Args: { "": unknown }
+        Returns: string
+      }
+      sparsevec_typmod_in: {
+        Args: { "": unknown[] }
+        Returns: number
+      }
+      vector_avg: {
+        Args: { "": number[] }
+        Returns: string
+      }
+      vector_dims: {
+        Args: { "": string } | { "": unknown }
+        Returns: number
+      }
+      vector_norm: {
+        Args: { "": string }
+        Returns: number
+      }
+      vector_out: {
+        Args: { "": string }
+        Returns: unknown
+      }
+      vector_send: {
+        Args: { "": string }
+        Returns: string
+      }
+      vector_typmod_in: {
+        Args: { "": unknown[] }
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never
