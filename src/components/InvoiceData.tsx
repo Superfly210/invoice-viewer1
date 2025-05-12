@@ -125,12 +125,12 @@ export const InvoiceData = () => {
               <TableCell>{currentInvoice.id}</TableCell>
             </TableRow>
             <TableRow>
-              <TableCell className="font-medium">Invoice Number</TableCell>
+              <TableCell className="font-medium w-1/3">Invoice Number</TableCell>
               <TableCell>{currentInvoice.Invoice_Number || 'N/A'}</TableCell>
             </TableRow>
             <Collapsible open={companyDetailsOpen} onOpenChange={setCompanyDetailsOpen}>
               <TableRow>
-                <TableCell className="font-medium">Company Name</TableCell>
+                <TableCell className="font-medium w-1/3">Company Name</TableCell>
                 <TableCell>{currentInvoice.Invoicing_Comp_Name || 'N/A'}</TableCell>
               </TableRow>
               <TableRow>
@@ -153,45 +153,45 @@ export const InvoiceData = () => {
               </TableRow>
               <CollapsibleContent>
                 <TableRow>
-                  <TableCell className="font-medium">Company Street</TableCell>
+                  <TableCell className="font-medium w-1/3">Company Street</TableCell>
                   <TableCell>{JSON.stringify(currentInvoice.Invoicing_Comp_Street) || 'N/A'}</TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell className="font-medium">Company City</TableCell>
+                  <TableCell className="font-medium w-1/3">Company City</TableCell>
                   <TableCell>{currentInvoice.Invoicing_Comp_City || 'N/A'}</TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell className="font-medium">Company State/Province</TableCell>
+                  <TableCell className="font-medium w-1/3">Company State/Province</TableCell>
                   <TableCell>{currentInvoice.Invoicing_Comp_State_Prov || 'N/A'}</TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell className="font-medium">Postal Code</TableCell>
+                  <TableCell className="font-medium w-1/3">Postal Code</TableCell>
                   <TableCell>{currentInvoice.Invoicing_Comp_Postal_Code || 'N/A'}</TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell className="font-medium">GST Number</TableCell>
+                  <TableCell className="font-medium w-1/3">GST Number</TableCell>
                   <TableCell>{currentInvoice.GST_Number ? JSON.stringify(currentInvoice.GST_Number) : 'N/A'}</TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell className="font-medium">WCB Number</TableCell>
+                  <TableCell className="font-medium w-1/3">WCB Number</TableCell>
                   <TableCell>{currentInvoice.WCB_Number ? JSON.stringify(currentInvoice.WCB_Number) : 'N/A'}</TableCell>
                 </TableRow>
               </CollapsibleContent>
             </Collapsible>
             <TableRow>
-              <TableCell className="font-medium">Subtotal</TableCell>
+              <TableCell className="font-medium w-1/3">Subtotal</TableCell>
               <TableCell>{currentInvoice.Sub_Total?.toFixed(2) || 'N/A'}</TableCell>
             </TableRow>
             <TableRow>
-              <TableCell className="font-medium">GST Total</TableCell>
+              <TableCell className="font-medium w-1/3">GST Total</TableCell>
               <TableCell>{currentInvoice.GST_Total?.toFixed(2) || 'N/A'}</TableCell>
             </TableRow>
             <TableRow>
-              <TableCell className="font-medium">Total</TableCell>
+              <TableCell className="font-medium w-1/3">Total</TableCell>
               <TableCell>{currentInvoice.Total?.toFixed(2) || 'N/A'}</TableCell>
             </TableRow>
             <TableRow>
-              <TableCell className="font-medium">Created At</TableCell>
+              <TableCell className="font-medium w-1/3">Created At</TableCell>
               <TableCell>{new Date(currentInvoice.created_at).toLocaleString()}</TableCell>
             </TableRow>
           </TableBody>
