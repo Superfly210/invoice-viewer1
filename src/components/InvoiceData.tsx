@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -5,6 +6,7 @@ import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Loader2, ChevronLeft, ChevronRight, Plus, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+
 type AttachmentInfo = {
   id: number;
   Invoice_Number: string | null;
@@ -19,76 +21,96 @@ type AttachmentInfo = {
   GST_Total: number | null;
   Total: number | null;
   created_at: string;
-};
+}
+
 export const InvoiceData = () => {
   const [invoices, setInvoices] = useState<AttachmentInfo[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [companyDetailsOpen, setCompanyDetailsOpen] = useState(false);
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
+
   useEffect(() => {
     fetchInvoiceData();
   }, []);
+
   const fetchInvoiceData = async () => {
     try {
       setIsLoading(true);
-      const {
-        data,
-        error
-      } = await supabase.from('Attachment Info').select('*').order('id', {
-        ascending: true
-      });
+      const { data, error } = await supabase
+        .from('Attachment Info')
+        .select('*')
+        .order('id', { ascending: true });
+
       if (error) throw error;
+
       setInvoices(data || []);
     } catch (error) {
       console.error('Error fetching invoice data:', error);
       toast({
         title: "Error",
         description: "Failed to load invoice data",
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setIsLoading(false);
     }
   };
+
   const handlePrevious = () => {
-    setCurrentIndex(prev => prev > 0 ? prev - 1 : prev);
+    setCurrentIndex((prev) => (prev > 0 ? prev - 1 : prev));
     // Reset collapsible state when navigating to new invoice
     setCompanyDetailsOpen(false);
   };
+
   const handleNext = () => {
-    setCurrentIndex(prev => prev < invoices.length - 1 ? prev + 1 : prev);
+    setCurrentIndex((prev) => (prev < invoices.length - 1 ? prev + 1 : prev));
     // Reset collapsible state when navigating to new invoice
     setCompanyDetailsOpen(false);
   };
+
   if (isLoading) {
-    return <div className="flex justify-center items-center h-64">
+    return (
+      <div className="flex justify-center items-center h-64">
         <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
         <span className="ml-2">Loading invoice data...</span>
-      </div>;
+      </div>
+    );
   }
+
   if (invoices.length === 0) {
-    return <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-8 text-center">
+    return (
+      <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-8 text-center">
         <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-200 mb-4">No Invoice Data Available</h2>
         <p className="text-slate-600 dark:text-slate-400">
           There are no invoices in the database. Try adding some data to the 'Attachment Info' table.
         </p>
-      </div>;
+      </div>
+    );
   }
+
   const currentInvoice = invoices[currentIndex];
-  return <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-4">
+
+  return (
+    <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-4">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-200">
           Invoice {currentIndex + 1} of {invoices.length}
         </h2>
         <div className="flex space-x-2">
-          <Button variant="outline" onClick={handlePrevious} disabled={currentIndex === 0}>
+          <Button
+            variant="outline"
+            onClick={handlePrevious}
+            disabled={currentIndex === 0}
+          >
             <ChevronLeft className="h-4 w-4" />
             Previous
           </Button>
-          <Button variant="outline" onClick={handleNext} disabled={currentIndex === invoices.length - 1}>
+          <Button
+            variant="outline"
+            onClick={handleNext}
+            disabled={currentIndex === invoices.length - 1}
+          >
             Next
             <ChevronRight className="h-4 w-4" />
           </Button>
@@ -108,7 +130,7 @@ export const InvoiceData = () => {
             </TableRow>
             <Collapsible open={companyDetailsOpen} onOpenChange={setCompanyDetailsOpen}>
               <TableRow>
-                <TableCell className="font-medium">Company Name</TableCell>
+                <TableCell className="font-medium w-1/3">Company Name</TableCell>
                 <TableCell>{currentInvoice.Invoicing_Comp_Name || 'N/A'}</TableCell>
               </TableRow>
               <TableRow>
@@ -116,7 +138,11 @@ export const InvoiceData = () => {
                   <div className="flex justify-center w-full">
                     <CollapsibleTrigger asChild>
                       <Button variant="ghost" size="sm" className="h-6 w-full flex justify-center items-center">
-                        {companyDetailsOpen ? <ChevronDown className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+                        {companyDetailsOpen ? (
+                          <ChevronDown className="h-4 w-4" />
+                        ) : (
+                          <Plus className="h-4 w-4" />
+                        )}
                         <span className="ml-2 text-xs text-slate-500 dark:text-slate-400">
                           {companyDetailsOpen ? "Hide details" : "Show company details"}
                         </span>
@@ -171,5 +197,6 @@ export const InvoiceData = () => {
           </TableBody>
         </Table>
       </div>
-    </div>;
+    </div>
+  );
 };
