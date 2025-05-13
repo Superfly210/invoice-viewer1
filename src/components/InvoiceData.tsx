@@ -6,6 +6,7 @@ import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Loader2, ChevronLeft, ChevronRight, Plus, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Json } from "@/integrations/supabase/types";
 
 type AttachmentInfo = {
   id: number;
@@ -21,7 +22,7 @@ type AttachmentInfo = {
   GST_Total: number | null;
   Total: number | null;
   created_at: string;
-  Google_Drive_URL: string | null;
+  Google_Drive_URL: string | null; // Changed from Json | null to string | null
 }
 
 export const InvoiceData = () => {
@@ -45,7 +46,13 @@ export const InvoiceData = () => {
 
       if (error) throw error;
 
-      setInvoices(data || []);
+      // Convert Google_Drive_URL from Json to string if needed
+      const processedData = data?.map(item => ({
+        ...item,
+        Google_Drive_URL: item.Google_Drive_URL ? String(item.Google_Drive_URL) : null
+      })) || [];
+
+      setInvoices(processedData as AttachmentInfo[]);
     } catch (error) {
       console.error('Error fetching invoice data:', error);
       toast({

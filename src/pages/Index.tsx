@@ -7,10 +7,15 @@ import { PDFViewer } from "@/components/PDFViewer";
 import { EmailViewer } from "@/components/EmailViewer";
 import { MetadataPanel } from "@/components/MetadataPanel";
 import { InvoiceSigner } from "@/components/InvoiceSigner";
+import { LineItemsPanel } from "@/components/LineItemsPanel";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
-import { FileTextIcon, TableIcon, MailIcon, FileIcon } from "lucide-react";
+import { 
+  ResizablePanelGroup, 
+  ResizablePanel, 
+  ResizableHandle 
+} from "@/components/ui/resizable";
+import { FileTextIcon, TableIcon, MailIcon, FileIcon, PanelBottomIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import AFE from "@/pages/AFE";
 import CostCenters from "@/pages/CostCenters";
@@ -25,6 +30,9 @@ const Index = () => {
   const [activeSection, setActiveSection] = useState("reviewer"); // "signer", "reviewer", "summary"
   const [currentPdfUrl, setCurrentPdfUrl] = useState<string | null>(null);
   const [currentInvoiceIndex, setCurrentInvoiceIndex] = useState(0);
+  const [currentInvoiceId, setCurrentInvoiceId] = useState<number | null>(null);
+  const [pdfCurrentPage, setPdfCurrentPage] = useState(1);
+  const [pdfTotalPages, setPdfTotalPages] = useState(3);
   const { toast } = useToast();
 
   // Fetch the current invoice's PDF URL
@@ -33,15 +41,17 @@ const Index = () => {
       try {
         const { data, error } = await supabase
           .from('Attachment Info')
-          .select('Google_Drive_URL')
+          .select('*')
           .order('id', { ascending: true })
           .range(currentInvoiceIndex, currentInvoiceIndex);
 
         if (error) throw error;
         
         if (data && data.length > 0) {
-          const url = data[0].Google_Drive_URL;
+          // Convert Google_Drive_URL from Json to string if needed
+          let url = data[0].Google_Drive_URL ? String(data[0].Google_Drive_URL) : null;
           setCurrentPdfUrl(url);
+          setCurrentInvoiceId(data[0].id);
         }
       } catch (error) {
         console.error('Error fetching PDF URL:', error);
@@ -100,6 +110,11 @@ const Index = () => {
     setActiveSection(section);
   };
 
+  const handlePdfPageChange = (currentPage: number, totalPages: number) => {
+    setPdfCurrentPage(currentPage);
+    setPdfTotalPages(totalPages);
+  };
+
   return (
     <div className="flex h-screen bg-slate-50 dark:bg-slate-900">
       <Sidebar 
@@ -121,51 +136,66 @@ const Index = () => {
               onPrevious={handlePrevious}
               onNext={handleNext}
             />
-            <ResizablePanelGroup direction="horizontal" className="flex-1">
-              <ResizablePanel defaultSize={50} minSize={30}>
-                <div className="h-full overflow-auto p-4">
-                  <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                    <TabsList className="grid w-full grid-cols-2 mb-4">
-                      <TabsTrigger value="data" className="flex items-center">
-                        <TableIcon className="h-4 w-4 mr-2" />
-                        Invoice Data
-                      </TabsTrigger>
-                      <TabsTrigger value="metadata" className="flex items-center">
-                        <FileTextIcon className="h-4 w-4 mr-2" />
-                        Metadata
-                      </TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="data" className="mt-0">
-                      <InvoiceData />
-                    </TabsContent>
-                    <TabsContent value="metadata" className="mt-0">
-                      <MetadataPanel />
-                    </TabsContent>
-                  </Tabs>
-                </div>
+            <ResizablePanelGroup direction="vertical" className="flex-1">
+              <ResizablePanel defaultSize={70} minSize={30}>
+                <ResizablePanelGroup direction="horizontal" className="h-full">
+                  <ResizablePanel defaultSize={50} minSize={30}>
+                    <div className="h-full overflow-auto p-4">
+                      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                        <TabsList className="grid w-full grid-cols-2 mb-4">
+                          <TabsTrigger value="data" className="flex items-center">
+                            <TableIcon className="h-4 w-4 mr-2" />
+                            Invoice Data
+                          </TabsTrigger>
+                          <TabsTrigger value="metadata" className="flex items-center">
+                            <FileTextIcon className="h-4 w-4 mr-2" />
+                            Metadata
+                          </TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="data" className="mt-0">
+                          <InvoiceData />
+                        </TabsContent>
+                        <TabsContent value="metadata" className="mt-0">
+                          <MetadataPanel />
+                        </TabsContent>
+                      </Tabs>
+                    </div>
+                  </ResizablePanel>
+                  <ResizableHandle withHandle />
+                  <ResizablePanel defaultSize={50} minSize={30}>
+                    <div className="h-full overflow-auto">
+                      <Tabs value={activeDocTab} onValueChange={setActiveDocTab} className="w-full h-full">
+                        <TabsList className="grid w-full grid-cols-2 mx-4 mt-4">
+                          <TabsTrigger value="pdf" className="flex items-center">
+                            <FileIcon className="h-4 w-4 mr-2" />
+                            Invoice PDF
+                          </TabsTrigger>
+                          <TabsTrigger value="email" className="flex items-center">
+                            <MailIcon className="h-4 w-4 mr-2" />
+                            Email Message
+                          </TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="pdf" className="mt-0 h-[calc(100%-60px)]">
+                          <PDFViewer 
+                            pdfUrl={currentPdfUrl} 
+                            onPageChange={handlePdfPageChange}
+                          />
+                        </TabsContent>
+                        <TabsContent value="email" className="mt-0 h-[calc(100%-60px)]">
+                          <EmailViewer />
+                        </TabsContent>
+                      </Tabs>
+                    </div>
+                  </ResizablePanel>
+                </ResizablePanelGroup>
               </ResizablePanel>
-              <ResizableHandle withHandle />
-              <ResizablePanel defaultSize={50} minSize={30}>
-                <div className="h-full overflow-auto p-4">
-                  <Tabs value={activeDocTab} onValueChange={setActiveDocTab} className="w-full">
-                    <TabsList className="grid w-full grid-cols-2 mb-4">
-                      <TabsTrigger value="pdf" className="flex items-center">
-                        <FileIcon className="h-4 w-4 mr-2" />
-                        Invoice PDF
-                      </TabsTrigger>
-                      <TabsTrigger value="email" className="flex items-center">
-                        <MailIcon className="h-4 w-4 mr-2" />
-                        Email Message
-                      </TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="pdf" className="mt-0">
-                      <PDFViewer pdfUrl={currentPdfUrl} />
-                    </TabsContent>
-                    <TabsContent value="email" className="mt-0">
-                      <EmailViewer />
-                    </TabsContent>
-                  </Tabs>
+              <ResizableHandle withHandle>
+                <div className="flex justify-center items-center w-full h-full">
+                  <PanelBottomIcon className="h-4 w-4 text-slate-400" />
                 </div>
+              </ResizableHandle>
+              <ResizablePanel defaultSize={30} minSize={15}>
+                <LineItemsPanel currentInvoiceId={currentInvoiceId} />
               </ResizablePanel>
             </ResizablePanelGroup>
           </>
