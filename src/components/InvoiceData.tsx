@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -128,56 +127,60 @@ export const InvoiceData = () => {
               <TableCell className="font-medium w-1/3">Invoice Number</TableCell>
               <TableCell>{currentInvoice.Invoice_Number || 'N/A'}</TableCell>
             </TableRow>
-            <Collapsible open={companyDetailsOpen} onOpenChange={setCompanyDetailsOpen}>
-              <TableRow>
-                <TableCell className="font-medium w-1/3">Company Name</TableCell>
-                <TableCell>{currentInvoice.Invoicing_Comp_Name || 'N/A'}</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell colSpan={2} className="p-2 bg-slate-50 dark:bg-slate-900/50">
-                  <div className="flex justify-center w-full">
-                    <CollapsibleTrigger asChild>
-                      <Button variant="ghost" size="sm" className="h-6 w-full flex justify-center items-center">
-                        {companyDetailsOpen ? (
-                          <ChevronDown className="h-4 w-4" />
-                        ) : (
-                          <Plus className="h-4 w-4" />
-                        )}
-                        <span className="ml-2 text-xs text-slate-500 dark:text-slate-400">
-                          {companyDetailsOpen ? "Hide details" : "Show company details"}
-                        </span>
-                      </Button>
-                    </CollapsibleTrigger>
-                  </div>
-                </TableCell>
-              </TableRow>
-              <CollapsibleContent>
-                <TableRow>
-                  <TableCell className="font-medium w-1/3">Company Street</TableCell>
-                  <TableCell>{JSON.stringify(currentInvoice.Invoicing_Comp_Street) || 'N/A'}</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="font-medium w-1/3">Company City</TableCell>
-                  <TableCell>{currentInvoice.Invoicing_Comp_City || 'N/A'}</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="font-medium w-1/3">Company State/Province</TableCell>
-                  <TableCell>{currentInvoice.Invoicing_Comp_State_Prov || 'N/A'}</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="font-medium w-1/3">Postal Code</TableCell>
-                  <TableCell>{currentInvoice.Invoicing_Comp_Postal_Code || 'N/A'}</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="font-medium w-1/3">GST Number</TableCell>
-                  <TableCell>{currentInvoice.GST_Number ? JSON.stringify(currentInvoice.GST_Number) : 'N/A'}</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="font-medium w-1/3">WCB Number</TableCell>
-                  <TableCell>{currentInvoice.WCB_Number ? JSON.stringify(currentInvoice.WCB_Number) : 'N/A'}</TableCell>
-                </TableRow>
-              </CollapsibleContent>
-            </Collapsible>
+            
+            {/* Move Collapsible inside the TableRow to maintain row structure */}
+            <TableRow>
+              <TableCell className="font-medium w-1/3">Company Name</TableCell>
+              <TableCell>{currentInvoice.Invoicing_Comp_Name || 'N/A'}</TableCell>
+            </TableRow>
+            
+            <TableRow>
+              <TableCell colSpan={2} className="p-0 border-0">
+                <Collapsible open={companyDetailsOpen} onOpenChange={setCompanyDetailsOpen} className="w-full">
+                  <CollapsibleTrigger asChild>
+                    <Button variant="ghost" size="sm" className="h-6 w-full flex justify-center items-center rounded-none bg-slate-50 dark:bg-slate-900/50">
+                      {companyDetailsOpen ? (
+                        <ChevronDown className="h-4 w-4" />
+                      ) : (
+                        <Plus className="h-4 w-4" />
+                      )}
+                      <span className="ml-2 text-xs text-slate-500 dark:text-slate-400">
+                        {companyDetailsOpen ? "Hide details" : "Show company details"}
+                      </span>
+                    </Button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <div className="w-full">
+                      <TableRow>
+                        <TableCell className="font-medium w-1/3">Company Street</TableCell>
+                        <TableCell>{JSON.stringify(currentInvoice.Invoicing_Comp_Street) || 'N/A'}</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="font-medium w-1/3">Company City</TableCell>
+                        <TableCell>{currentInvoice.Invoicing_Comp_City || 'N/A'}</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="font-medium w-1/3">Company State/Province</TableCell>
+                        <TableCell>{currentInvoice.Invoicing_Comp_State_Prov || 'N/A'}</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="font-medium w-1/3">Postal Code</TableCell>
+                        <TableCell>{currentInvoice.Invoicing_Comp_Postal_Code || 'N/A'}</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="font-medium w-1/3">GST Number</TableCell>
+                        <TableCell>{currentInvoice.GST_Number ? JSON.stringify(currentInvoice.GST_Number) : 'N/A'}</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="font-medium w-1/3">WCB Number</TableCell>
+                        <TableCell>{currentInvoice.WCB_Number ? JSON.stringify(currentInvoice.WCB_Number) : 'N/A'}</TableCell>
+                      </TableRow>
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
+              </TableCell>
+            </TableRow>
+            
             <TableRow>
               <TableCell className="font-medium w-1/3">Subtotal</TableCell>
               <TableCell>{currentInvoice.Sub_Total?.toFixed(2) || 'N/A'}</TableCell>
