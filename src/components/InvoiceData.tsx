@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -20,6 +21,7 @@ type AttachmentInfo = {
   GST_Total: number | null;
   Total: number | null;
   created_at: string;
+  Google_Drive_URL: string | null;
 }
 
 export const InvoiceData = () => {
@@ -66,6 +68,14 @@ export const InvoiceData = () => {
     setCurrentIndex((prev) => (prev < invoices.length - 1 ? prev + 1 : prev));
     // Reset collapsible state when navigating to new invoice
     setCompanyDetailsOpen(false);
+  };
+
+  // Get the current invoice's Google Drive URL (if any)
+  const getCurrentGoogleDriveUrl = (): string | null => {
+    if (!invoices.length || currentIndex >= invoices.length) return null;
+    
+    const currentInvoice = invoices[currentIndex];
+    return currentInvoice.Google_Drive_URL;
   };
 
   if (isLoading) {
@@ -128,7 +138,6 @@ export const InvoiceData = () => {
               <TableCell>{currentInvoice.Invoice_Number || 'N/A'}</TableCell>
             </TableRow>
             
-            {/* Move Collapsible inside the TableRow to maintain row structure */}
             <TableRow>
               <TableCell className="font-medium w-1/3">Company Name</TableCell>
               <TableCell>{currentInvoice.Invoicing_Comp_Name || 'N/A'}</TableCell>
@@ -175,6 +184,21 @@ export const InvoiceData = () => {
                         <TableCell className="font-medium w-1/3">WCB Number</TableCell>
                         <TableCell>{currentInvoice.WCB_Number ? JSON.stringify(currentInvoice.WCB_Number) : 'N/A'}</TableCell>
                       </TableRow>
+                      {currentInvoice.Google_Drive_URL && (
+                        <TableRow>
+                          <TableCell className="font-medium w-1/3">Google Drive URL</TableCell>
+                          <TableCell>
+                            <a 
+                              href={currentInvoice.Google_Drive_URL} 
+                              target="_blank" 
+                              rel="noopener noreferrer" 
+                              className="text-blue-600 hover:underline truncate block"
+                            >
+                              {currentInvoice.Google_Drive_URL}
+                            </a>
+                          </TableCell>
+                        </TableRow>
+                      )}
                     </div>
                   </CollapsibleContent>
                 </Collapsible>

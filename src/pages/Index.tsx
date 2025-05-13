@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { ActionBarWithThemeToggle } from "@/components/ActionBarWithThemeToggle";
 import { InvoiceData } from "@/components/InvoiceData";
@@ -10,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { FileTextIcon, TableIcon, MailIcon, FileIcon } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import AFE from "@/pages/AFE";
 import CostCenters from "@/pages/CostCenters";
 import Permissions from "@/pages/Permissions";
@@ -21,7 +23,33 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState("data");
   const [activeDocTab, setActiveDocTab] = useState("pdf");
   const [activeSection, setActiveSection] = useState("reviewer"); // "signer", "reviewer", "summary"
+  const [currentPdfUrl, setCurrentPdfUrl] = useState<string | null>(null);
+  const [currentInvoiceIndex, setCurrentInvoiceIndex] = useState(0);
   const { toast } = useToast();
+
+  // Fetch the current invoice's PDF URL
+  useEffect(() => {
+    const fetchCurrentInvoice = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('Attachment Info')
+          .select('Google_Drive_URL')
+          .order('id', { ascending: true })
+          .range(currentInvoiceIndex, currentInvoiceIndex);
+
+        if (error) throw error;
+        
+        if (data && data.length > 0) {
+          const url = data[0].Google_Drive_URL;
+          setCurrentPdfUrl(url);
+        }
+      } catch (error) {
+        console.error('Error fetching PDF URL:', error);
+      }
+    };
+
+    fetchCurrentInvoice();
+  }, [currentInvoiceIndex]);
 
   const handleApprove = () => {
     toast({
@@ -58,12 +86,14 @@ const Index = () => {
     if (currentInvoice > 1) {
       setCurrentInvoice(currentInvoice - 1);
     }
+    setCurrentInvoiceIndex(prev => Math.max(0, prev - 1));
   };
 
   const handleNext = () => {
     if (currentInvoice < totalInvoices) {
       setCurrentInvoice(currentInvoice + 1);
     }
+    setCurrentInvoiceIndex(prev => prev + 1);
   };
 
   const handleSectionChange = (section: string) => {
@@ -129,7 +159,7 @@ const Index = () => {
                       </TabsTrigger>
                     </TabsList>
                     <TabsContent value="pdf" className="mt-0">
-                      <PDFViewer />
+                      <PDFViewer pdfUrl={currentPdfUrl} />
                     </TabsContent>
                     <TabsContent value="email" className="mt-0">
                       <EmailViewer />

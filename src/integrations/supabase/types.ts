@@ -61,6 +61,9 @@ export type Database = {
           "Cost Codes": Json | null
           created_at: string
           Email_ID: number | null
+          File_Name: Json | null
+          Google_Drive_ID: Json | null
+          Google_Drive_URL: Json | null
           GST_Number: Json | null
           GST_Total: number | null
           id: number
@@ -84,6 +87,9 @@ export type Database = {
           "Cost Codes"?: Json | null
           created_at?: string
           Email_ID?: number | null
+          File_Name?: Json | null
+          Google_Drive_ID?: Json | null
+          Google_Drive_URL?: Json | null
           GST_Number?: Json | null
           GST_Total?: number | null
           id?: number
@@ -107,6 +113,9 @@ export type Database = {
           "Cost Codes"?: Json | null
           created_at?: string
           Email_ID?: number | null
+          File_Name?: Json | null
+          Google_Drive_ID?: Json | null
+          Google_Drive_URL?: Json | null
           GST_Number?: Json | null
           GST_Total?: number | null
           id?: number
@@ -250,6 +259,7 @@ export type Database = {
         Row: {
           created_at: string
           Date: string | null
+          Email_Type: Json | null
           From: Json | null
           id: Json | null
           id_: number
@@ -261,6 +271,7 @@ export type Database = {
         Insert: {
           created_at?: string
           Date?: string | null
+          Email_Type?: Json | null
           From?: Json | null
           id?: Json | null
           id_?: number
@@ -272,6 +283,7 @@ export type Database = {
         Update: {
           created_at?: string
           Date?: string | null
+          Email_Type?: Json | null
           From?: Json | null
           id?: Json | null
           id_?: number
