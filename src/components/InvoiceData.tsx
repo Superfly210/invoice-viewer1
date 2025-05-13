@@ -3,10 +3,9 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
-import { Loader2, ChevronLeft, ChevronRight, Plus, ChevronDown } from "lucide-react";
+import { Loader2, ChevronDown, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Json } from "@/integrations/supabase/types";
 
 type AttachmentInfo = {
   id: number;
@@ -22,7 +21,7 @@ type AttachmentInfo = {
   GST_Total: number | null;
   Total: number | null;
   created_at: string;
-  Google_Drive_URL: string | null; // Changed from Json | null to string | null
+  Google_Drive_URL: string | null;
 }
 
 export const InvoiceData = () => {
@@ -65,18 +64,6 @@ export const InvoiceData = () => {
     }
   };
 
-  const handlePrevious = () => {
-    setCurrentIndex((prev) => (prev > 0 ? prev - 1 : prev));
-    // Reset collapsible state when navigating to new invoice
-    setCompanyDetailsOpen(false);
-  };
-
-  const handleNext = () => {
-    setCurrentIndex((prev) => (prev < invoices.length - 1 ? prev + 1 : prev));
-    // Reset collapsible state when navigating to new invoice
-    setCompanyDetailsOpen(false);
-  };
-
   // Get the current invoice's Google Drive URL (if any)
   const getCurrentGoogleDriveUrl = (): string | null => {
     if (!invoices.length || currentIndex >= invoices.length) return null;
@@ -109,30 +96,6 @@ export const InvoiceData = () => {
 
   return (
     <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-4">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-200">
-          Invoice {currentIndex + 1} of {invoices.length}
-        </h2>
-        <div className="flex space-x-2">
-          <Button
-            variant="outline"
-            onClick={handlePrevious}
-            disabled={currentIndex === 0}
-          >
-            <ChevronLeft className="h-4 w-4" />
-            Previous
-          </Button>
-          <Button
-            variant="outline"
-            onClick={handleNext}
-            disabled={currentIndex === invoices.length - 1}
-          >
-            Next
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-
       <div className="overflow-x-auto">
         <Table>
           <TableBody>
@@ -234,3 +197,4 @@ export const InvoiceData = () => {
     </div>
   );
 };
+

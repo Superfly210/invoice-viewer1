@@ -23,8 +23,7 @@ import Permissions from "@/pages/Permissions";
 
 const Index = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [currentInvoice, setCurrentInvoice] = useState(3);
-  const [totalInvoices, setTotalInvoices] = useState(12);
+  const [totalInvoices, setTotalInvoices] = useState(0);
   const [activeTab, setActiveTab] = useState("data");
   const [activeDocTab, setActiveDocTab] = useState("pdf");
   const [activeSection, setActiveSection] = useState("reviewer"); // "signer", "reviewer", "summary"
@@ -35,10 +34,19 @@ const Index = () => {
   const [pdfTotalPages, setPdfTotalPages] = useState(3);
   const { toast } = useToast();
 
-  // Fetch the current invoice's PDF URL
+  // Fetch the current invoice's PDF URL and get total count
   useEffect(() => {
-    const fetchCurrentInvoice = async () => {
+    const fetchData = async () => {
       try {
+        // Get total count of invoices
+        const { count, error: countError } = await supabase
+          .from('Attachment Info')
+          .select('*', { count: 'exact', head: true });
+        
+        if (countError) throw countError;
+        setTotalInvoices(count || 0);
+        
+        // Fetch current invoice data
         const { data, error } = await supabase
           .from('Attachment Info')
           .select('*')
@@ -54,11 +62,11 @@ const Index = () => {
           setCurrentInvoiceId(data[0].id);
         }
       } catch (error) {
-        console.error('Error fetching PDF URL:', error);
+        console.error('Error fetching invoice data:', error);
       }
     };
 
-    fetchCurrentInvoice();
+    fetchData();
   }, [currentInvoiceIndex]);
 
   const handleApprove = () => {
@@ -93,17 +101,13 @@ const Index = () => {
   };
 
   const handlePrevious = () => {
-    if (currentInvoice > 1) {
-      setCurrentInvoice(currentInvoice - 1);
-    }
     setCurrentInvoiceIndex(prev => Math.max(0, prev - 1));
   };
 
   const handleNext = () => {
-    if (currentInvoice < totalInvoices) {
-      setCurrentInvoice(currentInvoice + 1);
+    if (currentInvoiceIndex < totalInvoices - 1) {
+      setCurrentInvoiceIndex(prev => prev + 1);
     }
-    setCurrentInvoiceIndex(prev => prev + 1);
   };
 
   const handleSectionChange = (section: string) => {
@@ -131,7 +135,7 @@ const Index = () => {
               onDeny={handleDeny}
               onQuarantine={handleQuarantine}
               onForward={handleForward}
-              currentInvoice={currentInvoice}
+              currentInvoice={currentInvoiceIndex + 1}
               totalInvoices={totalInvoices}
               onPrevious={handlePrevious}
               onNext={handleNext}
@@ -225,3 +229,4 @@ const Index = () => {
 };
 
 export default Index;
+
