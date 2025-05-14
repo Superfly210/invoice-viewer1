@@ -42,14 +42,16 @@ export const LineItemsPanel = ({ currentInvoiceId }: LineItemsPanelProps) => {
   const fetchLineItems = async (invoiceId: number) => {
     try {
       setIsLoading(true);
+      console.log("Fetching line items for invoice ID:", invoiceId);
+      
       const { data, error } = await supabase
         .from('Line Items')
         .select('*')
-        .eq('invoice_id', invoiceId)
-        .order('id', { ascending: true });
+        .eq('invoice_id', invoiceId);
 
       if (error) throw error;
       
+      console.log("Line items data:", data);
       setLineItems(data || []);
     } catch (error) {
       console.error('Error fetching line items:', error);
@@ -88,16 +90,48 @@ export const LineItemsPanel = ({ currentInvoiceId }: LineItemsPanelProps) => {
       <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-8 text-center h-full">
         <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-200 mb-4">No Line Items Available</h2>
         <p className="text-slate-600 dark:text-slate-400">
-          This invoice doesn't have any line items recorded.
+          This invoice doesn't have any line items recorded or there might be a data issue.
         </p>
+        <div className="text-sm text-slate-500 mt-2">
+          Current invoice ID: {currentInvoiceId}
+        </div>
       </div>
     );
   }
 
+  // Function to safely parse JSON or return the value as-is
+  const parseJsonValue = (value: any) => {
+    if (value === null || value === undefined) return 'N/A';
+    
+    if (typeof value === 'string') {
+      try {
+        // Try to parse as JSON if it looks like JSON
+        if (value.startsWith('{') || value.startsWith('[')) {
+          return JSON.parse(value);
+        }
+        return value;
+      } catch {
+        return value;
+      }
+    }
+    
+    return value;
+  };
+
+  // Display the value in a readable format
+  const displayValue = (value: any) => {
+    if (value === null || value === undefined) return 'N/A';
+    
+    const parsedValue = parseJsonValue(value);
+    if (typeof parsedValue === 'object') return JSON.stringify(parsedValue);
+    
+    return String(parsedValue);
+  };
+
   return (
     <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-4 h-full overflow-auto">
       <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-200 mb-4">
-        Line Items for Invoice #{currentInvoiceId}
+        Line Items for Invoice #{currentInvoiceId} ({lineItems.length} items)
       </h2>
       
       <div className="overflow-x-auto">
@@ -119,16 +153,16 @@ export const LineItemsPanel = ({ currentInvoiceId }: LineItemsPanelProps) => {
           <TableBody>
             {lineItems.map((item) => (
               <TableRow key={item.id}>
-                <TableCell>{item.Description ? JSON.stringify(item.Description) : 'N/A'}</TableCell>
-                <TableCell>{item.Date_of_Work ? JSON.stringify(item.Date_of_Work) : 'N/A'}</TableCell>
-                <TableCell>{item.Ticket_Work_Order ? JSON.stringify(item.Ticket_Work_Order) : 'N/A'}</TableCell>
-                <TableCell>{item.AFE_number ? JSON.stringify(item.AFE_number) : 'N/A'}</TableCell>
-                <TableCell>{item.Cost_Center ? JSON.stringify(item.Cost_Center) : 'N/A'}</TableCell>
-                <TableCell>{item.Cost_Code ? JSON.stringify(item.Cost_Code) : 'N/A'}</TableCell>
-                <TableCell>{item.Unit_of_Measure ? JSON.stringify(item.Unit_of_Measure) : 'N/A'}</TableCell>
-                <TableCell className="text-right">{item.Qauntity ? JSON.stringify(item.Qauntity) : 'N/A'}</TableCell>
-                <TableCell className="text-right">{item.Rate ? JSON.stringify(item.Rate) : 'N/A'}</TableCell>
-                <TableCell className="text-right">{item.Total ? JSON.stringify(item.Total) : 'N/A'}</TableCell>
+                <TableCell>{displayValue(item.Description)}</TableCell>
+                <TableCell>{displayValue(item.Date_of_Work)}</TableCell>
+                <TableCell>{displayValue(item.Ticket_Work_Order)}</TableCell>
+                <TableCell>{displayValue(item.AFE_number)}</TableCell>
+                <TableCell>{displayValue(item.Cost_Center)}</TableCell>
+                <TableCell>{displayValue(item.Cost_Code)}</TableCell>
+                <TableCell>{displayValue(item.Unit_of_Measure)}</TableCell>
+                <TableCell className="text-right">{displayValue(item.Qauntity)}</TableCell>
+                <TableCell className="text-right">{displayValue(item.Rate)}</TableCell>
+                <TableCell className="text-right">{displayValue(item.Total)}</TableCell>
               </TableRow>
             ))}
           </TableBody>

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { ActionBarWithThemeToggle } from "@/components/ActionBarWithThemeToggle";
@@ -59,6 +60,7 @@ const Index = () => {
           let url = data[0].Google_Drive_URL ? String(data[0].Google_Drive_URL) : null;
           setCurrentPdfUrl(url);
           setCurrentInvoiceId(data[0].id);
+          console.log("Set current invoice ID to:", data[0].id);
         }
       } catch (error) {
         console.error('Error fetching invoice data:', error);
