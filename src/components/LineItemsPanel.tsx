@@ -49,7 +49,10 @@ export const LineItemsPanel = ({ currentInvoiceId }: LineItemsPanelProps) => {
         .select('*')
         .eq('invoice_id', invoiceId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching line items:', error);
+        throw error;
+      }
       
       console.log("Line items data:", data);
       setLineItems(data || []);
