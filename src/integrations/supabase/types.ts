@@ -60,18 +60,19 @@ export type Database = {
           "Cost Centers": Json | null
           "Cost Codes": Json | null
           created_at: string
-          Email_ID: number | null
+          Email_ID: Json | null
+          Email_Info_ID: number | null
           File_Name: Json | null
           Google_Drive_ID: Json | null
           Google_Drive_URL: Json | null
           GST_Number: Json | null
           GST_Total: number | null
           id: number
-          Invoice_Number: string | null
-          Invoicing_Comp_City: string | null
+          Invoice_Number: Json | null
+          Invoicing_Comp_City: Json | null
           Invoicing_Comp_Name: string | null
-          Invoicing_Comp_Postal_Code: string | null
-          Invoicing_Comp_State_Prov: string | null
+          Invoicing_Comp_Postal_Code: Json | null
+          Invoicing_Comp_State_Prov: Json | null
           Invoicing_Comp_Street: Json | null
           Number_Of_Pages: Json | null
           Page_Field_Ticket_Starts_On: Json | null
@@ -86,18 +87,19 @@ export type Database = {
           "Cost Centers"?: Json | null
           "Cost Codes"?: Json | null
           created_at?: string
-          Email_ID?: number | null
+          Email_ID?: Json | null
+          Email_Info_ID?: number | null
           File_Name?: Json | null
           Google_Drive_ID?: Json | null
           Google_Drive_URL?: Json | null
           GST_Number?: Json | null
           GST_Total?: number | null
           id?: number
-          Invoice_Number?: string | null
-          Invoicing_Comp_City?: string | null
+          Invoice_Number?: Json | null
+          Invoicing_Comp_City?: Json | null
           Invoicing_Comp_Name?: string | null
-          Invoicing_Comp_Postal_Code?: string | null
-          Invoicing_Comp_State_Prov?: string | null
+          Invoicing_Comp_Postal_Code?: Json | null
+          Invoicing_Comp_State_Prov?: Json | null
           Invoicing_Comp_Street?: Json | null
           Number_Of_Pages?: Json | null
           Page_Field_Ticket_Starts_On?: Json | null
@@ -112,18 +114,19 @@ export type Database = {
           "Cost Centers"?: Json | null
           "Cost Codes"?: Json | null
           created_at?: string
-          Email_ID?: number | null
+          Email_ID?: Json | null
+          Email_Info_ID?: number | null
           File_Name?: Json | null
           Google_Drive_ID?: Json | null
           Google_Drive_URL?: Json | null
           GST_Number?: Json | null
           GST_Total?: number | null
           id?: number
-          Invoice_Number?: string | null
-          Invoicing_Comp_City?: string | null
+          Invoice_Number?: Json | null
+          Invoicing_Comp_City?: Json | null
           Invoicing_Comp_Name?: string | null
-          Invoicing_Comp_Postal_Code?: string | null
-          Invoicing_Comp_State_Prov?: string | null
+          Invoicing_Comp_Postal_Code?: Json | null
+          Invoicing_Comp_State_Prov?: Json | null
           Invoicing_Comp_Street?: Json | null
           Number_Of_Pages?: Json | null
           Page_Field_Ticket_Starts_On?: Json | null
@@ -134,8 +137,8 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "Attachment Info_Email_ID_fkey"
-            columns: ["Email_ID"]
+            foreignKeyName: "Attachment Info_Email_Info_ID_fkey"
+            columns: ["Email_Info_ID"]
             isOneToOne: false
             referencedRelation: "Email Information"
             referencedColumns: ["id_"]
@@ -257,9 +260,16 @@ export type Database = {
       }
       "Email Information": {
         Row: {
+          cc: Json | null
           created_at: string
           Date: string | null
+          Email_Mark_Down: Json | null
           Email_Type: Json | null
+          Email_Type_Account_Info: boolean | null
+          Email_Type_Account_Statement: boolean | null
+          Email_Type_Invoice: boolean | null
+          Email_Type_Other: boolean | null
+          Email_Type_Requesting_Payment: boolean | null
           From: Json | null
           id: Json | null
           id_: number
@@ -269,9 +279,16 @@ export type Database = {
           "x-recieved": Json | null
         }
         Insert: {
+          cc?: Json | null
           created_at?: string
           Date?: string | null
+          Email_Mark_Down?: Json | null
           Email_Type?: Json | null
+          Email_Type_Account_Info?: boolean | null
+          Email_Type_Account_Statement?: boolean | null
+          Email_Type_Invoice?: boolean | null
+          Email_Type_Other?: boolean | null
+          Email_Type_Requesting_Payment?: boolean | null
           From?: Json | null
           id?: Json | null
           id_?: number
@@ -281,9 +298,16 @@ export type Database = {
           "x-recieved"?: Json | null
         }
         Update: {
+          cc?: Json | null
           created_at?: string
           Date?: string | null
+          Email_Mark_Down?: Json | null
           Email_Type?: Json | null
+          Email_Type_Account_Info?: boolean | null
+          Email_Type_Account_Statement?: boolean | null
+          Email_Type_Invoice?: boolean | null
+          Email_Type_Other?: boolean | null
+          Email_Type_Requesting_Payment?: boolean | null
           From?: Json | null
           id?: Json | null
           id_?: number

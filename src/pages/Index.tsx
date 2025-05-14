@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { ActionBarWithThemeToggle } from "@/components/ActionBarWithThemeToggle";
@@ -229,4 +228,3 @@ const Index = () => {
 };
 
 export default Index;
-
