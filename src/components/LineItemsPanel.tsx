@@ -44,6 +44,7 @@ export const LineItemsPanel = ({ currentInvoiceId }: LineItemsPanelProps) => {
       setIsLoading(true);
       console.log("Fetching line items for invoice ID:", invoiceId);
       
+      // Make sure we're using the exact table name as in Supabase
       const { data, error } = await supabase
         .from('Line Items')
         .select('*')
@@ -54,7 +55,7 @@ export const LineItemsPanel = ({ currentInvoiceId }: LineItemsPanelProps) => {
         throw error;
       }
       
-      console.log("Line items data:", data);
+      console.log("Line items data received:", data);
       setLineItems(data || []);
     } catch (error) {
       console.error('Error fetching line items:', error);
