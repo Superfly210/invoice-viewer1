@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -13,9 +12,9 @@ type LineItem = {
   AFE_number: any;
   Cost_Center: any;
   Cost_Code: any;
-  Rate: any;
+  Rate: any; // Changed from number to any
   Qauntity: any; // Note: This is misspelled in the database
-  Total: any;
+  Total: any; // Changed from number to any
   Date_of_Work: any;
   Ticket_Work_Order: any;
   created_at: string;
@@ -130,8 +129,8 @@ export const LineItemsPanel = ({ currentInvoiceId }: LineItemsPanelProps) => {
     
     // Handle numeric values
     if (typeof parsedValue === 'number') {
-      // Format currency values
-      if (value === parsedValue.Rate || value === parsedValue.Total) {
+      // Format currency values - fixed the type error by checking property names instead
+      if ('Rate' in value || 'Total' in value) {
         return parsedValue.toFixed(2);
       }
       return String(parsedValue);
