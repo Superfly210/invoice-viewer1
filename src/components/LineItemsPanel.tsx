@@ -1,22 +1,23 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertCircle } from "lucide-react";
 
 type LineItem = {
   id: number;
   invoice_id: number;
-  Description: any;
-  Unit_of_Measure: any;
-  AFE_number: any;
-  Cost_Center: any;
-  Cost_Code: any;
-  Rate: any; // Changed from number to any
-  Qauntity: any; // Note: This is misspelled in the database
-  Total: any; // Changed from number to any
-  Date_of_Work: any;
-  Ticket_Work_Order: any;
+  Description: any; // jsonb
+  Unit_of_Measure: any; // jsonb
+  AFE_number: any; // jsonb
+  Cost_Center: any; // jsonb
+  Cost_Code: any; // jsonb
+  Rate: any; // jsonb
+  Qauntity: any; // jsonb - Note: This is misspelled in the database
+  Total: any; // jsonb
+  Date_of_Work: any; // jsonb
+  Ticket_Work_Order: any; // jsonb
   created_at: string;
 };
 
@@ -27,11 +28,13 @@ interface LineItemsPanelProps {
 export const LineItemsPanel = ({ currentInvoiceId }: LineItemsPanelProps) => {
   const [lineItems, setLineItems] = useState<LineItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
     // Log the currentInvoiceId when it changes
     console.log("LineItemsPanel - currentInvoiceId changed to:", currentInvoiceId);
+    setError(null);
     
     if (currentInvoiceId) {
       fetchLineItems(currentInvoiceId);
@@ -54,6 +57,7 @@ export const LineItemsPanel = ({ currentInvoiceId }: LineItemsPanelProps) => {
 
       if (error) {
         console.error('Error fetching line items:', error);
+        setError(`Database error: ${error.message}`);
         throw error;
       }
       
@@ -61,6 +65,13 @@ export const LineItemsPanel = ({ currentInvoiceId }: LineItemsPanelProps) => {
       
       if (data && data.length > 0) {
         console.log("Sample line item structure:", JSON.stringify(data[0], null, 2));
+        // Count how many items have valid data for key fields
+        const validItems = data.filter(item => 
+          item.Description !== null || 
+          item.Date_of_Work !== null || 
+          item.Total !== null
+        ).length;
+        console.log(`Found ${validItems} line items with valid key data out of ${data.length} total`);
       } else {
         console.log("No line items found for invoice ID:", invoiceId);
         // Double-check if the invoice exists
@@ -72,6 +83,7 @@ export const LineItemsPanel = ({ currentInvoiceId }: LineItemsPanelProps) => {
           
         if (invoiceError) {
           console.error('Error checking invoice existence:', invoiceError);
+          setError(`Could not verify invoice: ${invoiceError.message}`);
         } else {
           console.log("Invoice existence check result:", invoiceData);
         }
@@ -80,6 +92,7 @@ export const LineItemsPanel = ({ currentInvoiceId }: LineItemsPanelProps) => {
       setLineItems(data || []);
     } catch (error) {
       console.error('Error fetching line items:', error);
+      setError(error instanceof Error ? error.message : 'Unknown error occurred');
       toast({
         title: "Error",
         description: "Failed to load line items",
@@ -90,47 +103,61 @@ export const LineItemsPanel = ({ currentInvoiceId }: LineItemsPanelProps) => {
     }
   };
 
-  // Function to safely parse JSON or return the value as-is
-  const parseJsonValue = (value: any) => {
+  // Function to safely parse JSON values from jsonb fields
+  const parseJsonValue = (value: any, fieldName: string) => {
     if (value === null || value === undefined) return 'N/A';
     
-    if (typeof value === 'string') {
-      try {
-        // Try to parse as JSON if it looks like JSON
+    console.log(`Parsing field ${fieldName} with value:`, value);
+    
+    try {
+      // If it's already a string, try to parse as JSON if it looks like JSON
+      if (typeof value === 'string') {
         if (value.startsWith('{') || value.startsWith('[')) {
           return JSON.parse(value);
         }
         return value;
-      } catch {
+      }
+      
+      // If it's already an object or array (from jsonb column)
+      if (typeof value === 'object') {
         return value;
       }
-    }
-    
-    // If it's already an object (likely from jsonb column)
-    if (typeof value === 'object') {
+      
+      return value;
+    } catch (error) {
+      console.warn(`Error parsing ${fieldName}:`, error, value);
       return value;
     }
-    
-    return value;
   };
 
   // Display the value in a readable format
-  const displayValue = (value: any) => {
+  const displayValue = (value: any, fieldName: string) => {
     if (value === null || value === undefined) return 'N/A';
     
     // Parse if needed
-    const parsedValue = parseJsonValue(value);
+    const parsedValue = parseJsonValue(value, fieldName);
     
     // Handle object display
     if (typeof parsedValue === 'object') {
       if (parsedValue === null) return 'N/A';
+      
+      // For arrays, join the values
+      if (Array.isArray(parsedValue)) {
+        return parsedValue.join(', ');
+      }
+      
+      // For objects, we can either stringify or return a specific property
+      if (parsedValue.value !== undefined) {
+        return String(parsedValue.value);
+      }
+      
       return JSON.stringify(parsedValue);
     }
     
     // Handle numeric values
     if (typeof parsedValue === 'number') {
-      // Format currency values - fixed the type error by checking property names instead
-      if ('Rate' in value || 'Total' in value) {
+      // Format currency values
+      if (fieldName === 'Rate' || fieldName === 'Total') {
         return parsedValue.toFixed(2);
       }
       return String(parsedValue);
@@ -144,6 +171,23 @@ export const LineItemsPanel = ({ currentInvoiceId }: LineItemsPanelProps) => {
       <div className="flex justify-center items-center h-64">
         <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
         <span className="ml-2">Loading line items...</span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-8 text-center h-full">
+        <div className="flex justify-center items-center mb-4">
+          <AlertCircle className="h-8 w-8 text-red-500" />
+          <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-200 ml-2">Error Loading Line Items</h2>
+        </div>
+        <p className="text-slate-600 dark:text-slate-400">
+          {error}
+        </p>
+        <div className="text-sm text-slate-500 mt-4">
+          Current invoice ID: {currentInvoiceId}
+        </div>
       </div>
     );
   }
@@ -198,16 +242,16 @@ export const LineItemsPanel = ({ currentInvoiceId }: LineItemsPanelProps) => {
           <TableBody>
             {lineItems.map((item) => (
               <TableRow key={item.id}>
-                <TableCell>{displayValue(item.Description)}</TableCell>
-                <TableCell>{displayValue(item.Date_of_Work)}</TableCell>
-                <TableCell>{displayValue(item.Ticket_Work_Order)}</TableCell>
-                <TableCell>{displayValue(item.AFE_number)}</TableCell>
-                <TableCell>{displayValue(item.Cost_Center)}</TableCell>
-                <TableCell>{displayValue(item.Cost_Code)}</TableCell>
-                <TableCell>{displayValue(item.Unit_of_Measure)}</TableCell>
-                <TableCell className="text-right">{displayValue(item.Qauntity)}</TableCell>
-                <TableCell className="text-right">{displayValue(item.Rate)}</TableCell>
-                <TableCell className="text-right">{displayValue(item.Total)}</TableCell>
+                <TableCell>{displayValue(item.Description, 'Description')}</TableCell>
+                <TableCell>{displayValue(item.Date_of_Work, 'Date_of_Work')}</TableCell>
+                <TableCell>{displayValue(item.Ticket_Work_Order, 'Ticket_Work_Order')}</TableCell>
+                <TableCell>{displayValue(item.AFE_number, 'AFE_number')}</TableCell>
+                <TableCell>{displayValue(item.Cost_Center, 'Cost_Center')}</TableCell>
+                <TableCell>{displayValue(item.Cost_Code, 'Cost_Code')}</TableCell>
+                <TableCell>{displayValue(item.Unit_of_Measure, 'Unit_of_Measure')}</TableCell>
+                <TableCell className="text-right">{displayValue(item.Qauntity, 'Qauntity')}</TableCell>
+                <TableCell className="text-right">{displayValue(item.Rate, 'Rate')}</TableCell>
+                <TableCell className="text-right">{displayValue(item.Total, 'Total')}</TableCell>
               </TableRow>
             ))}
           </TableBody>

@@ -53,8 +53,20 @@ export const InvoiceReviewer = ({ onSectionChange }: InvoiceReviewerProps) => {
         if (error) throw error;
         
         if (data && data.length > 0) {
+          // Log more details about the data we received
+          console.log("Invoice data retrieved:", data[0]);
+          
           // Convert Google_Drive_URL from Json to string if needed
-          let url = data[0].Google_Drive_URL ? String(data[0].Google_Drive_URL) : null;
+          let url = null;
+          if (data[0].Google_Drive_URL) {
+            if (typeof data[0].Google_Drive_URL === 'object') {
+              url = String(JSON.stringify(data[0].Google_Drive_URL));
+            } else {
+              url = String(data[0].Google_Drive_URL);
+            }
+            console.log("Extracted PDF URL:", url);
+          }
+          
           setCurrentPdfUrl(url);
           setCurrentInvoiceId(data[0].id);
           console.log("InvoiceReviewer - Set current invoice ID to:", data[0].id);
@@ -68,6 +80,8 @@ export const InvoiceReviewer = ({ onSectionChange }: InvoiceReviewerProps) => {
           if (!lineItemError) {
             console.log(`Invoice #${data[0].id} has ${lineItemCount || 0} line items`);
           }
+        } else {
+          console.log("No invoice data found for index:", currentInvoiceIndex);
         }
       } catch (error) {
         console.error('Error fetching invoice data:', error);
@@ -205,3 +219,19 @@ export const InvoiceReviewer = ({ onSectionChange }: InvoiceReviewerProps) => {
     </>
   );
 };
+
+function handleApprove() {
+  console.log("Invoice approved");
+}
+
+function handleDeny() {
+  console.log("Invoice denied");
+}
+
+function handleQuarantine() {
+  console.log("Invoice quarantined");
+}
+
+function handleForward() {
+  console.log("Invoice forwarded");
+}
