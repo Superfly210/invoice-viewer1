@@ -60,10 +60,25 @@ const Index = () => {
           let url = data[0].Google_Drive_URL ? String(data[0].Google_Drive_URL) : null;
           setCurrentPdfUrl(url);
           setCurrentInvoiceId(data[0].id);
-          console.log("Set current invoice ID to:", data[0].id);
+          console.log("Index - Set current invoice ID to:", data[0].id);
+          
+          // Check if this invoice has line items
+          const { count: lineItemCount, error: lineItemError } = await supabase
+            .from('Line Items')
+            .select('*', { count: 'exact', head: true })
+            .eq('invoice_id', data[0].id);
+            
+          if (!lineItemError) {
+            console.log(`Invoice #${data[0].id} has ${lineItemCount || 0} line items`);
+          }
         }
       } catch (error) {
         console.error('Error fetching invoice data:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load invoice data",
+          variant: "destructive",
+        });
       }
     };
 

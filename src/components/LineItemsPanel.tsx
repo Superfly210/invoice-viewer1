@@ -8,16 +8,16 @@ import { Loader2 } from "lucide-react";
 type LineItem = {
   id: number;
   invoice_id: number;
-  Description: any | null;
-  Unit_of_Measure: any | null;
-  AFE_number: any | null;
-  Cost_Center: any | null;
-  Cost_Code: any | null;
-  Rate: any | null;
-  Qauntity: any | null;
-  Total: any | null;
-  Date_of_Work: any | null;
-  Ticket_Work_Order: any | null;
+  Description: any;
+  Unit_of_Measure: any;
+  AFE_number: any;
+  Cost_Center: any;
+  Cost_Code: any;
+  Rate: any;
+  Qauntity: any; // Note: This is misspelled in the database
+  Total: any;
+  Date_of_Work: any;
+  Ticket_Work_Order: any;
   created_at: string;
 };
 
@@ -31,6 +31,9 @@ export const LineItemsPanel = ({ currentInvoiceId }: LineItemsPanelProps) => {
   const { toast } = useToast();
 
   useEffect(() => {
+    // Log the currentInvoiceId when it changes
+    console.log("LineItemsPanel - currentInvoiceId changed to:", currentInvoiceId);
+    
     if (currentInvoiceId) {
       fetchLineItems(currentInvoiceId);
     } else {
@@ -55,7 +58,26 @@ export const LineItemsPanel = ({ currentInvoiceId }: LineItemsPanelProps) => {
         throw error;
       }
       
-      console.log("Line items data received:", data);
+      console.log("Raw line items data received:", data);
+      
+      if (data && data.length > 0) {
+        console.log("Sample line item structure:", JSON.stringify(data[0], null, 2));
+      } else {
+        console.log("No line items found for invoice ID:", invoiceId);
+        // Double-check if the invoice exists
+        const { data: invoiceData, error: invoiceError } = await supabase
+          .from('Attachment Info')
+          .select('id')
+          .eq('id', invoiceId)
+          .single();
+          
+        if (invoiceError) {
+          console.error('Error checking invoice existence:', invoiceError);
+        } else {
+          console.log("Invoice existence check result:", invoiceData);
+        }
+      }
+      
       setLineItems(data || []);
     } catch (error) {
       console.error('Error fetching line items:', error);
@@ -67,6 +89,55 @@ export const LineItemsPanel = ({ currentInvoiceId }: LineItemsPanelProps) => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Function to safely parse JSON or return the value as-is
+  const parseJsonValue = (value: any) => {
+    if (value === null || value === undefined) return 'N/A';
+    
+    if (typeof value === 'string') {
+      try {
+        // Try to parse as JSON if it looks like JSON
+        if (value.startsWith('{') || value.startsWith('[')) {
+          return JSON.parse(value);
+        }
+        return value;
+      } catch {
+        return value;
+      }
+    }
+    
+    // If it's already an object (likely from jsonb column)
+    if (typeof value === 'object') {
+      return value;
+    }
+    
+    return value;
+  };
+
+  // Display the value in a readable format
+  const displayValue = (value: any) => {
+    if (value === null || value === undefined) return 'N/A';
+    
+    // Parse if needed
+    const parsedValue = parseJsonValue(value);
+    
+    // Handle object display
+    if (typeof parsedValue === 'object') {
+      if (parsedValue === null) return 'N/A';
+      return JSON.stringify(parsedValue);
+    }
+    
+    // Handle numeric values
+    if (typeof parsedValue === 'number') {
+      // Format currency values
+      if (value === parsedValue.Rate || value === parsedValue.Total) {
+        return parsedValue.toFixed(2);
+      }
+      return String(parsedValue);
+    }
+    
+    return String(parsedValue);
   };
 
   if (isLoading) {
@@ -102,35 +173,6 @@ export const LineItemsPanel = ({ currentInvoiceId }: LineItemsPanelProps) => {
       </div>
     );
   }
-
-  // Function to safely parse JSON or return the value as-is
-  const parseJsonValue = (value: any) => {
-    if (value === null || value === undefined) return 'N/A';
-    
-    if (typeof value === 'string') {
-      try {
-        // Try to parse as JSON if it looks like JSON
-        if (value.startsWith('{') || value.startsWith('[')) {
-          return JSON.parse(value);
-        }
-        return value;
-      } catch {
-        return value;
-      }
-    }
-    
-    return value;
-  };
-
-  // Display the value in a readable format
-  const displayValue = (value: any) => {
-    if (value === null || value === undefined) return 'N/A';
-    
-    const parsedValue = parseJsonValue(value);
-    if (typeof parsedValue === 'object') return JSON.stringify(parsedValue);
-    
-    return String(parsedValue);
-  };
 
   return (
     <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-4 h-full overflow-auto">
