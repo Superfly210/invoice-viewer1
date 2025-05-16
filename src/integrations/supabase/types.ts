@@ -320,49 +320,49 @@ export type Database = {
       }
       "Line Items": {
         Row: {
-          AFE_number: Json | null
-          Cost_Center: Json | null
-          Cost_Code: Json | null
+          AFE_number: string | null
+          Cost_Center: string | null
+          Cost_Code: string | null
           created_at: string
-          Date_of_Work: Json | null
-          Description: Json | null
+          Date_of_Work: string | null
+          Description: string | null
           id: number
           invoice_id: number
-          Qauntity: Json | null
-          Rate: Json | null
-          Ticket_Work_Order: Json | null
-          Total: Json | null
-          Unit_of_Measure: Json | null
+          Qauntity: number | null
+          Rate: number | null
+          Ticket_Work_Order: string | null
+          Total: number | null
+          Unit_of_Measure: string | null
         }
         Insert: {
-          AFE_number?: Json | null
-          Cost_Center?: Json | null
-          Cost_Code?: Json | null
+          AFE_number?: string | null
+          Cost_Center?: string | null
+          Cost_Code?: string | null
           created_at?: string
-          Date_of_Work?: Json | null
-          Description?: Json | null
+          Date_of_Work?: string | null
+          Description?: string | null
           id?: number
           invoice_id: number
-          Qauntity?: Json | null
-          Rate?: Json | null
-          Ticket_Work_Order?: Json | null
-          Total?: Json | null
-          Unit_of_Measure?: Json | null
+          Qauntity?: number | null
+          Rate?: number | null
+          Ticket_Work_Order?: string | null
+          Total?: number | null
+          Unit_of_Measure?: string | null
         }
         Update: {
-          AFE_number?: Json | null
-          Cost_Center?: Json | null
-          Cost_Code?: Json | null
+          AFE_number?: string | null
+          Cost_Center?: string | null
+          Cost_Code?: string | null
           created_at?: string
-          Date_of_Work?: Json | null
-          Description?: Json | null
+          Date_of_Work?: string | null
+          Description?: string | null
           id?: number
           invoice_id?: number
-          Qauntity?: Json | null
-          Rate?: Json | null
-          Ticket_Work_Order?: Json | null
-          Total?: Json | null
-          Unit_of_Measure?: Json | null
+          Qauntity?: number | null
+          Rate?: number | null
+          Ticket_Work_Order?: string | null
+          Total?: number | null
+          Unit_of_Measure?: string | null
         }
         Relationships: [
           {

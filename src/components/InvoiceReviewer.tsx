@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { ActionBarWithThemeToggle } from "@/components/ActionBarWithThemeToggle";
 import { InvoiceData } from "@/components/InvoiceData";
@@ -56,9 +55,10 @@ export const InvoiceReviewer = ({ onSectionChange }: InvoiceReviewerProps) => {
           // Log more details about the data we received
           console.log("Invoice data retrieved:", data[0]);
           
-          // Convert Google_Drive_URL from Json to string if needed
+          // Extract PDF URL correctly
           let url = null;
           if (data[0].Google_Drive_URL) {
+            // Handle both object and string types for Google_Drive_URL
             if (typeof data[0].Google_Drive_URL === 'object') {
               url = String(JSON.stringify(data[0].Google_Drive_URL));
             } else {
@@ -70,16 +70,6 @@ export const InvoiceReviewer = ({ onSectionChange }: InvoiceReviewerProps) => {
           setCurrentPdfUrl(url);
           setCurrentInvoiceId(data[0].id);
           console.log("InvoiceReviewer - Set current invoice ID to:", data[0].id);
-          
-          // Check if this invoice has line items
-          const { count: lineItemCount, error: lineItemError } = await supabase
-            .from('Line Items')
-            .select('*', { count: 'exact', head: true })
-            .eq('invoice_id', data[0].id);
-            
-          if (!lineItemError) {
-            console.log(`Invoice #${data[0].id} has ${lineItemCount || 0} line items`);
-          }
         } else {
           console.log("No invoice data found for index:", currentInvoiceIndex);
         }
@@ -94,7 +84,7 @@ export const InvoiceReviewer = ({ onSectionChange }: InvoiceReviewerProps) => {
     };
 
     fetchData();
-  }, [currentInvoiceIndex]);
+  }, [currentInvoiceIndex, toast]);
 
   const handleApprove = () => {
     toast({

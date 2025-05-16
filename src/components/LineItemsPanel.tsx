@@ -8,16 +8,16 @@ import { Loader2, AlertCircle } from "lucide-react";
 type LineItem = {
   id: number;
   invoice_id: number;
-  Description: any; // jsonb
-  Unit_of_Measure: any; // jsonb
-  AFE_number: any; // jsonb
-  Cost_Center: any; // jsonb
-  Cost_Code: any; // jsonb
-  Rate: any; // jsonb
-  Qauntity: any; // jsonb - Note: This is misspelled in the database
-  Total: any; // jsonb
-  Date_of_Work: any; // jsonb
-  Ticket_Work_Order: any; // jsonb
+  Description: string | null;
+  Unit_of_Measure: string | null;
+  AFE_number: string | null;
+  Cost_Center: string | null;
+  Cost_Code: string | null;
+  Rate: number | null;
+  Qauntity: number | null;
+  Total: number | null;
+  Date_of_Work: string | null;
+  Ticket_Work_Order: string | null;
   created_at: string;
 };
 
@@ -49,7 +49,6 @@ export const LineItemsPanel = ({ currentInvoiceId }: LineItemsPanelProps) => {
       setIsLoading(true);
       console.log("Fetching line items for invoice ID:", invoiceId);
       
-      // Make sure we're using the exact table name as in Supabase
       const { data, error } = await supabase
         .from('Line Items')
         .select('*')
@@ -64,8 +63,9 @@ export const LineItemsPanel = ({ currentInvoiceId }: LineItemsPanelProps) => {
       console.log("Raw line items data received:", data);
       
       if (data && data.length > 0) {
-        console.log("Sample line item structure:", JSON.stringify(data[0], null, 2));
-        // Count how many items have valid data for key fields
+        // Log a sample item to see its structure
+        console.log("Sample line item structure:", data[0]);
+        // Count valid items
         const validItems = data.filter(item => 
           item.Description !== null || 
           item.Date_of_Work !== null || 
@@ -103,67 +103,19 @@ export const LineItemsPanel = ({ currentInvoiceId }: LineItemsPanelProps) => {
     }
   };
 
-  // Function to safely parse JSON values from jsonb fields
-  const parseJsonValue = (value: any, fieldName: string) => {
-    if (value === null || value === undefined) return 'N/A';
-    
-    console.log(`Parsing field ${fieldName} with value:`, value);
-    
-    try {
-      // If it's already a string, try to parse as JSON if it looks like JSON
-      if (typeof value === 'string') {
-        if (value.startsWith('{') || value.startsWith('[')) {
-          return JSON.parse(value);
-        }
-        return value;
-      }
-      
-      // If it's already an object or array (from jsonb column)
-      if (typeof value === 'object') {
-        return value;
-      }
-      
-      return value;
-    } catch (error) {
-      console.warn(`Error parsing ${fieldName}:`, error, value);
-      return value;
-    }
-  };
-
   // Display the value in a readable format
   const displayValue = (value: any, fieldName: string) => {
     if (value === null || value === undefined) return 'N/A';
     
-    // Parse if needed
-    const parsedValue = parseJsonValue(value, fieldName);
-    
-    // Handle object display
-    if (typeof parsedValue === 'object') {
-      if (parsedValue === null) return 'N/A';
-      
-      // For arrays, join the values
-      if (Array.isArray(parsedValue)) {
-        return parsedValue.join(', ');
-      }
-      
-      // For objects, we can either stringify or return a specific property
-      if (parsedValue.value !== undefined) {
-        return String(parsedValue.value);
-      }
-      
-      return JSON.stringify(parsedValue);
-    }
-    
-    // Handle numeric values
-    if (typeof parsedValue === 'number') {
-      // Format currency values
+    // Format numeric values
+    if (typeof value === 'number') {
       if (fieldName === 'Rate' || fieldName === 'Total') {
-        return parsedValue.toFixed(2);
+        return value.toFixed(2);
       }
-      return String(parsedValue);
+      return String(value);
     }
     
-    return String(parsedValue);
+    return String(value);
   };
 
   if (isLoading) {
