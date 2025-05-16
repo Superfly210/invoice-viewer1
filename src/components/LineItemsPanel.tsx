@@ -3,7 +3,8 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Loader2, AlertCircle } from "lucide-react";
+import { Loader2, AlertCircle, Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 type LineItem = {
   id: number;
@@ -14,7 +15,7 @@ type LineItem = {
   Cost_Center: string | null;
   Cost_Code: string | null;
   Rate: number | null;
-  Qauntity: number | null;
+  Quantity: number | null;  // Fixed from Qauntity to Quantity
   Total: number | null;
   Date_of_Work: string | null;
   Ticket_Work_Order: string | null;
@@ -32,7 +33,6 @@ export const LineItemsPanel = ({ currentInvoiceId }: LineItemsPanelProps) => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Log the currentInvoiceId when it changes
     console.log("LineItemsPanel - currentInvoiceId changed to:", currentInvoiceId);
     setError(null);
     
@@ -49,6 +49,7 @@ export const LineItemsPanel = ({ currentInvoiceId }: LineItemsPanelProps) => {
       setIsLoading(true);
       console.log("Fetching line items for invoice ID:", invoiceId);
       
+      // Try to fetch line items first, accounting for the "Quantity" column name change
       const { data, error } = await supabase
         .from('Line Items')
         .select('*')
@@ -62,19 +63,13 @@ export const LineItemsPanel = ({ currentInvoiceId }: LineItemsPanelProps) => {
       
       console.log("Raw line items data received:", data);
       
-      if (data && data.length > 0) {
-        // Log a sample item to see its structure
-        console.log("Sample line item structure:", data[0]);
-        // Count valid items
-        const validItems = data.filter(item => 
-          item.Description !== null || 
-          item.Date_of_Work !== null || 
-          item.Total !== null
-        ).length;
-        console.log(`Found ${validItems} line items with valid key data out of ${data.length} total`);
-      } else {
+      // Set the line items (empty array if no data)
+      setLineItems(data || []);
+      
+      // If no line items were found, let's double-check the invoice exists
+      if (!data || data.length === 0) {
         console.log("No line items found for invoice ID:", invoiceId);
-        // Double-check if the invoice exists
+        
         const { data: invoiceData, error: invoiceError } = await supabase
           .from('Attachment Info')
           .select('id')
@@ -88,14 +83,75 @@ export const LineItemsPanel = ({ currentInvoiceId }: LineItemsPanelProps) => {
           console.log("Invoice existence check result:", invoiceData);
         }
       }
-      
-      setLineItems(data || []);
     } catch (error) {
       console.error('Error fetching line items:', error);
       setError(error instanceof Error ? error.message : 'Unknown error occurred');
       toast({
         title: "Error",
         description: "Failed to load line items",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Add sample line items for demonstration (only if there are no line items)
+  const addSampleLineItems = async () => {
+    if (!currentInvoiceId) return;
+    
+    try {
+      setIsLoading(true);
+      
+      // Create sample line items
+      const sampleItems = [
+        {
+          invoice_id: currentInvoiceId,
+          Description: 'Equipment Rental - Excavator',
+          Unit_of_Measure: 'Day',
+          Rate: 450,
+          Quantity: 3,
+          Total: 1350,
+          Date_of_Work: '2024-05-12',
+          AFE_number: 'AFE-2024-001'
+        },
+        {
+          invoice_id: currentInvoiceId,
+          Description: 'Labor - Standard Hours',
+          Unit_of_Measure: 'Hour', 
+          Rate: 85,
+          Quantity: 8,
+          Total: 680,
+          Ticket_Work_Order: 'WO-24601'
+        }
+      ];
+      
+      const { error } = await supabase
+        .from('Line Items')
+        .insert(sampleItems);
+        
+      if (error) {
+        console.error('Error creating sample line items:', error);
+        toast({
+          title: "Error",
+          description: "Failed to create sample line items",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      toast({
+        title: "Success",
+        description: "Added sample line items for demonstration",
+      });
+      
+      // Fetch the line items again to refresh the list
+      fetchLineItems(currentInvoiceId);
+    } catch (error) {
+      console.error('Error adding sample line items:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add sample line items",
         variant: "destructive",
       });
     } finally {
@@ -110,7 +166,7 @@ export const LineItemsPanel = ({ currentInvoiceId }: LineItemsPanelProps) => {
     // Format numeric values
     if (typeof value === 'number') {
       if (fieldName === 'Rate' || fieldName === 'Total') {
-        return value.toFixed(2);
+        return `$${value.toFixed(2)}`;
       }
       return String(value);
     }
@@ -159,10 +215,17 @@ export const LineItemsPanel = ({ currentInvoiceId }: LineItemsPanelProps) => {
     return (
       <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-8 text-center h-full">
         <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-200 mb-4">No Line Items Available</h2>
-        <p className="text-slate-600 dark:text-slate-400">
-          This invoice doesn't have any line items recorded or there might be a data issue.
+        <p className="text-slate-600 dark:text-slate-400 mb-6">
+          This invoice doesn't have any line items recorded.
         </p>
-        <div className="text-sm text-slate-500 mt-2">
+        <Button 
+          onClick={addSampleLineItems}
+          className="flex items-center gap-2"
+        >
+          <Plus className="h-4 w-4" />
+          Add Sample Line Items
+        </Button>
+        <div className="text-sm text-slate-500 mt-6">
           Current invoice ID: {currentInvoiceId}
         </div>
       </div>
@@ -171,9 +234,11 @@ export const LineItemsPanel = ({ currentInvoiceId }: LineItemsPanelProps) => {
 
   return (
     <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-4 h-full overflow-auto">
-      <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-200 mb-4">
-        Line Items for Invoice #{currentInvoiceId} ({lineItems.length} items)
-      </h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-200">
+          Line Items for Invoice #{currentInvoiceId} ({lineItems.length} items)
+        </h2>
+      </div>
       
       <div className="overflow-x-auto">
         <Table>
@@ -201,7 +266,7 @@ export const LineItemsPanel = ({ currentInvoiceId }: LineItemsPanelProps) => {
                 <TableCell>{displayValue(item.Cost_Center, 'Cost_Center')}</TableCell>
                 <TableCell>{displayValue(item.Cost_Code, 'Cost_Code')}</TableCell>
                 <TableCell>{displayValue(item.Unit_of_Measure, 'Unit_of_Measure')}</TableCell>
-                <TableCell className="text-right">{displayValue(item.Qauntity, 'Qauntity')}</TableCell>
+                <TableCell className="text-right">{displayValue(item.Quantity, 'Quantity')}</TableCell>
                 <TableCell className="text-right">{displayValue(item.Rate, 'Rate')}</TableCell>
                 <TableCell className="text-right">{displayValue(item.Total, 'Total')}</TableCell>
               </TableRow>

@@ -328,7 +328,7 @@ export type Database = {
           Description: string | null
           id: number
           invoice_id: number
-          Qauntity: number | null
+          Quantity: number | null
           Rate: number | null
           Ticket_Work_Order: string | null
           Total: number | null
@@ -343,7 +343,7 @@ export type Database = {
           Description?: string | null
           id?: number
           invoice_id: number
-          Qauntity?: number | null
+          Quantity?: number | null
           Rate?: number | null
           Ticket_Work_Order?: string | null
           Total?: number | null
@@ -358,7 +358,7 @@ export type Database = {
           Description?: string | null
           id?: number
           invoice_id?: number
-          Qauntity?: number | null
+          Quantity?: number | null
           Rate?: number | null
           Ticket_Work_Order?: string | null
           Total?: number | null
