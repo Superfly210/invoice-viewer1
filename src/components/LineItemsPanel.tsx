@@ -3,8 +3,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Loader2, AlertCircle, Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Loader2, AlertCircle } from "lucide-react";
 
 type LineItem = {
   id: number;
@@ -15,7 +14,7 @@ type LineItem = {
   Cost_Center: string | null;
   Cost_Code: string | null;
   Rate: number | null;
-  Quantity: number | null;  // Fixed from Qauntity to Quantity
+  Quantity: number | null;
   Total: number | null;
   Date_of_Work: string | null;
   Ticket_Work_Order: string | null;
@@ -49,9 +48,9 @@ export const LineItemsPanel = ({ currentInvoiceId }: LineItemsPanelProps) => {
       setIsLoading(true);
       console.log("Fetching line items for invoice ID:", invoiceId);
       
-      // Try to fetch line items first, accounting for the "Quantity" column name change
+      // Updated table name to use underscore instead of space
       const { data, error } = await supabase
-        .from('Line Items')
+        .from('Line_Items')
         .select('*')
         .eq('invoice_id', invoiceId);
 
@@ -71,7 +70,7 @@ export const LineItemsPanel = ({ currentInvoiceId }: LineItemsPanelProps) => {
         console.log("No line items found for invoice ID:", invoiceId);
         
         const { data: invoiceData, error: invoiceError } = await supabase
-          .from('Attachment Info')
+          .from('Attachment_Info')
           .select('id')
           .eq('id', invoiceId)
           .single();
@@ -89,69 +88,6 @@ export const LineItemsPanel = ({ currentInvoiceId }: LineItemsPanelProps) => {
       toast({
         title: "Error",
         description: "Failed to load line items",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Add sample line items for demonstration (only if there are no line items)
-  const addSampleLineItems = async () => {
-    if (!currentInvoiceId) return;
-    
-    try {
-      setIsLoading(true);
-      
-      // Create sample line items
-      const sampleItems = [
-        {
-          invoice_id: currentInvoiceId,
-          Description: 'Equipment Rental - Excavator',
-          Unit_of_Measure: 'Day',
-          Rate: 450,
-          Quantity: 3,
-          Total: 1350,
-          Date_of_Work: '2024-05-12',
-          AFE_number: 'AFE-2024-001'
-        },
-        {
-          invoice_id: currentInvoiceId,
-          Description: 'Labor - Standard Hours',
-          Unit_of_Measure: 'Hour', 
-          Rate: 85,
-          Quantity: 8,
-          Total: 680,
-          Ticket_Work_Order: 'WO-24601'
-        }
-      ];
-      
-      const { error } = await supabase
-        .from('Line Items')
-        .insert(sampleItems);
-        
-      if (error) {
-        console.error('Error creating sample line items:', error);
-        toast({
-          title: "Error",
-          description: "Failed to create sample line items",
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      toast({
-        title: "Success",
-        description: "Added sample line items for demonstration",
-      });
-      
-      // Fetch the line items again to refresh the list
-      fetchLineItems(currentInvoiceId);
-    } catch (error) {
-      console.error('Error adding sample line items:', error);
-      toast({
-        title: "Error",
-        description: "Failed to add sample line items",
         variant: "destructive",
       });
     } finally {
@@ -218,13 +154,6 @@ export const LineItemsPanel = ({ currentInvoiceId }: LineItemsPanelProps) => {
         <p className="text-slate-600 dark:text-slate-400 mb-6">
           This invoice doesn't have any line items recorded.
         </p>
-        <Button 
-          onClick={addSampleLineItems}
-          className="flex items-center gap-2"
-        >
-          <Plus className="h-4 w-4" />
-          Add Sample Line Items
-        </Button>
         <div className="text-sm text-slate-500 mt-6">
           Current invoice ID: {currentInvoiceId}
         </div>

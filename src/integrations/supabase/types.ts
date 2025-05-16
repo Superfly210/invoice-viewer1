@@ -53,7 +53,7 @@ export type Database = {
           },
         ]
       }
-      "Attachment Info": {
+      Attachment_Info: {
         Row: {
           AFE_Numbers: Json | null
           Attach_Markdown: Json | null
@@ -140,28 +140,10 @@ export type Database = {
             foreignKeyName: "Attachment Info_Email_Info_ID_fkey"
             columns: ["Email_Info_ID"]
             isOneToOne: false
-            referencedRelation: "Email Information"
+            referencedRelation: "Email_Information"
             referencedColumns: ["id_"]
           },
         ]
-      }
-      "Cost Code": {
-        Row: {
-          Cost_Code: string | null
-          created_at: string
-          id: number
-        }
-        Insert: {
-          Cost_Code?: string | null
-          created_at?: string
-          id?: number
-        }
-        Update: {
-          Cost_Code?: string | null
-          created_at?: string
-          id?: number
-        }
-        Relationships: []
       }
       cost_centers: {
         Row: {
@@ -184,6 +166,24 @@ export type Database = {
           description?: string
           id?: string
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      Cost_Code: {
+        Row: {
+          Cost_Code: string | null
+          created_at: string
+          id: number
+        }
+        Insert: {
+          Cost_Code?: string | null
+          created_at?: string
+          id?: number
+        }
+        Update: {
+          Cost_Code?: string | null
+          created_at?: string
+          id?: number
         }
         Relationships: []
       }
@@ -258,7 +258,7 @@ export type Database = {
         }
         Relationships: []
       }
-      "Email Information": {
+      Email_Information: {
         Row: {
           cc: Json | null
           created_at: string
@@ -318,7 +318,7 @@ export type Database = {
         }
         Relationships: []
       }
-      "Line Items": {
+      Line_Items: {
         Row: {
           AFE_number: string | null
           Cost_Center: string | null
@@ -369,7 +369,7 @@ export type Database = {
             foreignKeyName: "Line Items_invoice_id_fkey"
             columns: ["invoice_id"]
             isOneToOne: false
-            referencedRelation: "Attachment Info"
+            referencedRelation: "Attachment_Info"
             referencedColumns: ["id"]
           },
         ]
