@@ -48,7 +48,6 @@ export const LineItemsPanel = ({ currentInvoiceId }: LineItemsPanelProps) => {
       setIsLoading(true);
       console.log("Fetching line items for invoice ID:", invoiceId);
       
-      // Updated table name to use underscore instead of space
       const { data, error } = await supabase
         .from('Line_Items')
         .select('*')

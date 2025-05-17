@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { ActionBarWithThemeToggle } from "@/components/ActionBarWithThemeToggle";
 import { InvoiceData } from "@/components/InvoiceData";
@@ -36,7 +37,7 @@ export const InvoiceReviewer = ({ onSectionChange }: InvoiceReviewerProps) => {
       try {
         // Get total count of invoices
         const { count, error: countError } = await supabase
-          .from('Attachment Info')
+          .from('Attachment_Info')
           .select('*', { count: 'exact', head: true });
         
         if (countError) throw countError;
@@ -44,7 +45,7 @@ export const InvoiceReviewer = ({ onSectionChange }: InvoiceReviewerProps) => {
         
         // Fetch current invoice data
         const { data, error } = await supabase
-          .from('Attachment Info')
+          .from('Attachment_Info')
           .select('*')
           .order('id', { ascending: true })
           .range(currentInvoiceIndex, currentInvoiceIndex);
