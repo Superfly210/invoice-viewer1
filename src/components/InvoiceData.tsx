@@ -100,16 +100,16 @@ export const InvoiceData = () => {
         <Table>
           <TableBody>
             <TableRow>
-              <TableCell className="font-medium w-1/3">ID</TableCell>
+              <TableCell className="font-medium w-1/3 text-left">ID</TableCell>
               <TableCell className="text-left">{currentInvoice.id}</TableCell>
             </TableRow>
             <TableRow>
-              <TableCell className="font-medium w-1/3">Invoice Number</TableCell>
+              <TableCell className="font-medium w-1/3 text-left">Invoice Number</TableCell>
               <TableCell className="text-left">{currentInvoice.Invoice_Number || 'N/A'}</TableCell>
             </TableRow>
             
             <TableRow>
-              <TableCell className="font-medium w-1/3">Company Name</TableCell>
+              <TableCell className="font-medium w-1/3 text-left">Company Name</TableCell>
               <TableCell className="text-left">{currentInvoice.Invoicing_Comp_Name || 'N/A'}</TableCell>
             </TableRow>
             
@@ -132,32 +132,32 @@ export const InvoiceData = () => {
                     <Table>
                       <TableBody>
                         <TableRow>
-                          <TableCell className="font-medium w-1/3">Company Street</TableCell>
+                          <TableCell className="font-medium w-1/3 text-left">Company Street</TableCell>
                           <TableCell className="text-left">{JSON.stringify(currentInvoice.Invoicing_Comp_Street) || 'N/A'}</TableCell>
                         </TableRow>
                         <TableRow>
-                          <TableCell className="font-medium w-1/3">Company City</TableCell>
+                          <TableCell className="font-medium w-1/3 text-left">Company City</TableCell>
                           <TableCell className="text-left">{currentInvoice.Invoicing_Comp_City || 'N/A'}</TableCell>
                         </TableRow>
                         <TableRow>
-                          <TableCell className="font-medium w-1/3">Company State/Province</TableCell>
+                          <TableCell className="font-medium w-1/3 text-left">Company State/Province</TableCell>
                           <TableCell className="text-left">{currentInvoice.Invoicing_Comp_State_Prov || 'N/A'}</TableCell>
                         </TableRow>
                         <TableRow>
-                          <TableCell className="font-medium w-1/3">Postal Code</TableCell>
+                          <TableCell className="font-medium w-1/3 text-left">Postal Code</TableCell>
                           <TableCell className="text-left">{currentInvoice.Invoicing_Comp_Postal_Code || 'N/A'}</TableCell>
                         </TableRow>
                         <TableRow>
-                          <TableCell className="font-medium w-1/3">GST Number</TableCell>
+                          <TableCell className="font-medium w-1/3 text-left">GST Number</TableCell>
                           <TableCell className="text-left">{currentInvoice.GST_Number ? JSON.stringify(currentInvoice.GST_Number) : 'N/A'}</TableCell>
                         </TableRow>
                         <TableRow>
-                          <TableCell className="font-medium w-1/3">WCB Number</TableCell>
+                          <TableCell className="font-medium w-1/3 text-left">WCB Number</TableCell>
                           <TableCell className="text-left">{currentInvoice.WCB_Number ? JSON.stringify(currentInvoice.WCB_Number) : 'N/A'}</TableCell>
                         </TableRow>
                         {currentInvoice.Google_Drive_URL && (
                           <TableRow>
-                            <TableCell className="font-medium w-1/3">Google Drive URL</TableCell>
+                            <TableCell className="font-medium w-1/3 text-left">Google Drive URL</TableCell>
                             <TableCell className="text-left">
                               <a 
                                 href={currentInvoice.Google_Drive_URL} 
@@ -178,19 +178,19 @@ export const InvoiceData = () => {
             </TableRow>
             
             <TableRow>
-              <TableCell className="font-medium w-1/3">Subtotal</TableCell>
+              <TableCell className="font-medium w-1/3 text-left">Subtotal</TableCell>
               <TableCell className="text-left">{currentInvoice.Sub_Total?.toFixed(2) || 'N/A'}</TableCell>
             </TableRow>
             <TableRow>
-              <TableCell className="font-medium w-1/3">GST Total</TableCell>
+              <TableCell className="font-medium w-1/3 text-left">GST Total</TableCell>
               <TableCell className="text-left">{currentInvoice.GST_Total?.toFixed(2) || 'N/A'}</TableCell>
             </TableRow>
             <TableRow>
-              <TableCell className="font-medium w-1/3">Total</TableCell>
+              <TableCell className="font-medium w-1/3 text-left">Total</TableCell>
               <TableCell className="text-left">{currentInvoice.Total?.toFixed(2) || 'N/A'}</TableCell>
             </TableRow>
             <TableRow>
-              <TableCell className="font-medium w-1/3">Created At</TableCell>
+              <TableCell className="font-medium w-1/3 text-left">Created At</TableCell>
               <TableCell className="text-left">{new Date(currentInvoice.created_at).toLocaleString()}</TableCell>
             </TableRow>
           </TableBody>

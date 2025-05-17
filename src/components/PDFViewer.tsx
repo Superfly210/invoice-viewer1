@@ -40,6 +40,11 @@ export const PDFViewer = ({ pdfUrl, onPageChange }: PDFViewerProps) => {
         // If it's already a direct URL, use it as is
         setProcessedUrl(pdfUrl);
       }
+      
+      // Reset zoom level and page to defaults when loading a new PDF
+      setZoomLevel(100);
+      setCurrentPage(1);
+      
     } catch (err) {
       console.error("Error processing PDF URL:", err);
       setError("Unable to process the PDF URL");
@@ -80,30 +85,72 @@ export const PDFViewer = ({ pdfUrl, onPageChange }: PDFViewerProps) => {
 
   const zoomIn = () => {
     setZoomLevel(prev => Math.min(prev + 10, 200));
-    if (iframeRef.current) {
-      iframeRef.current.contentWindow?.postMessage({ action: 'zoom-in' }, '*');
+    if (iframeRef.current && iframeRef.current.contentWindow) {
+      try {
+        // For Google Drive PDFs, we can try to manipulate the iframe zoom
+        const iframe = iframeRef.current;
+        iframe.style.transform = `scale(${(zoomLevel + 10) / 100})`;
+        iframe.style.transformOrigin = 'top left';
+      } catch (err) {
+        console.error("Error during zoom in:", err);
+      }
     }
   };
 
   const zoomOut = () => {
     setZoomLevel(prev => Math.max(prev - 10, 50));
-    if (iframeRef.current) {
-      iframeRef.current.contentWindow?.postMessage({ action: 'zoom-out' }, '*');
+    if (iframeRef.current && iframeRef.current.contentWindow) {
+      try {
+        // For Google Drive PDFs, we can try to manipulate the iframe zoom
+        const iframe = iframeRef.current;
+        iframe.style.transform = `scale(${(zoomLevel - 10) / 100})`;
+        iframe.style.transformOrigin = 'top left';
+      } catch (err) {
+        console.error("Error during zoom out:", err);
+      }
     }
   };
 
   const fitToWidth = () => {
+    // Reset zoom to default
     setZoomLevel(100);
     if (iframeRef.current) {
-      iframeRef.current.contentWindow?.postMessage({ action: 'fit-width' }, '*');
+      try {
+        const iframe = iframeRef.current;
+        iframe.style.transform = '';
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+      } catch (err) {
+        console.error("Error fitting to width:", err);
+      }
     }
   };
 
   const previousPage = () => {
     if (currentPage > 1) {
       setCurrentPage(prev => prev - 1);
-      if (iframeRef.current) {
-        iframeRef.current.contentWindow?.postMessage({ action: 'prev-page' }, '*');
+      
+      // For Google Drive embedded PDFs, we can try to post a message to the iframe
+      if (iframeRef.current && iframeRef.current.contentWindow) {
+        try {
+          iframeRef.current.contentWindow.postMessage({
+            action: 'prev-page'
+          }, '*');
+          
+          // Since Google Drive doesn't support direct PDF control via postMessage,
+          // we'll try to simulate keyboard navigation
+          const iframe = iframeRef.current;
+          iframe.focus();
+          const event = new KeyboardEvent('keydown', {
+            key: 'ArrowUp',
+            keyCode: 38,
+            which: 38,
+            bubbles: true
+          });
+          document.activeElement?.dispatchEvent(event);
+        } catch (err) {
+          console.error("Error navigating to previous page:", err);
+        }
       }
     }
   };
@@ -111,8 +158,28 @@ export const PDFViewer = ({ pdfUrl, onPageChange }: PDFViewerProps) => {
   const nextPage = () => {
     if (currentPage < totalPages) {
       setCurrentPage(prev => prev + 1);
-      if (iframeRef.current) {
-        iframeRef.current.contentWindow?.postMessage({ action: 'next-page' }, '*');
+      
+      // For Google Drive embedded PDFs, we can try to post a message to the iframe
+      if (iframeRef.current && iframeRef.current.contentWindow) {
+        try {
+          iframeRef.current.contentWindow.postMessage({
+            action: 'next-page'
+          }, '*');
+          
+          // Since Google Drive doesn't support direct PDF control via postMessage,
+          // we'll try to simulate keyboard navigation
+          const iframe = iframeRef.current;
+          iframe.focus();
+          const event = new KeyboardEvent('keydown', {
+            key: 'ArrowDown',
+            keyCode: 40,
+            which: 40,
+            bubbles: true
+          });
+          document.activeElement?.dispatchEvent(event);
+        } catch (err) {
+          console.error("Error navigating to next page:", err);
+        }
       }
     }
   };
@@ -177,7 +244,7 @@ export const PDFViewer = ({ pdfUrl, onPageChange }: PDFViewerProps) => {
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto p-0 bg-slate-100">
+      <div className="flex-1 overflow-auto p-0 bg-slate-100 relative">
         {loading ? (
           <div className="flex items-center justify-center h-full">
             <Loader2 className="h-8 w-8 animate-spin text-slate-500" />
@@ -197,6 +264,10 @@ export const PDFViewer = ({ pdfUrl, onPageChange }: PDFViewerProps) => {
             className="w-full h-full border-0"
             title="PDF Document"
             sandbox="allow-scripts allow-same-origin allow-popups"
+            onLoad={() => {
+              // When iframe loads, we'll try to determine total pages (though this is difficult with Google Drive's viewer)
+              setTotalPages(Math.max(1, totalPages));
+            }}
           />
         ) : (
           <div className="flex items-center justify-center h-full">
