@@ -55,34 +55,65 @@ export const PDFViewer = ({ pdfUrl, onPageChange }: PDFViewerProps) => {
     }
   }, [currentPage, totalPages, onPageChange]);
 
+  // Function to handle PDF iframe messages for page changes
+  useEffect(() => {
+    const handleIframeMessage = (event: MessageEvent) => {
+      // Only process messages from our iframe
+      if (iframeRef.current && event.source === iframeRef.current.contentWindow) {
+        try {
+          const data = event.data;
+          if (data && data.type === 'pdf-page-change') {
+            setCurrentPage(data.page);
+            setTotalPages(data.totalPages);
+          }
+        } catch (error) {
+          console.error("Error processing iframe message:", error);
+        }
+      }
+    };
+
+    window.addEventListener('message', handleIframeMessage);
+    return () => {
+      window.removeEventListener('message', handleIframeMessage);
+    };
+  }, []);
+
   const zoomIn = () => {
     setZoomLevel(prev => Math.min(prev + 10, 200));
+    if (iframeRef.current) {
+      iframeRef.current.contentWindow?.postMessage({ action: 'zoom-in' }, '*');
+    }
   };
 
   const zoomOut = () => {
     setZoomLevel(prev => Math.max(prev - 10, 50));
+    if (iframeRef.current) {
+      iframeRef.current.contentWindow?.postMessage({ action: 'zoom-out' }, '*');
+    }
   };
 
   const fitToWidth = () => {
     setZoomLevel(100);
+    if (iframeRef.current) {
+      iframeRef.current.contentWindow?.postMessage({ action: 'fit-width' }, '*');
+    }
   };
 
   const previousPage = () => {
     if (currentPage > 1) {
       setCurrentPage(prev => prev - 1);
+      if (iframeRef.current) {
+        iframeRef.current.contentWindow?.postMessage({ action: 'prev-page' }, '*');
+      }
     }
   };
 
   const nextPage = () => {
     if (currentPage < totalPages) {
       setCurrentPage(prev => prev + 1);
-    }
-  };
-
-  // Function to set page programmatically
-  const setPage = (pageNumber: number) => {
-    if (pageNumber >= 1 && pageNumber <= totalPages) {
-      setCurrentPage(pageNumber);
+      if (iframeRef.current) {
+        iframeRef.current.contentWindow?.postMessage({ action: 'next-page' }, '*');
+      }
     }
   };
 
@@ -95,6 +126,7 @@ export const PDFViewer = ({ pdfUrl, onPageChange }: PDFViewerProps) => {
             variant="outline" 
             size="icon" 
             className="h-8 w-8"
+            title="Zoom Out"
           >
             <Minus className="h-4 w-4" />
           </Button>
@@ -104,6 +136,7 @@ export const PDFViewer = ({ pdfUrl, onPageChange }: PDFViewerProps) => {
             variant="outline" 
             size="icon" 
             className="h-8 w-8"
+            title="Zoom In"
           >
             <Plus className="h-4 w-4" />
           </Button>
@@ -111,6 +144,7 @@ export const PDFViewer = ({ pdfUrl, onPageChange }: PDFViewerProps) => {
             onClick={fitToWidth} 
             variant="outline" 
             className="text-xs h-8"
+            title="Fit to Width"
           >
             <Maximize className="h-3 w-3 mr-1" /> Fit Width
           </Button>
@@ -123,6 +157,7 @@ export const PDFViewer = ({ pdfUrl, onPageChange }: PDFViewerProps) => {
             size="icon" 
             disabled={currentPage === 1}
             className="h-8 w-8"
+            title="Previous Page"
           >
             <ChevronUp className="h-4 w-4" />
           </Button>
@@ -135,6 +170,7 @@ export const PDFViewer = ({ pdfUrl, onPageChange }: PDFViewerProps) => {
             size="icon" 
             disabled={currentPage === totalPages}
             className="h-8 w-8"
+            title="Next Page"
           >
             <ChevronDown className="h-4 w-4" />
           </Button>

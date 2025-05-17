@@ -27,6 +27,7 @@ export const InvoiceReviewer = ({ onSectionChange }: InvoiceReviewerProps) => {
   const [currentPdfUrl, setCurrentPdfUrl] = useState<string | null>(null);
   const [currentInvoiceIndex, setCurrentInvoiceIndex] = useState(0);
   const [currentInvoiceId, setCurrentInvoiceId] = useState<number | null>(null);
+  const [currentEmailInfoId, setCurrentEmailInfoId] = useState<number | null>(null);
   const [pdfCurrentPage, setPdfCurrentPage] = useState(1);
   const [pdfTotalPages, setPdfTotalPages] = useState(3);
   const { toast } = useToast();
@@ -70,7 +71,9 @@ export const InvoiceReviewer = ({ onSectionChange }: InvoiceReviewerProps) => {
           
           setCurrentPdfUrl(url);
           setCurrentInvoiceId(data[0].id);
+          setCurrentEmailInfoId(data[0].Email_Info_ID);
           console.log("InvoiceReviewer - Set current invoice ID to:", data[0].id);
+          console.log("InvoiceReviewer - Set current email info ID to:", data[0].Email_Info_ID);
         } else {
           console.log("No invoice data found for index:", currentInvoiceIndex);
         }
@@ -191,7 +194,10 @@ export const InvoiceReviewer = ({ onSectionChange }: InvoiceReviewerProps) => {
                     />
                   </TabsContent>
                   <TabsContent value="email" className="mt-0 h-[calc(100%-60px)]">
-                    <EmailViewer />
+                    <EmailViewer 
+                      currentInvoiceId={currentInvoiceId}
+                      emailInfoId={currentEmailInfoId}
+                    />
                   </TabsContent>
                 </Tabs>
               </div>
@@ -210,19 +216,3 @@ export const InvoiceReviewer = ({ onSectionChange }: InvoiceReviewerProps) => {
     </>
   );
 };
-
-function handleApprove() {
-  console.log("Invoice approved");
-}
-
-function handleDeny() {
-  console.log("Invoice denied");
-}
-
-function handleQuarantine() {
-  console.log("Invoice quarantined");
-}
-
-function handleForward() {
-  console.log("Invoice forwarded");
-}

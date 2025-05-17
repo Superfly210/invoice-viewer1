@@ -140,7 +140,7 @@ export type Database = {
             foreignKeyName: "Attachment Info_Email_Info_ID_fkey"
             columns: ["Email_Info_ID"]
             isOneToOne: false
-            referencedRelation: "Email_Information"
+            referencedRelation: "Email_Info"
             referencedColumns: ["id_"]
           },
         ]
@@ -258,63 +258,63 @@ export type Database = {
         }
         Relationships: []
       }
-      Email_Information: {
+      Email_Info: {
         Row: {
-          cc: Json | null
+          cc: string | null
           created_at: string
           Date: string | null
-          Email_Mark_Down: Json | null
-          Email_Type: Json | null
+          Email_Mark_Down: string | null
+          Email_Type: string | null
           Email_Type_Account_Info: boolean | null
           Email_Type_Account_Statement: boolean | null
           Email_Type_Invoice: boolean | null
           Email_Type_Other: boolean | null
           Email_Type_Requesting_Payment: boolean | null
-          From: Json | null
-          id: Json | null
+          From: string | null
+          id: string | null
           id_: number
-          "message-id": Json | null
-          Subject: Json | null
-          threadID: Json | null
-          "x-recieved": Json | null
+          "message-id": string | null
+          Subject: string | null
+          threadID: string | null
+          "x-recieved": string | null
         }
         Insert: {
-          cc?: Json | null
+          cc?: string | null
           created_at?: string
           Date?: string | null
-          Email_Mark_Down?: Json | null
-          Email_Type?: Json | null
+          Email_Mark_Down?: string | null
+          Email_Type?: string | null
           Email_Type_Account_Info?: boolean | null
           Email_Type_Account_Statement?: boolean | null
           Email_Type_Invoice?: boolean | null
           Email_Type_Other?: boolean | null
           Email_Type_Requesting_Payment?: boolean | null
-          From?: Json | null
-          id?: Json | null
+          From?: string | null
+          id?: string | null
           id_?: number
-          "message-id"?: Json | null
-          Subject?: Json | null
-          threadID?: Json | null
-          "x-recieved"?: Json | null
+          "message-id"?: string | null
+          Subject?: string | null
+          threadID?: string | null
+          "x-recieved"?: string | null
         }
         Update: {
-          cc?: Json | null
+          cc?: string | null
           created_at?: string
           Date?: string | null
-          Email_Mark_Down?: Json | null
-          Email_Type?: Json | null
+          Email_Mark_Down?: string | null
+          Email_Type?: string | null
           Email_Type_Account_Info?: boolean | null
           Email_Type_Account_Statement?: boolean | null
           Email_Type_Invoice?: boolean | null
           Email_Type_Other?: boolean | null
           Email_Type_Requesting_Payment?: boolean | null
-          From?: Json | null
-          id?: Json | null
+          From?: string | null
+          id?: string | null
           id_?: number
-          "message-id"?: Json | null
-          Subject?: Json | null
-          threadID?: Json | null
-          "x-recieved"?: Json | null
+          "message-id"?: string | null
+          Subject?: string | null
+          threadID?: string | null
+          "x-recieved"?: string | null
         }
         Relationships: []
       }
