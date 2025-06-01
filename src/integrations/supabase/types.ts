@@ -68,8 +68,8 @@ export type Database = {
           GST_Number: string | null
           GST_Total: number | null
           id: number
-          Invoice_Number: Json | null
-          Invoicing_Comp_City: Json | null
+          Invoice_Number: string | null
+          Invoicing_Comp_City: string | null
           Invoicing_Comp_Name: string | null
           Invoicing_Comp_Postal_Code: string | null
           Invoicing_Comp_State_Province: string | null
@@ -95,8 +95,8 @@ export type Database = {
           GST_Number?: string | null
           GST_Total?: number | null
           id?: number
-          Invoice_Number?: Json | null
-          Invoicing_Comp_City?: Json | null
+          Invoice_Number?: string | null
+          Invoicing_Comp_City?: string | null
           Invoicing_Comp_Name?: string | null
           Invoicing_Comp_Postal_Code?: string | null
           Invoicing_Comp_State_Province?: string | null
@@ -122,8 +122,8 @@ export type Database = {
           GST_Number?: string | null
           GST_Total?: number | null
           id?: number
-          Invoice_Number?: Json | null
-          Invoicing_Comp_City?: Json | null
+          Invoice_Number?: string | null
+          Invoicing_Comp_City?: string | null
           Invoicing_Comp_Name?: string | null
           Invoicing_Comp_Postal_Code?: string | null
           Invoicing_Comp_State_Province?: string | null

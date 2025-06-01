@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { FileText, Paperclip, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,7 +11,7 @@ type EmailInfo = {
   From: string | null;
   Subject: string | null;
   Email_Mark_Down: string | null;
-  cc: string | null;
+  cc?: string | null;
   Email_Type: string | null;
 }
 
@@ -71,7 +72,18 @@ export const EmailViewer = ({ currentInvoiceId, emailInfoId }: EmailViewerProps 
       }
       
       if (data && data.length > 0) {
-        setEmailData(data[0] as EmailInfo);
+        // Map the database fields to our EmailInfo type, making cc optional
+        const emailInfo: EmailInfo = {
+          id_: data[0].id_,
+          created_at: data[0].created_at,
+          Date: data[0].Date,
+          From: data[0].From,
+          Subject: data[0].Subject,
+          Email_Mark_Down: data[0].Email_Mark_Down,
+          cc: data[0].cc || undefined,
+          Email_Type: data[0].Email_Type
+        };
+        setEmailData(emailInfo);
       } else {
         setEmailData(null);
         setError("No email data found");

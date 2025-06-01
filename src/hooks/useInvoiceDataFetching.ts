@@ -18,6 +18,7 @@ export type AttachmentInfo = {
   Total: number | null;
   created_at: string;
   Google_Drive_URL: string | null;
+  Email_Info_ID: number | null;
 }
 
 export const useInvoiceDataFetching = (currentInvoiceIndex: number) => {
@@ -39,10 +40,23 @@ export const useInvoiceDataFetching = (currentInvoiceIndex: number) => {
 
       if (error) throw error;
 
-      // Convert Google_Drive_URL from Json to string if needed
+      // Convert Google_Drive_URL from Json to string if needed and map database fields to our type
       const processedData = data?.map(item => ({
-        ...item,
-        Google_Drive_URL: item.Google_Drive_URL ? String(item.Google_Drive_URL) : null
+        id: item.id,
+        Invoice_Number: item.Invoice_Number,
+        Invoicing_Comp_Name: item.Invoicing_Comp_Name,
+        Invoicing_Comp_Street: item.Invoicing_Comp_Street,
+        Invoicing_Comp_City: item.Invoicing_Comp_City,
+        Invoicing_Comp_State_Prov: item.Invoicing_Comp_State_Province || null,
+        Invoicing_Comp_Postal_Code: item.Invoicing_Comp_Postal_Code,
+        GST_Number: item.GST_Number,
+        WCB_Number: item.WCB_Number,
+        Sub_Total: item.Sub_Total,
+        GST_Total: item.GST_Total,
+        Total: item.Total,
+        created_at: item.created_at,
+        Google_Drive_URL: item.Google_Drive_URL ? String(item.Google_Drive_URL) : null,
+        Email_Info_ID: item.Email_Info_ID
       })) || [];
 
       setInvoices(processedData as AttachmentInfo[]);

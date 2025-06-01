@@ -41,7 +41,7 @@ export const InvoiceDataPanel = ({ currentInvoiceIndex, onSectionChange }: Invoi
           <InvoiceData currentInvoice={currentInvoice} isLoading={isLoading} />
         </TabsContent>
         <TabsContent value="metadata" className="mt-0">
-          <MetadataPanel />
+          <MetadataPanel currentInvoiceId={currentInvoice?.id || null} />
         </TabsContent>
       </Tabs>
     </div>
