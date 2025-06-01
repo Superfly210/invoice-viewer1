@@ -20,9 +20,8 @@ export type AttachmentInfo = {
   Google_Drive_URL: string | null;
 }
 
-export const useInvoiceDataFetching = () => {
+export const useInvoiceDataFetching = (currentInvoiceIndex: number) => {
   const [invoices, setInvoices] = useState<AttachmentInfo[]>([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
@@ -47,6 +46,7 @@ export const useInvoiceDataFetching = () => {
       })) || [];
 
       setInvoices(processedData as AttachmentInfo[]);
+      console.log("Fetched invoices:", processedData.length);
     } catch (error) {
       console.error('Error fetching invoice data:', error);
       toast({
@@ -60,18 +60,19 @@ export const useInvoiceDataFetching = () => {
   };
 
   const getCurrentGoogleDriveUrl = (): string | null => {
-    if (!invoices.length || currentIndex >= invoices.length) return null;
+    if (!invoices.length || currentInvoiceIndex >= invoices.length) return null;
     
-    const currentInvoice = invoices[currentIndex];
+    const currentInvoice = invoices[currentInvoiceIndex];
     return currentInvoice.Google_Drive_URL;
   };
 
+  const currentInvoice = invoices[currentInvoiceIndex] || null;
+  console.log("Current invoice index:", currentInvoiceIndex, "Current invoice:", currentInvoice);
+
   return {
     invoices,
-    currentIndex,
-    setCurrentIndex,
     isLoading,
     getCurrentGoogleDriveUrl,
-    currentInvoice: invoices[currentIndex] || null,
+    currentInvoice,
   };
 };

@@ -37,19 +37,30 @@ export const InvoiceReviewer = ({ onSectionChange }: InvoiceReviewerProps) => {
   } = useToastNotifications();
 
   const handlePrevious = () => {
-    setCurrentInvoiceIndex(prev => Math.max(0, prev - 1));
+    console.log("Previous clicked, current index:", currentInvoiceIndex);
+    const newIndex = Math.max(0, currentInvoiceIndex - 1);
+    setCurrentInvoiceIndex(newIndex);
+    setPdfCurrentPage(1); // Reset to first page when changing invoices
+    console.log("New index:", newIndex);
   };
 
   const handleNext = () => {
+    console.log("Next clicked, current index:", currentInvoiceIndex, "total:", totalInvoices);
     if (currentInvoiceIndex < totalInvoices - 1) {
-      setCurrentInvoiceIndex(prev => prev + 1);
+      const newIndex = currentInvoiceIndex + 1;
+      setCurrentInvoiceIndex(newIndex);
+      setPdfCurrentPage(1); // Reset to first page when changing invoices
+      console.log("New index:", newIndex);
     }
   };
 
   const handlePdfPageChange = (currentPage: number, totalPages: number) => {
+    console.log("PDF page changed:", currentPage, "of", totalPages);
     setPdfCurrentPage(currentPage);
     setPdfTotalPages(totalPages);
   };
+
+  console.log("InvoiceReviewer rendering with index:", currentInvoiceIndex);
 
   return (
     <>
@@ -67,7 +78,10 @@ export const InvoiceReviewer = ({ onSectionChange }: InvoiceReviewerProps) => {
         <ResizablePanel defaultSize={70} minSize={30}>
           <ResizablePanelGroup direction="horizontal" className="h-full">
             <ResizablePanel defaultSize={50} minSize={30}>
-              <InvoiceDataPanel onSectionChange={onSectionChange} />
+              <InvoiceDataPanel 
+                currentInvoiceIndex={currentInvoiceIndex}
+                onSectionChange={onSectionChange} 
+              />
             </ResizablePanel>
             <ResizableHandle withHandle />
             <ResizablePanel defaultSize={50} minSize={30}>

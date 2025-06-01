@@ -55,85 +55,85 @@ export type Database = {
       }
       Attachment_Info: {
         Row: {
-          AFE_Numbers: Json | null
-          Attach_Markdown: Json | null
-          "Cost Centers": Json | null
-          "Cost Codes": Json | null
+          AFE_Numbers: string | null
+          Attach_Markdown: string | null
+          "Cost Centers": string | null
+          "Cost Codes": string | null
           created_at: string
-          Email_ID: Json | null
+          Email_ID: string | null
           Email_Info_ID: number | null
-          File_Name: Json | null
-          Google_Drive_ID: Json | null
-          Google_Drive_URL: Json | null
-          GST_Number: Json | null
+          File_Name: string | null
+          Google_Drive_ID: string | null
+          Google_Drive_URL: string | null
+          GST_Number: string | null
           GST_Total: number | null
           id: number
           Invoice_Number: Json | null
           Invoicing_Comp_City: Json | null
           Invoicing_Comp_Name: string | null
-          Invoicing_Comp_Postal_Code: Json | null
-          Invoicing_Comp_State_Prov: Json | null
-          Invoicing_Comp_Street: Json | null
-          Number_Of_Pages: Json | null
-          Page_Field_Ticket_Starts_On: Json | null
+          Invoicing_Comp_Postal_Code: string | null
+          Invoicing_Comp_State_Province: string | null
+          Invoicing_Comp_Street: string | null
+          Number_Of_Pages: number | null
+          Page_Field_Ticket_Starts_On: number | null
           Sub_Total: number | null
           Total: number | null
-          Type_of_Document: Json | null
-          WCB_Number: Json | null
+          Type_of_Document: string | null
+          WCB_Number: string | null
         }
         Insert: {
-          AFE_Numbers?: Json | null
-          Attach_Markdown?: Json | null
-          "Cost Centers"?: Json | null
-          "Cost Codes"?: Json | null
+          AFE_Numbers?: string | null
+          Attach_Markdown?: string | null
+          "Cost Centers"?: string | null
+          "Cost Codes"?: string | null
           created_at?: string
-          Email_ID?: Json | null
+          Email_ID?: string | null
           Email_Info_ID?: number | null
-          File_Name?: Json | null
-          Google_Drive_ID?: Json | null
-          Google_Drive_URL?: Json | null
-          GST_Number?: Json | null
+          File_Name?: string | null
+          Google_Drive_ID?: string | null
+          Google_Drive_URL?: string | null
+          GST_Number?: string | null
           GST_Total?: number | null
           id?: number
           Invoice_Number?: Json | null
           Invoicing_Comp_City?: Json | null
           Invoicing_Comp_Name?: string | null
-          Invoicing_Comp_Postal_Code?: Json | null
-          Invoicing_Comp_State_Prov?: Json | null
-          Invoicing_Comp_Street?: Json | null
-          Number_Of_Pages?: Json | null
-          Page_Field_Ticket_Starts_On?: Json | null
+          Invoicing_Comp_Postal_Code?: string | null
+          Invoicing_Comp_State_Province?: string | null
+          Invoicing_Comp_Street?: string | null
+          Number_Of_Pages?: number | null
+          Page_Field_Ticket_Starts_On?: number | null
           Sub_Total?: number | null
           Total?: number | null
-          Type_of_Document?: Json | null
-          WCB_Number?: Json | null
+          Type_of_Document?: string | null
+          WCB_Number?: string | null
         }
         Update: {
-          AFE_Numbers?: Json | null
-          Attach_Markdown?: Json | null
-          "Cost Centers"?: Json | null
-          "Cost Codes"?: Json | null
+          AFE_Numbers?: string | null
+          Attach_Markdown?: string | null
+          "Cost Centers"?: string | null
+          "Cost Codes"?: string | null
           created_at?: string
-          Email_ID?: Json | null
+          Email_ID?: string | null
           Email_Info_ID?: number | null
-          File_Name?: Json | null
-          Google_Drive_ID?: Json | null
-          Google_Drive_URL?: Json | null
-          GST_Number?: Json | null
+          File_Name?: string | null
+          Google_Drive_ID?: string | null
+          Google_Drive_URL?: string | null
+          GST_Number?: string | null
           GST_Total?: number | null
           id?: number
           Invoice_Number?: Json | null
           Invoicing_Comp_City?: Json | null
           Invoicing_Comp_Name?: string | null
-          Invoicing_Comp_Postal_Code?: Json | null
-          Invoicing_Comp_State_Prov?: Json | null
-          Invoicing_Comp_Street?: Json | null
-          Number_Of_Pages?: Json | null
-          Page_Field_Ticket_Starts_On?: Json | null
+          Invoicing_Comp_Postal_Code?: string | null
+          Invoicing_Comp_State_Province?: string | null
+          Invoicing_Comp_Street?: string | null
+          Number_Of_Pages?: number | null
+          Page_Field_Ticket_Starts_On?: number | null
           Sub_Total?: number | null
           Total?: number | null
-          Type_of_Document?: Json | null
-          WCB_Number?: Json | null
+          Type_of_Document?: string | null
+          WCB_Number?: string | null
         }
         Relationships: [
           {
@@ -260,7 +260,6 @@ export type Database = {
       }
       Email_Info: {
         Row: {
-          cc: string | null
           created_at: string
           Date: string | null
           Email_Mark_Down: string | null
@@ -279,7 +278,6 @@ export type Database = {
           "x-recieved": string | null
         }
         Insert: {
-          cc?: string | null
           created_at?: string
           Date?: string | null
           Email_Mark_Down?: string | null
@@ -298,7 +296,6 @@ export type Database = {
           "x-recieved"?: string | null
         }
         Update: {
-          cc?: string | null
           created_at?: string
           Date?: string | null
           Email_Mark_Down?: string | null
@@ -419,6 +416,45 @@ export type Database = {
           updated_at?: string | null
           user_permission?: string
           username?: string | null
+        }
+        Relationships: []
+      }
+      vendor_info: {
+        Row: {
+          created_at: string
+          gst_number: string | null
+          id: number
+          invoicing_company_city: string | null
+          invoicing_company_name: string | null
+          invoicing_company_post_zip_code: string | null
+          invoicing_company_province_state: string | null
+          invoicing_company_street: string | null
+          Prompt_Line_Items: string | null
+          wcb_number: string | null
+        }
+        Insert: {
+          created_at?: string
+          gst_number?: string | null
+          id?: number
+          invoicing_company_city?: string | null
+          invoicing_company_name?: string | null
+          invoicing_company_post_zip_code?: string | null
+          invoicing_company_province_state?: string | null
+          invoicing_company_street?: string | null
+          Prompt_Line_Items?: string | null
+          wcb_number?: string | null
+        }
+        Update: {
+          created_at?: string
+          gst_number?: string | null
+          id?: number
+          invoicing_company_city?: string | null
+          invoicing_company_name?: string | null
+          invoicing_company_post_zip_code?: string | null
+          invoicing_company_province_state?: string | null
+          invoicing_company_street?: string | null
+          Prompt_Line_Items?: string | null
+          wcb_number?: string | null
         }
         Relationships: []
       }

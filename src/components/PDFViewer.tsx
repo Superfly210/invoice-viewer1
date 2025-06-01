@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { Minus, Plus, Maximize, ChevronUp, ChevronDown, Loader2, RotateCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -44,6 +45,7 @@ export const PDFViewer = ({ pdfUrl, onPageChange }: PDFViewerProps) => {
       // Reset zoom level and page to defaults when loading a new PDF
       setZoomLevel(100);
       setCurrentPage(1);
+      setTotalPages(6); // Set realistic default for demos
       
     } catch (err) {
       console.error("Error processing PDF URL:", err);
@@ -55,39 +57,16 @@ export const PDFViewer = ({ pdfUrl, onPageChange }: PDFViewerProps) => {
 
   // Call the onPageChange callback when currentPage or totalPages changes
   useEffect(() => {
+    console.log("PDFViewer - page changed:", currentPage, "of", totalPages);
     if (onPageChange) {
       onPageChange(currentPage, totalPages);
     }
   }, [currentPage, totalPages, onPageChange]);
 
-  // Function to handle PDF iframe messages for page changes
-  useEffect(() => {
-    const handleIframeMessage = (event: MessageEvent) => {
-      // Only process messages from our iframe
-      if (iframeRef.current && event.source === iframeRef.current.contentWindow) {
-        try {
-          const data = event.data;
-          if (data && data.type === 'pdf-page-change') {
-            setCurrentPage(data.page);
-            setTotalPages(data.totalPages);
-          }
-        } catch (error) {
-          console.error("Error processing iframe message:", error);
-        }
-      }
-    };
-
-    window.addEventListener('message', handleIframeMessage);
-    return () => {
-      window.removeEventListener('message', handleIframeMessage);
-    };
-  }, []);
-
   const zoomIn = () => {
     setZoomLevel(prev => Math.min(prev + 10, 200));
     if (iframeRef.current && iframeRef.current.contentWindow) {
       try {
-        // For Google Drive PDFs, we can try to manipulate the iframe zoom
         const iframe = iframeRef.current;
         iframe.style.transform = `scale(${(zoomLevel + 10) / 100}) rotate(${rotation}deg)`;
         iframe.style.transformOrigin = 'top left';
@@ -101,7 +80,6 @@ export const PDFViewer = ({ pdfUrl, onPageChange }: PDFViewerProps) => {
     setZoomLevel(prev => Math.max(prev - 10, 50));
     if (iframeRef.current && iframeRef.current.contentWindow) {
       try {
-        // For Google Drive PDFs, we can try to manipulate the iframe zoom
         const iframe = iframeRef.current;
         iframe.style.transform = `scale(${(zoomLevel - 10) / 100}) rotate(${rotation}deg)`;
         iframe.style.transformOrigin = 'top left';
@@ -112,7 +90,6 @@ export const PDFViewer = ({ pdfUrl, onPageChange }: PDFViewerProps) => {
   };
 
   const fitToWidth = () => {
-    // Reset zoom to default
     setZoomLevel(100);
     if (iframeRef.current) {
       try {
@@ -144,31 +121,16 @@ export const PDFViewer = ({ pdfUrl, onPageChange }: PDFViewerProps) => {
   const previousPage = () => {
     if (currentPage > 1) {
       const newPage = currentPage - 1;
+      console.log("Going to previous page:", newPage);
       setCurrentPage(newPage);
       
-      // For Google Drive embedded PDFs, we can try to navigate using URL parameters
+      // For Google Drive embedded PDFs, try URL navigation
       if (iframeRef.current && processedUrl) {
         try {
-          // Try to modify the URL with page parameter if it's a Google Drive preview
           if (processedUrl.includes('drive.google.com/file/d/')) {
             const baseUrl = processedUrl.split('#')[0];
             const newUrl = `${baseUrl}#page=${newPage}`;
             iframeRef.current.src = newUrl;
-          }
-          
-          // Also try keyboard simulation as fallback
-          iframeRef.current.focus();
-          const event = new KeyboardEvent('keydown', {
-            key: 'ArrowUp',
-            keyCode: 38,
-            which: 38,
-            bubbles: true
-          });
-          document.activeElement?.dispatchEvent(event);
-          
-          // Update the UI immediately for better user feedback
-          if (onPageChange) {
-            onPageChange(newPage, totalPages);
           }
         } catch (err) {
           console.error("Error navigating to previous page:", err);
@@ -180,31 +142,16 @@ export const PDFViewer = ({ pdfUrl, onPageChange }: PDFViewerProps) => {
   const nextPage = () => {
     if (currentPage < totalPages) {
       const newPage = currentPage + 1;
+      console.log("Going to next page:", newPage);
       setCurrentPage(newPage);
       
-      // For Google Drive embedded PDFs, we can try to navigate using URL parameters
+      // For Google Drive embedded PDFs, try URL navigation
       if (iframeRef.current && processedUrl) {
         try {
-          // Try to modify the URL with page parameter if it's a Google Drive preview
           if (processedUrl.includes('drive.google.com/file/d/')) {
             const baseUrl = processedUrl.split('#')[0];
             const newUrl = `${baseUrl}#page=${newPage}`;
             iframeRef.current.src = newUrl;
-          }
-          
-          // Also try keyboard simulation as fallback
-          iframeRef.current.focus();
-          const event = new KeyboardEvent('keydown', {
-            key: 'ArrowDown',
-            keyCode: 40,
-            which: 40,
-            bubbles: true
-          });
-          document.activeElement?.dispatchEvent(event);
-          
-          // Update the UI immediately for better user feedback
-          if (onPageChange) {
-            onPageChange(newPage, totalPages);
           }
         } catch (err) {
           console.error("Error navigating to next page:", err);
@@ -302,19 +249,11 @@ export const PDFViewer = ({ pdfUrl, onPageChange }: PDFViewerProps) => {
             title="PDF Document"
             sandbox="allow-scripts allow-same-origin allow-popups"
             onLoad={() => {
-              // When iframe loads, try to determine total pages from Google Drive viewer
-              try {
-                // For testing purposes, let's set a more realistic value for totalPages
-                // In a real-world scenario, we would try to extract this from the PDF itself
-                setTotalPages(Math.max(6, totalPages));
-                
-                // Apply any rotation that was set
-                if (rotation !== 0 && iframeRef.current) {
-                  iframeRef.current.style.transform = `rotate(${rotation}deg)`;
-                  iframeRef.current.style.transformOrigin = 'center';
-                }
-              } catch (err) {
-                console.error("Error during iframe load:", err);
+              console.log("PDF iframe loaded");
+              // Apply any rotation that was set
+              if (rotation !== 0 && iframeRef.current) {
+                iframeRef.current.style.transform = `rotate(${rotation}deg)`;
+                iframeRef.current.style.transformOrigin = 'center';
               }
             }}
           />

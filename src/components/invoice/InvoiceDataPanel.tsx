@@ -4,13 +4,16 @@ import { InvoiceData } from "@/components/InvoiceData";
 import { MetadataPanel } from "@/components/MetadataPanel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TableIcon, FileTextIcon } from "lucide-react";
+import { useInvoiceDataFetching } from "@/hooks/useInvoiceDataFetching";
 
 interface InvoiceDataPanelProps {
+  currentInvoiceIndex: number;
   onSectionChange?: (section: string) => void;
 }
 
-export const InvoiceDataPanel = ({ onSectionChange }: InvoiceDataPanelProps) => {
+export const InvoiceDataPanel = ({ currentInvoiceIndex, onSectionChange }: InvoiceDataPanelProps) => {
   const [activeTab, setActiveTab] = useState("data");
+  const { currentInvoice, isLoading } = useInvoiceDataFetching(currentInvoiceIndex);
   
   const handleTabChange = (value: string) => {
     setActiveTab(value);
@@ -18,6 +21,8 @@ export const InvoiceDataPanel = ({ onSectionChange }: InvoiceDataPanelProps) => 
       onSectionChange(value);
     }
   };
+
+  console.log("InvoiceDataPanel - currentInvoiceIndex:", currentInvoiceIndex, "currentInvoice:", currentInvoice);
 
   return (
     <div className="h-full overflow-auto p-4">
@@ -33,7 +38,7 @@ export const InvoiceDataPanel = ({ onSectionChange }: InvoiceDataPanelProps) => 
           </TabsTrigger>
         </TabsList>
         <TabsContent value="data" className="mt-0">
-          <InvoiceData />
+          <InvoiceData currentInvoice={currentInvoice} isLoading={isLoading} />
         </TabsContent>
         <TabsContent value="metadata" className="mt-0">
           <MetadataPanel />
