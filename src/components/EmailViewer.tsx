@@ -11,7 +11,7 @@ type EmailInfo = {
   From: string | null;
   Subject: string | null;
   Email_Mark_Down: string | null;
-  cc?: string | null;
+  cc: string | null;
   Email_Type: string | null;
 }
 
@@ -72,7 +72,7 @@ export const EmailViewer = ({ currentInvoiceId, emailInfoId }: EmailViewerProps 
       }
       
       if (data && data.length > 0) {
-        // Map the database fields to our EmailInfo type, making cc optional
+        // Map the database fields to our EmailInfo type
         const emailInfo: EmailInfo = {
           id_: data[0].id_,
           created_at: data[0].created_at,
@@ -80,7 +80,7 @@ export const EmailViewer = ({ currentInvoiceId, emailInfoId }: EmailViewerProps 
           From: data[0].From,
           Subject: data[0].Subject,
           Email_Mark_Down: data[0].Email_Mark_Down,
-          cc: data[0].cc || undefined,
+          cc: data[0].cc,
           Email_Type: data[0].Email_Type
         };
         setEmailData(emailInfo);
