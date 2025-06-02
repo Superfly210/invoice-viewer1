@@ -8,6 +8,14 @@ interface InvoiceDataTableProps {
 }
 
 export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
+  // Helper function to clean up JSON stringified values
+  const cleanValue = (value: any): string => {
+    if (value === null || value === undefined) return 'N/A';
+    if (typeof value === 'string') return value;
+    // Remove quotes from JSON stringified values
+    return String(value).replace(/^"(.*)"$/, '$1');
+  };
+
   return (
     <div className="overflow-x-auto">
       <Table>
@@ -23,6 +31,10 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
           <TableRow>
             <TableCell className="font-medium w-1/3 text-left">Invoice Number</TableCell>
             <TableCell className="text-left">{currentInvoice.Invoice_Number || 'N/A'}</TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell className="font-medium w-1/3 text-left">Invoice Date</TableCell>
+            <TableCell className="text-left">{currentInvoice.Invoice_Date || 'N/A'}</TableCell>
           </TableRow>
           
           <TableRow>

@@ -13,6 +13,18 @@ interface CompanyDetailsProps {
 export const CompanyDetails = ({ currentInvoice }: CompanyDetailsProps) => {
   const [companyDetailsOpen, setCompanyDetailsOpen] = useState(false);
 
+  // Helper function to clean up JSON stringified values
+  const cleanValue = (value: any): string => {
+    if (value === null || value === undefined) return 'N/A';
+    if (typeof value === 'string') return value;
+    // Remove quotes from JSON stringified values and handle JSON objects
+    const stringValue = String(value);
+    if (stringValue.startsWith('"') && stringValue.endsWith('"')) {
+      return stringValue.slice(1, -1);
+    }
+    return stringValue;
+  };
+
   return (
     <TableRow>
       <TableCell colSpan={2} className="p-0 border-0">
@@ -34,7 +46,7 @@ export const CompanyDetails = ({ currentInvoice }: CompanyDetailsProps) => {
               <TableBody>
                 <TableRow>
                   <TableCell className="font-medium w-1/3 text-left">Company Street</TableCell>
-                  <TableCell className="text-left">{JSON.stringify(currentInvoice.Invoicing_Comp_Street) || 'N/A'}</TableCell>
+                  <TableCell className="text-left">{cleanValue(currentInvoice.Invoicing_Comp_Street)}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="font-medium w-1/3 text-left">Company City</TableCell>
@@ -50,11 +62,11 @@ export const CompanyDetails = ({ currentInvoice }: CompanyDetailsProps) => {
                 </TableRow>
                 <TableRow>
                   <TableCell className="font-medium w-1/3 text-left">GST Number</TableCell>
-                  <TableCell className="text-left">{currentInvoice.GST_Number ? JSON.stringify(currentInvoice.GST_Number) : 'N/A'}</TableCell>
+                  <TableCell className="text-left">{cleanValue(currentInvoice.GST_Number)}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="font-medium w-1/3 text-left">WCB Number</TableCell>
-                  <TableCell className="text-left">{currentInvoice.WCB_Number ? JSON.stringify(currentInvoice.WCB_Number) : 'N/A'}</TableCell>
+                  <TableCell className="text-left">{cleanValue(currentInvoice.WCB_Number)}</TableCell>
                 </TableRow>
                 {currentInvoice.Google_Drive_URL && (
                   <TableRow>

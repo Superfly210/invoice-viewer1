@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 export type AttachmentInfo = {
   id: number;
   Invoice_Number: string | null;
+  Invoice_Date: string | null;
   Invoicing_Comp_Name: string | null;
   Invoicing_Comp_Street: any | null;
   Invoicing_Comp_City: string | null;
@@ -44,6 +45,7 @@ export const useInvoiceDataFetching = (currentInvoiceIndex: number) => {
       const processedData = data?.map(item => ({
         id: item.id,
         Invoice_Number: item.Invoice_Number,
+        Invoice_Date: item.Invoice_Date,
         Invoicing_Comp_Name: item.Invoicing_Comp_Name,
         Invoicing_Comp_Street: item.Invoicing_Comp_Street,
         Invoicing_Comp_City: item.Invoicing_Comp_City,

@@ -11,7 +11,7 @@ export type Database = {
     Tables: {
       afe: {
         Row: {
-          AFE_Description: Json | null
+          AFE_Description: string | null
           afe_estimate: number
           afe_number: string
           approved_amount: number
@@ -22,18 +22,18 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
-          AFE_Description?: Json | null
-          afe_estimate?: number
+          AFE_Description?: string | null
+          afe_estimate: number
           afe_number: string
-          approved_amount?: number
-          awaiting_approval_amount?: number
+          approved_amount: number
+          awaiting_approval_amount: number
           created_at?: string | null
           id?: string
           responsible_user_id?: string | null
           updated_at?: string | null
         }
         Update: {
-          AFE_Description?: Json | null
+          AFE_Description?: string | null
           afe_estimate?: number
           afe_number?: string
           approved_amount?: number
@@ -68,6 +68,7 @@ export type Database = {
           GST_Number: string | null
           GST_Total: number | null
           id: number
+          Invoice_Date: string | null
           Invoice_Number: string | null
           Invoicing_Comp_City: string | null
           Invoicing_Comp_Name: string | null
@@ -95,6 +96,7 @@ export type Database = {
           GST_Number?: string | null
           GST_Total?: number | null
           id?: number
+          Invoice_Date?: string | null
           Invoice_Number?: string | null
           Invoicing_Comp_City?: string | null
           Invoicing_Comp_Name?: string | null
@@ -122,6 +124,7 @@ export type Database = {
           GST_Number?: string | null
           GST_Total?: number | null
           id?: number
+          Invoice_Date?: string | null
           Invoice_Number?: string | null
           Invoicing_Comp_City?: string | null
           Invoicing_Comp_Name?: string | null
