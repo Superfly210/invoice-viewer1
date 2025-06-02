@@ -46,15 +46,15 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
           
           <TableRow>
             <TableCell className="font-medium w-1/3 text-left">Subtotal</TableCell>
-            <TableCell className="text-left">{currentInvoice.Sub_Total?.toFixed(2) || 'N/A'}</TableCell>
+            <TableCell className="text-left">{currentInvoice.Sub_Total ? `$${currentInvoice.Sub_Total.toFixed(2)}` : 'N/A'}</TableCell>
           </TableRow>
           <TableRow>
             <TableCell className="font-medium w-1/3 text-left">GST Total</TableCell>
-            <TableCell className="text-left">{currentInvoice.GST_Total?.toFixed(2) || 'N/A'}</TableCell>
+            <TableCell className="text-left">{currentInvoice.GST_Total ? `$${currentInvoice.GST_Total.toFixed(2)}` : 'N/A'}</TableCell>
           </TableRow>
           <TableRow>
             <TableCell className="font-medium w-1/3 text-left">Total</TableCell>
-            <TableCell className="text-left">{currentInvoice.Total?.toFixed(2) || 'N/A'}</TableCell>
+            <TableCell className="text-left">{currentInvoice.Total ? `$${currentInvoice.Total.toFixed(2)}` : 'N/A'}</TableCell>
           </TableRow>
         </TableBody>
       </Table>

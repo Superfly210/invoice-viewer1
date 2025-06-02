@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import {
   Table,
@@ -16,9 +17,9 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Plus, Upload } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
 
 type Profile = {
   id: string;
@@ -36,6 +37,9 @@ type AFE = {
 };
 
 export function AFETable() {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
   // Fetch users for the responsible user dropdown
   const { data: profiles } = useQuery({
     queryKey: ['profiles'],
@@ -49,13 +53,20 @@ export function AFETable() {
   });
 
   // Fetch AFE data
-  const { data: afes } = useQuery({
+  const { data: afes, isLoading, error } = useQuery({
     queryKey: ['afes'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('afe')
-        .select('*');
-      if (error) throw error;
+        .select('*')
+        .order('afe_number', { ascending: true });
+      
+      if (error) {
+        console.error('Error fetching AFE data:', error);
+        throw error;
+      }
+      
+      console.log('Fetched AFE data:', data);
       
       // Transform the data to include invoices_awaiting_approval with a default value of 0
       return (data || []).map(afe => ({
@@ -66,13 +77,34 @@ export function AFETable() {
   });
 
   const handleUserChange = async (afeId: string, userId: string) => {
-    const { error } = await supabase
-      .from('afe')
-      .update({ responsible_user_id: userId })
-      .eq('id', afeId);
+    try {
+      const { error } = await supabase
+        .from('afe')
+        .update({ responsible_user_id: userId })
+        .eq('id', afeId);
 
-    if (error) {
+      if (error) {
+        console.error('Error updating responsible user:', error);
+        toast({
+          title: "Error",
+          description: "Failed to update responsible user",
+          variant: "destructive",
+        });
+      } else {
+        // Refresh the data
+        queryClient.invalidateQueries({ queryKey: ['afes'] });
+        toast({
+          title: "Success",
+          description: "Responsible user updated successfully",
+        });
+      }
+    } catch (error) {
       console.error('Error updating responsible user:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update responsible user",
+        variant: "destructive",
+      });
     }
   };
 
@@ -86,6 +118,14 @@ export function AFETable() {
     console.log("Add AFE");
   };
 
+  if (error) {
+    return (
+      <div className="p-4 text-center">
+        <p className="text-red-600">Error loading AFE data: {error.message}</p>
+      </div>
+    );
+  }
+
   return (
     <div className="rounded-md border">
       <div className="flex justify-end p-4 space-x-2">
@@ -96,46 +136,60 @@ export function AFETable() {
           <Plus className="mr-2 h-4 w-4" /> Add AFE
         </Button>
       </div>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>AFE Number</TableHead>
-            <TableHead>Responsible User</TableHead>
-            <TableHead className="text-right">Invoices Awaiting Approval</TableHead>
-            <TableHead className="text-right">AFE Estimate</TableHead>
-            <TableHead className="text-right">Approved Amount</TableHead>
-            <TableHead className="text-right">Awaiting Approval Amount</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {afes?.map((afe) => (
-            <TableRow key={afe.id}>
-              <TableCell>{afe.afe_number}</TableCell>
-              <TableCell>
-                <Select
-                  value={afe.responsible_user_id || ""}
-                  onValueChange={(value) => handleUserChange(afe.id, value)}
-                >
-                  <SelectTrigger className="w-[200px]">
-                    <SelectValue placeholder="Select user" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {profiles?.map((profile) => (
-                      <SelectItem key={profile.id} value={profile.id}>
-                        {profile.full_name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </TableCell>
-              <TableCell className="text-right">{afe.invoices_awaiting_approval || 0}</TableCell>
-              <TableCell className="text-right">${afe.afe_estimate.toLocaleString()}</TableCell>
-              <TableCell className="text-right">${afe.approved_amount.toLocaleString()}</TableCell>
-              <TableCell className="text-right">${afe.awaiting_approval_amount.toLocaleString()}</TableCell>
+      {isLoading ? (
+        <div className="p-4 text-center">
+          <p>Loading AFE data...</p>
+        </div>
+      ) : (
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>AFE Number</TableHead>
+              <TableHead>Responsible User</TableHead>
+              <TableHead className="text-right">Invoices Awaiting Approval</TableHead>
+              <TableHead className="text-right">AFE Estimate</TableHead>
+              <TableHead className="text-right">Approved Amount</TableHead>
+              <TableHead className="text-right">Awaiting Approval Amount</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {afes && afes.length > 0 ? (
+              afes.map((afe) => (
+                <TableRow key={afe.id}>
+                  <TableCell>{afe.afe_number}</TableCell>
+                  <TableCell>
+                    <Select
+                      value={afe.responsible_user_id || ""}
+                      onValueChange={(value) => handleUserChange(afe.id, value)}
+                    >
+                      <SelectTrigger className="w-[200px]">
+                        <SelectValue placeholder="Select user" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {profiles?.map((profile) => (
+                          <SelectItem key={profile.id} value={profile.id}>
+                            {profile.full_name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </TableCell>
+                  <TableCell className="text-right">{afe.invoices_awaiting_approval || 0}</TableCell>
+                  <TableCell className="text-right">${afe.afe_estimate.toLocaleString()}</TableCell>
+                  <TableCell className="text-right">${afe.approved_amount.toLocaleString()}</TableCell>
+                  <TableCell className="text-right">${afe.awaiting_approval_amount.toLocaleString()}</TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={6} className="text-center text-gray-500">
+                  No AFE data found
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      )}
     </div>
   );
 }
