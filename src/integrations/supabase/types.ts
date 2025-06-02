@@ -260,6 +260,7 @@ export type Database = {
       }
       Email_Info: {
         Row: {
+          cc: string | null
           created_at: string
           Date: string | null
           Email_Mark_Down: string | null
@@ -278,6 +279,7 @@ export type Database = {
           "x-recieved": string | null
         }
         Insert: {
+          cc?: string | null
           created_at?: string
           Date?: string | null
           Email_Mark_Down?: string | null
@@ -296,6 +298,7 @@ export type Database = {
           "x-recieved"?: string | null
         }
         Update: {
+          cc?: string | null
           created_at?: string
           Date?: string | null
           Email_Mark_Down?: string | null

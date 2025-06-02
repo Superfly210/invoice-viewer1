@@ -35,7 +35,7 @@ export const EmailViewer = ({ currentInvoiceId, emailInfoId }: EmailViewerProps 
       setIsLoading(true);
       setError(null);
       
-      let query = supabase.from('Email_Info').select('*');
+      let query = supabase.from('Email_Info').select('id_, created_at, Date, From, Subject, Email_Mark_Down, cc, Email_Type');
       
       // If we have a specific Email_Info ID, query by that
       if (emailInfoId) {
