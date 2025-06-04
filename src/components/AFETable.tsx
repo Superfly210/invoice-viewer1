@@ -58,7 +58,7 @@ export function AFETable() {
   });
 
   // Fetch AFE data
-  const { data: afes, isLoading, error } = useQuery({
+  const { data: afes, isLoading, error, refetch } = useQuery({
     queryKey: ['afes'],
     queryFn: async () => {
       console.log("Fetching AFE data...");
@@ -74,21 +74,35 @@ export function AFETable() {
       
       console.log('Raw AFE data fetched:', data);
       
-      if (!data || data.length === 0) {
-        console.log("No AFE data found");
+      if (!data) {
+        console.log("No AFE data returned from query");
         return [];
       }
       
       // Transform the data to include invoices_awaiting_approval with a default value of 0
       const transformedData = data.map(afe => ({
-        ...afe,
+        id: afe.id,
+        afe_number: afe.afe_number,
+        responsible_user_id: afe.responsible_user_id,
+        afe_estimate: afe.afe_estimate || 0,
+        approved_amount: afe.approved_amount || 0,
+        awaiting_approval_amount: afe.awaiting_approval_amount || 0,
         invoices_awaiting_approval: 0 // Default value since it's not in the database
       })) as AFE[];
       
       console.log('Transformed AFE data:', transformedData);
+      console.log('Number of AFE records:', transformedData.length);
       return transformedData;
     },
+    retry: 3,
+    retryDelay: 1000,
   });
+
+  // Add a manual refresh function for debugging
+  const handleRefresh = () => {
+    console.log("Manual refresh triggered");
+    refetch();
+  };
 
   const handleUserChange = async (afeId: string, userId: string) => {
     try {
@@ -141,12 +155,22 @@ export function AFETable() {
     });
   };
 
-  console.log("AFE Table render - Loading:", isLoading, "Error:", error, "Data:", afes);
+  console.log("AFE Table render - Loading:", isLoading, "Error:", error, "Data:", afes, "Data length:", afes?.length);
 
   if (isLoading) {
     return (
-      <div className="p-4 text-center">
-        <p>Loading AFE data...</p>
+      <div className="rounded-md border">
+        <div className="flex justify-end p-4 space-x-2">
+          <Button variant="outline" onClick={handleImportAFE}>
+            <Upload className="mr-2 h-4 w-4" /> Import AFE Data
+          </Button>
+          <Button onClick={handleAddAFE}>
+            <Plus className="mr-2 h-4 w-4" /> Add AFE
+          </Button>
+        </div>
+        <div className="p-4 text-center">
+          <p>Loading AFE data...</p>
+        </div>
       </div>
     );
   }
@@ -154,9 +178,22 @@ export function AFETable() {
   if (error) {
     console.error("AFE Table error:", error);
     return (
-      <div className="p-4 text-center">
-        <p className="text-red-600">Error loading AFE data: {error.message}</p>
-        <p className="text-sm text-gray-500 mt-2">Check console for more details</p>
+      <div className="rounded-md border">
+        <div className="flex justify-end p-4 space-x-2">
+          <Button variant="outline" onClick={handleImportAFE}>
+            <Upload className="mr-2 h-4 w-4" /> Import AFE Data
+          </Button>
+          <Button onClick={handleAddAFE}>
+            <Plus className="mr-2 h-4 w-4" /> Add AFE
+          </Button>
+          <Button variant="outline" onClick={handleRefresh}>
+            Refresh
+          </Button>
+        </div>
+        <div className="p-4 text-center">
+          <p className="text-red-600">Error loading AFE data: {error.message}</p>
+          <p className="text-sm text-gray-500 mt-2">Check console for more details</p>
+        </div>
       </div>
     );
   }
@@ -169,6 +206,9 @@ export function AFETable() {
         </Button>
         <Button onClick={handleAddAFE}>
           <Plus className="mr-2 h-4 w-4" /> Add AFE
+        </Button>
+        <Button variant="outline" onClick={handleRefresh}>
+          Refresh
         </Button>
       </div>
       <Table>
@@ -213,7 +253,11 @@ export function AFETable() {
           ) : (
             <TableRow>
               <TableCell colSpan={6} className="text-center text-gray-500">
-                No AFE data found
+                No AFE data found. Records in database: {afes?.length || 0}
+                <br />
+                <Button variant="outline" onClick={handleRefresh} className="mt-2">
+                  Try Refresh
+                </Button>
               </TableCell>
             </TableRow>
           )}
