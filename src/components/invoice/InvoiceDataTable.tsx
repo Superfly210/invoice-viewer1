@@ -1,4 +1,3 @@
-
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { CompanyDetails } from "./CompanyDetails";
 import { EditableTableCell } from "./EditableTableCell";
@@ -6,6 +5,7 @@ import { AttachmentInfo } from "@/hooks/useInvoiceDataFetching";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
+import { formatCurrency, parseCurrencyValue } from "@/lib/currencyFormatter";
 
 interface InvoiceDataTableProps {
   currentInvoice: AttachmentInfo;
@@ -23,9 +23,8 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
       let processedValue: any = newValue;
       
       if (field === 'Sub_Total' || field === 'GST_Total' || field === 'Total') {
-        // Remove $ sign and convert to number
-        const numericValue = parseFloat(newValue.replace(/[$,]/g, ''));
-        processedValue = isNaN(numericValue) ? null : numericValue;
+        // Use the currency parser for monetary fields
+        processedValue = parseCurrencyValue(newValue);
       }
 
       const { error } = await supabase
@@ -106,7 +105,7 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
             <TableCell className="font-medium w-1/3 text-left">Subtotal</TableCell>
             <TableCell className="text-left">
               <EditableTableCell
-                value={currentInvoice.Sub_Total ? `$${currentInvoice.Sub_Total.toFixed(2)}` : null}
+                value={currentInvoice.Sub_Total ? formatCurrency(currentInvoice.Sub_Total) : null}
                 onSave={(newValue) => handleFieldUpdate('Sub_Total', newValue)}
                 type="text"
               />
@@ -116,7 +115,7 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
             <TableCell className="font-medium w-1/3 text-left">GST Total</TableCell>
             <TableCell className="text-left">
               <EditableTableCell
-                value={currentInvoice.GST_Total ? `$${currentInvoice.GST_Total.toFixed(2)}` : null}
+                value={currentInvoice.GST_Total ? formatCurrency(currentInvoice.GST_Total) : null}
                 onSave={(newValue) => handleFieldUpdate('GST_Total', newValue)}
                 type="text"
               />
@@ -126,7 +125,7 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
             <TableCell className="font-medium w-1/3 text-left">Total</TableCell>
             <TableCell className="text-left">
               <EditableTableCell
-                value={currentInvoice.Total ? `$${currentInvoice.Total.toFixed(2)}` : null}
+                value={currentInvoice.Total ? formatCurrency(currentInvoice.Total) : null}
                 onSave={(newValue) => handleFieldUpdate('Total', newValue)}
                 type="text"
               />

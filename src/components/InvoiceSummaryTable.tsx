@@ -9,6 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { formatCurrency } from "@/lib/currencyFormatter";
 
 type AttachmentInfo = {
   id: number;
@@ -73,13 +74,13 @@ export const InvoiceSummaryTable = () => {
                 <TableCell>{invoice.Invoice_Date || 'N/A'}</TableCell>
                 <TableCell>{invoice.Invoicing_Comp_Name || 'N/A'}</TableCell>
                 <TableCell className="text-right">
-                  {invoice.Sub_Total ? `$${invoice.Sub_Total.toFixed(2)}` : 'N/A'}
+                  {invoice.Sub_Total ? formatCurrency(invoice.Sub_Total) : 'N/A'}
                 </TableCell>
                 <TableCell className="text-right">
-                  {invoice.GST_Total ? `$${invoice.GST_Total.toFixed(2)}` : 'N/A'}
+                  {invoice.GST_Total ? formatCurrency(invoice.GST_Total) : 'N/A'}
                 </TableCell>
                 <TableCell className="text-right">
-                  {invoice.Total ? `$${invoice.Total.toFixed(2)}` : 'N/A'}
+                  {invoice.Total ? formatCurrency(invoice.Total) : 'N/A'}
                 </TableCell>
                 <TableCell>{new Date(invoice.created_at).toLocaleDateString()}</TableCell>
               </TableRow>

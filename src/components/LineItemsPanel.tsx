@@ -5,6 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Loader2, AlertCircle } from "lucide-react";
 import { EditableLineItemCell } from "./invoice/EditableLineItemCell";
 import { useQueryClient } from "@tanstack/react-query";
+import { formatCurrency, parseCurrencyValue } from "@/lib/currencyFormatter";
 
 type LineItem = {
   id: number;
@@ -103,9 +104,12 @@ export const LineItemsPanel = ({ currentInvoiceId }: LineItemsPanelProps) => {
       // Convert string values to appropriate types
       let processedValue: any = newValue;
       
-      if (field === 'Rate' || field === 'Quantity' || field === 'Total') {
-        // Remove $ sign and convert to number
-        const numericValue = parseFloat(newValue.replace(/[$,]/g, ''));
+      if (field === 'Rate' || field === 'Total') {
+        // Use the currency parser for monetary fields
+        processedValue = parseCurrencyValue(newValue);
+      } else if (field === 'Quantity') {
+        // Convert to number for quantity
+        const numericValue = parseFloat(newValue.replace(/[,]/g, ''));
         processedValue = isNaN(numericValue) ? null : numericValue;
       }
 
@@ -286,14 +290,14 @@ export const LineItemsPanel = ({ currentInvoiceId }: LineItemsPanelProps) => {
                 </TableCell>
                 <TableCell className="text-right">
                   <EditableLineItemCell
-                    value={item.Rate ? `$${item.Rate.toFixed(2)}` : null}
+                    value={item.Rate ? formatCurrency(item.Rate) : null}
                     onSave={(newValue) => handleFieldUpdate(item.id, 'Rate', newValue)}
                     type="text"
                   />
                 </TableCell>
                 <TableCell className="text-right">
                   <EditableLineItemCell
-                    value={item.Total ? `$${item.Total.toFixed(2)}` : null}
+                    value={item.Total ? formatCurrency(item.Total) : null}
                     onSave={(newValue) => handleFieldUpdate(item.id, 'Total', newValue)}
                     type="text"
                   />
