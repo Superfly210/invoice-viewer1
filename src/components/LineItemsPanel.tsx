@@ -1,9 +1,10 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Loader2, AlertCircle } from "lucide-react";
+import { EditableLineItemCell } from "./invoice/EditableLineItemCell";
+import { useQueryClient } from "@tanstack/react-query";
 
 type LineItem = {
   id: number;
@@ -30,6 +31,7 @@ export const LineItemsPanel = ({ currentInvoiceId }: LineItemsPanelProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     console.log("LineItemsPanel - currentInvoiceId changed to:", currentInvoiceId);
@@ -94,9 +96,54 @@ export const LineItemsPanel = ({ currentInvoiceId }: LineItemsPanelProps) => {
     }
   };
 
+  const handleFieldUpdate = async (lineItemId: number, field: string, newValue: string) => {
+    try {
+      console.log(`Updating line item ${lineItemId} ${field} to:`, newValue);
+      
+      // Convert string values to appropriate types
+      let processedValue: any = newValue;
+      
+      if (field === 'Rate' || field === 'Quantity' || field === 'Total') {
+        // Remove $ sign and convert to number
+        const numericValue = parseFloat(newValue.replace(/[$,]/g, ''));
+        processedValue = isNaN(numericValue) ? null : numericValue;
+      }
+
+      const { error } = await supabase
+        .from('Line_Items')
+        .update({ [field]: processedValue })
+        .eq('id', lineItemId);
+
+      if (error) {
+        console.error('Error updating line item field:', error);
+        toast({
+          title: "Error",
+          description: `Failed to update ${field}`,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Success",
+          description: `${field} updated successfully`,
+        });
+        // Refresh the line items data
+        if (currentInvoiceId) {
+          fetchLineItems(currentInvoiceId);
+        }
+      }
+    } catch (error) {
+      console.error('Error updating line item field:', error);
+      toast({
+        title: "Error",
+        description: `Failed to update ${field}`,
+        variant: "destructive",
+      });
+    }
+  };
+
   // Display the value in a readable format
   const displayValue = (value: any, fieldName: string) => {
-    if (value === null || value === undefined) return 'N/A';
+    if (value === null || value === undefined) return '';
     
     // Format numeric values
     if (typeof value === 'number') {
@@ -187,16 +234,70 @@ export const LineItemsPanel = ({ currentInvoiceId }: LineItemsPanelProps) => {
           <TableBody>
             {lineItems.map((item) => (
               <TableRow key={item.id}>
-                <TableCell>{displayValue(item.Description, 'Description')}</TableCell>
-                <TableCell>{displayValue(item.Date_of_Work, 'Date_of_Work')}</TableCell>
-                <TableCell>{displayValue(item.Ticket_Work_Order, 'Ticket_Work_Order')}</TableCell>
-                <TableCell>{displayValue(item.AFE_number, 'AFE_number')}</TableCell>
-                <TableCell>{displayValue(item.Cost_Center, 'Cost_Center')}</TableCell>
-                <TableCell>{displayValue(item.Cost_Code, 'Cost_Code')}</TableCell>
-                <TableCell>{displayValue(item.Unit_of_Measure, 'Unit_of_Measure')}</TableCell>
-                <TableCell className="text-right">{displayValue(item.Quantity, 'Quantity')}</TableCell>
-                <TableCell className="text-right">{displayValue(item.Rate, 'Rate')}</TableCell>
-                <TableCell className="text-right">{displayValue(item.Total, 'Total')}</TableCell>
+                <TableCell>
+                  <EditableLineItemCell
+                    value={item.Description}
+                    onSave={(newValue) => handleFieldUpdate(item.id, 'Description', newValue)}
+                  />
+                </TableCell>
+                <TableCell>
+                  <EditableLineItemCell
+                    value={item.Date_of_Work}
+                    onSave={(newValue) => handleFieldUpdate(item.id, 'Date_of_Work', newValue)}
+                    type="date"
+                  />
+                </TableCell>
+                <TableCell>
+                  <EditableLineItemCell
+                    value={item.Ticket_Work_Order}
+                    onSave={(newValue) => handleFieldUpdate(item.id, 'Ticket_Work_Order', newValue)}
+                  />
+                </TableCell>
+                <TableCell>
+                  <EditableLineItemCell
+                    value={item.AFE_number}
+                    onSave={(newValue) => handleFieldUpdate(item.id, 'AFE_number', newValue)}
+                  />
+                </TableCell>
+                <TableCell>
+                  <EditableLineItemCell
+                    value={item.Cost_Center}
+                    onSave={(newValue) => handleFieldUpdate(item.id, 'Cost_Center', newValue)}
+                  />
+                </TableCell>
+                <TableCell>
+                  <EditableLineItemCell
+                    value={item.Cost_Code}
+                    onSave={(newValue) => handleFieldUpdate(item.id, 'Cost_Code', newValue)}
+                  />
+                </TableCell>
+                <TableCell>
+                  <EditableLineItemCell
+                    value={item.Unit_of_Measure}
+                    onSave={(newValue) => handleFieldUpdate(item.id, 'Unit_of_Measure', newValue)}
+                  />
+                </TableCell>
+                <TableCell className="text-right">
+                  <EditableLineItemCell
+                    value={item.Quantity}
+                    onSave={(newValue) => handleFieldUpdate(item.id, 'Quantity', newValue)}
+                    type="number"
+                  />
+                </TableCell>
+                <TableCell className="text-right">
+                  <EditableLineItemCell
+                    value={item.Rate ? `$${item.Rate.toFixed(2)}` : null}
+                    onSave={(newValue) => handleFieldUpdate(item.id, 'Rate', newValue)}
+                    type="text"
+                  />
+                </TableCell>
+                <TableCell className="text-right">
+                  <EditableLineItemCell
+                    value={item.Total ? `$${item.Total.toFixed(2)}` : null}
+                    onSave={(newValue) => handleFieldUpdate(item.id, 'Total', newValue)}
+                    type="text"
+                  />
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
