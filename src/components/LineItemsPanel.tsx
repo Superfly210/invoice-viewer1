@@ -205,7 +205,7 @@ export const LineItemsPanel = ({
               <TableHead>Cost Code</TableHead>
               <TableHead>Unit</TableHead>
               <TableHead className="">Quantity</TableHead>
-              <TableHead className="text-right">Rate</TableHead>
+              <TableHead className="">Rate</TableHead>
               <TableHead className="text-right">Total</TableHead>
             </TableRow>
           </TableHeader>
