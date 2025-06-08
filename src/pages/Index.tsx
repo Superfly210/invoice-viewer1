@@ -7,10 +7,11 @@ import { SummarySection } from "@/components/SummarySection";
 import AFE from "@/pages/AFE";
 import CostCenters from "@/pages/CostCenters";
 import Permissions from "@/pages/Permissions";
+import Vendor from "@/pages/Vendor";
 
 const Index = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [activeSection, setActiveSection] = useState("reviewer"); // "signer", "reviewer", "summary"
+  const [activeSection, setActiveSection] = useState("reviewer"); // "signer", "reviewer", "summary", "vendor"
 
   const handleSectionChange = (section: string) => {
     setActiveSection(section);
@@ -31,6 +32,7 @@ const Index = () => {
         {activeSection === "afe" && <AFE />}
         {activeSection === "cost-centers" && <CostCenters />}
         {activeSection === "permissions" && <Permissions />}
+        {activeSection === "vendor" && <Vendor />}
       </main>
     </div>
   );

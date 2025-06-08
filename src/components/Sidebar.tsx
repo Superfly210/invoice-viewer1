@@ -1,9 +1,8 @@
-
 import { useState } from "react";
 import { 
   FileCheck, FileText, FilePieChart, ChevronLeft, ChevronRight,
   UserCog, Settings, Shield, PauseCircle, FileSpreadsheet, Building, Table as TableIcon,
-  Sun, Moon // Import the correct icons from lucide-react
+  Sun, Moon, Store // Import the correct icons from lucide-react
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "./ThemeToggle";
@@ -36,6 +35,7 @@ export const Sidebar = ({
     { id: "reviewer", label: "Invoice Reviewer", icon: FileText, active: activeSection === "reviewer" },
     { id: "summary", label: "Invoice Summary", icon: FilePieChart, active: activeSection === "summary" },
     { id: "afe", label: "AFE", icon: FileSpreadsheet, active: activeSection === "afe" },
+    { id: "vendor", label: "Vendor", icon: Store, active: activeSection === "vendor" },
   ];
 
   const adminMenuItems = [
