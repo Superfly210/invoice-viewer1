@@ -1,3 +1,4 @@
+
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { CompanyDetails } from "./CompanyDetails";
 import { EditableTableCell } from "./EditableTableCell";
@@ -44,8 +45,9 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
           title: "Success",
           description: `${field} updated successfully`,
         });
-        // Refresh the data
+        // Refresh the data with more specific query invalidation
         queryClient.invalidateQueries({ queryKey: ['attachment-info'] });
+        queryClient.invalidateQueries({ queryKey: ['invoice-data'] });
       }
     } catch (error) {
       console.error('Error updating field:', error);
