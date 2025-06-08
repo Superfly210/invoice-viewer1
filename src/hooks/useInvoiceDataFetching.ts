@@ -20,6 +20,8 @@ export type AttachmentInfo = {
   created_at: string;
   Google_Drive_URL: string | null;
   Email_Info_ID: number | null;
+  "Responsible User": string | null;
+  Status: string | null;
 }
 
 export const useInvoiceDataFetching = (currentInvoiceIndex: number) => {
@@ -58,7 +60,9 @@ export const useInvoiceDataFetching = (currentInvoiceIndex: number) => {
         Total: item.Total,
         created_at: item.created_at,
         Google_Drive_URL: item.Google_Drive_URL ? String(item.Google_Drive_URL) : null,
-        Email_Info_ID: item.Email_Info_ID
+        Email_Info_ID: item.Email_Info_ID,
+        "Responsible User": item["Responsible User"],
+        Status: item.Status
       })) || [];
 
       setInvoices(processedData as AttachmentInfo[]);

@@ -77,6 +77,8 @@ export type Database = {
           Invoicing_Comp_Street: string | null
           Number_Of_Pages: number | null
           Page_Field_Ticket_Starts_On: number | null
+          "Responsible User": string | null
+          Status: string | null
           Sub_Total: number | null
           Total: number | null
           Type_of_Document: string | null
@@ -105,6 +107,8 @@ export type Database = {
           Invoicing_Comp_Street?: string | null
           Number_Of_Pages?: number | null
           Page_Field_Ticket_Starts_On?: number | null
+          "Responsible User"?: string | null
+          Status?: string | null
           Sub_Total?: number | null
           Total?: number | null
           Type_of_Document?: string | null
@@ -133,6 +137,8 @@ export type Database = {
           Invoicing_Comp_Street?: string | null
           Number_Of_Pages?: number | null
           Page_Field_Ticket_Starts_On?: number | null
+          "Responsible User"?: string | null
+          Status?: string | null
           Sub_Total?: number | null
           Total?: number | null
           Type_of_Document?: string | null
