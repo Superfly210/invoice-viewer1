@@ -72,6 +72,15 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
             <TableCell className="text-left">{new Date(currentInvoice.created_at).toLocaleString()}</TableCell>
           </TableRow>
           <TableRow>
+            <TableCell className="font-medium w-1/3 text-left">Email ID</TableCell>
+            <TableCell className="text-left">
+              <EditableTableCell
+                value={currentInvoice.Email_ID}
+                onSave={(newValue) => handleFieldUpdate('Email_ID', newValue)}
+              />
+            </TableCell>
+          </TableRow>
+          <TableRow>
             <TableCell className="font-medium w-1/3 text-left">Responsible User</TableCell>
             <TableCell className="text-left">
               <EditableTableCell
