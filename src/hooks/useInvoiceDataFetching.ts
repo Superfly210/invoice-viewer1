@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -26,17 +26,12 @@ export type AttachmentInfo = {
 }
 
 export const useInvoiceDataFetching = (currentInvoiceIndex: number) => {
-  const [invoices, setInvoices] = useState<AttachmentInfo[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    fetchInvoiceData();
-  }, []);
-
-  const fetchInvoiceData = async () => {
-    try {
-      setIsLoading(true);
+  const { data: invoices = [], isLoading } = useQuery({
+    queryKey: ['attachment-info'],
+    queryFn: async () => {
       const { data, error } = await supabase
         .from('Attachment_Info')
         .select('*')
@@ -67,19 +62,11 @@ export const useInvoiceDataFetching = (currentInvoiceIndex: number) => {
         Status: item.Status
       })) || [];
 
-      setInvoices(processedData as AttachmentInfo[]);
       console.log("Fetched invoices:", processedData.length);
-    } catch (error) {
-      console.error('Error fetching invoice data:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load invoice data",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      return processedData as AttachmentInfo[];
+    },
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
 
   const getCurrentGoogleDriveUrl = (): string | null => {
     if (!invoices.length || currentInvoiceIndex >= invoices.length) return null;

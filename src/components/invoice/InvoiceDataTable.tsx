@@ -20,7 +20,18 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
     try {
       console.log(`Updating ${field} to:`, newValue);
       
-      // Convert string values to appropriate types
+      // Optimistic update - immediately update the cache
+      queryClient.setQueryData(['attachment-info'], (oldData: AttachmentInfo[] | undefined) => {
+        if (!oldData) return oldData;
+        
+        return oldData.map(invoice => 
+          invoice.id === currentInvoice.id 
+            ? { ...invoice, [field]: newValue }
+            : invoice
+        );
+      });
+      
+      // Convert string values to appropriate types for database
       let processedValue: any = newValue;
       
       if (field === 'Sub_Total' || field === 'GST_Total' || field === 'Total') {
@@ -35,6 +46,8 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
 
       if (error) {
         console.error('Error updating field:', error);
+        // Revert optimistic update on error
+        queryClient.invalidateQueries({ queryKey: ['attachment-info'] });
         toast({
           title: "Error",
           description: `Failed to update ${field}`,
@@ -45,12 +58,14 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
           title: "Success",
           description: `${field} updated successfully`,
         });
-        // Refresh the data with more specific query invalidation
+        // Refresh to ensure data consistency
         queryClient.invalidateQueries({ queryKey: ['attachment-info'] });
-        queryClient.invalidateQueries({ queryKey: ['invoice-data'] });
+        queryClient.invalidateQueries({ queryKey: ['attachment-info-summary'] });
       }
     } catch (error) {
       console.error('Error updating field:', error);
+      // Revert optimistic update on error
+      queryClient.invalidateQueries({ queryKey: ['attachment-info'] });
       toast({
         title: "Error",
         description: `Failed to update ${field}`,
