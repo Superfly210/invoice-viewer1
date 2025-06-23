@@ -2,12 +2,16 @@ import { useState } from "react";
 import { 
   FileCheck, FileText, FilePieChart, ChevronLeft, ChevronRight,
   UserCog, Settings, Shield, PauseCircle, FileSpreadsheet, Building, Table as TableIcon,
-  Sun, Moon, Store // Import the correct icons from lucide-react
+  Sun, Moon, Store, LogOut // Import LogOut icon
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "./ThemeToggle";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "./ui/collapsible";
 import { useTheme } from "./ThemeProvider";
+import { useAuth } from "./AuthProvider";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 type SidebarProps = {
   collapsed: boolean;
@@ -23,9 +27,32 @@ export const Sidebar = ({
   onSectionChange 
 }: SidebarProps) => {
   const { theme, toggleTheme } = useTheme();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
   
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
+  };
+
+  const handleLogout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
+      toast({
+        title: "Logged out successfully",
+        description: "You have been signed out of your account.",
+      });
+      
+      navigate("/auth");
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to log out",
+      });
+    }
   };
 
   const [adminOpen, setAdminOpen] = useState(false);
@@ -149,6 +176,21 @@ export const Sidebar = ({
             <UserCog className="h-5 w-5 text-slate-500 dark:text-slate-400" />
           </button>
         )}
+
+        {/* Logout button */}
+        <div className="border-t border-slate-200 dark:border-slate-700">
+          <button
+            onClick={handleLogout}
+            className={cn(
+              "w-full flex items-center px-4 py-3 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors",
+              collapsed ? "justify-center" : "justify-start"
+            )}
+            title={collapsed ? "Logout" : undefined}
+          >
+            <LogOut className="h-5 w-5 text-slate-500 dark:text-slate-400" />
+            {!collapsed && <span className="ml-3">Logout</span>}
+          </button>
+        </div>
 
         <div className={cn(
           "p-4 flex justify-center border-t border-slate-200 dark:border-slate-700",
