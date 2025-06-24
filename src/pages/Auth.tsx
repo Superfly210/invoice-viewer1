@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Auth() {
   const [email, setEmail] = useState("");
@@ -15,6 +15,7 @@ export default function Auth() {
   const [loading, setLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
+  const [signUpEmailSent, setSignUpEmailSent] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -34,10 +35,7 @@ export default function Auth() {
           }
         });
         if (error) throw error;
-        toast({
-          title: "Success!",
-          description: "Please check your email to verify your account.",
-        });
+        setSignUpEmailSent(true);
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email,
@@ -122,6 +120,12 @@ export default function Auth() {
                 {loading ? "Sending..." : "Send Reset Email"}
               </Button>
             </form>
+          ) : isSignUp && signUpEmailSent ? (
+            <div className="text-center space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Please check your email to verify your account.
+              </p>
+            </div>
           ) : (
             <form onSubmit={handleAuth} className="space-y-4">
               {isSignUp && (
@@ -178,7 +182,10 @@ export default function Auth() {
             {!isForgotPassword && (
               <>
                 <button
-                  onClick={() => setIsSignUp(!isSignUp)}
+                  onClick={() => {
+                    setIsSignUp(!isSignUp);
+                    setSignUpEmailSent(false);
+                  }}
                   className="text-sm text-muted-foreground hover:text-primary block w-full"
                 >
                   {isSignUp
