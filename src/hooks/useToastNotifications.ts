@@ -1,38 +1,66 @@
 
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
 
-export const useToastNotifications = () => {
+export const useToastNotifications = (currentInvoiceId?: number | null) => {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const updateInvoiceStatus = async (status: string, responsibleUser?: string) => {
+    if (!currentInvoiceId) {
+      toast({
+        title: "Error",
+        description: "No invoice selected",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const updateData: any = { Status: status };
+      if (responsibleUser) {
+        updateData["Responsible User"] = responsibleUser;
+      }
+
+      const { error } = await supabase
+        .from('Attachment_Info')
+        .update(updateData)
+        .eq('id', currentInvoiceId);
+
+      if (error) throw error;
+
+      // Invalidate queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ['attachment-info'] });
+      
+      toast({
+        title: "Success",
+        description: `Invoice ${status.toLowerCase()}${responsibleUser ? ` and forwarded to ${responsibleUser}` : ''}`,
+      });
+    } catch (error) {
+      console.error('Error updating invoice:', error);
+      toast({
+        title: "Error",
+        description: `Failed to update invoice`,
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleApprove = () => {
-    toast({
-      title: "Invoice Approved",
-      description: "The invoice has been successfully approved.",
-      variant: "default",
-    });
+    updateInvoiceStatus("Approved");
   };
 
   const handleDeny = () => {
-    toast({
-      title: "Invoice Denied",
-      description: "The invoice has been denied.",
-      variant: "destructive",
-    });
+    updateInvoiceStatus("Denied");
   };
 
   const handleQuarantine = () => {
-    toast({
-      title: "Invoice Quarantined",
-      description: "The invoice has been placed in quarantine for further review.",
-      variant: "default",
-    });
+    updateInvoiceStatus("Hold");
   };
 
-  const handleForward = () => {
-    toast({
-      title: "Invoice Forwarded",
-      description: "The invoice has been forwarded for review.",
-    });
+  const handleForward = (userId: string, userName: string) => {
+    updateInvoiceStatus("Forwarded", userName);
   };
 
   return {

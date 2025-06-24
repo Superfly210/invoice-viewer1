@@ -12,6 +12,7 @@ import { InvoiceDataPanel } from "@/components/invoice/InvoiceDataPanel";
 import { DocumentViewer } from "@/components/document/DocumentViewer";
 import { useInvoiceData } from "@/hooks/useInvoiceData";
 import { useToastNotifications } from "@/hooks/useToastNotifications";
+import { useInvoiceDataFetching } from "@/hooks/useInvoiceDataFetching";
 
 interface InvoiceReviewerProps {
   onSectionChange?: (section: string) => void;
@@ -28,13 +29,15 @@ export const InvoiceReviewer = ({ onSectionChange }: InvoiceReviewerProps) => {
     currentInvoiceId, 
     currentEmailInfoId 
   } = useInvoiceData(currentInvoiceIndex);
+
+  const { currentInvoice } = useInvoiceDataFetching(currentInvoiceIndex);
   
   const {
     handleApprove,
     handleDeny,
     handleQuarantine,
     handleForward
-  } = useToastNotifications();
+  } = useToastNotifications(currentInvoiceId);
 
   const handlePrevious = () => {
     console.log("Previous clicked, current index:", currentInvoiceIndex);

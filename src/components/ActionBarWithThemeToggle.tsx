@@ -5,15 +5,24 @@ import {
   CornerUpRight, 
   ChevronLeft,
   ChevronRight,
-  PauseCircle
+  PauseCircle,
+  ChevronDown
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 type ActionBarProps = {
   onApprove: () => void;
   onDeny: () => void;
   onQuarantine: () => void;
-  onForward: () => void;
+  onForward: (userId: string, userName: string) => void;
   currentInvoice: number;
   totalInvoices: number;
   onPrevious: () => void;
@@ -30,6 +39,19 @@ export const ActionBarWithThemeToggle = ({
   onPrevious,
   onNext,
 }: ActionBarProps) => {
+  const { data: profiles = [] } = useQuery({
+    queryKey: ['profiles'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, full_name, username')
+        .order('full_name');
+      
+      if (error) throw error;
+      return data;
+    },
+  });
+
   return (
     <div className="flex justify-between items-center p-4 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
       <div className="flex items-center space-x-2">
@@ -71,12 +93,25 @@ export const ActionBarWithThemeToggle = ({
         >
           <PauseCircle className="h-4 w-4 mr-2" /> Hold
         </Button>
-        <Button 
-          onClick={onForward}
-          className="min-w-[100px]"
-        >
-          <CornerUpRight className="h-4 w-4 mr-2" /> Forward
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button className="min-w-[100px]">
+              <CornerUpRight className="h-4 w-4 mr-2" /> 
+              Forward
+              <ChevronDown className="h-4 w-4 ml-2" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            {profiles.map((profile) => (
+              <DropdownMenuItem
+                key={profile.id}
+                onClick={() => onForward(profile.id, profile.full_name || profile.username || 'Unknown User')}
+              >
+                {profile.full_name || profile.username || 'Unknown User'}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   );
