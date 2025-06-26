@@ -12,6 +12,7 @@ import { useAuth } from "./AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
 
 type SidebarProps = {
   collapsed: boolean;
@@ -30,6 +31,23 @@ export const Sidebar = ({
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  
+  // Get user profile information
+  const { data: userProfile } = useQuery({
+    queryKey: ['user-profile', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name, username')
+        .eq('id', user.id)
+        .single();
+      
+      return profile;
+    },
+    enabled: !!user?.id,
+  });
   
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
@@ -56,6 +74,8 @@ export const Sidebar = ({
   };
 
   const [adminOpen, setAdminOpen] = useState(false);
+
+  const displayName = userProfile?.full_name || userProfile?.username || user?.email || 'User';
 
   const menuItems = [
     { id: "signer", label: "Invoice Signer", icon: FileCheck, active: activeSection === "signer" },
@@ -177,8 +197,13 @@ export const Sidebar = ({
           </button>
         )}
 
-        {/* Logout button */}
+        {/* User info and logout section */}
         <div className="border-t border-slate-200 dark:border-slate-700">
+          {!collapsed && (
+            <div className="px-4 py-2 text-sm text-slate-600 dark:text-slate-300 border-b border-slate-200 dark:border-slate-700">
+              <div className="truncate">{displayName}</div>
+            </div>
+          )}
           <button
             onClick={handleLogout}
             className={cn(
@@ -192,6 +217,7 @@ export const Sidebar = ({
           </button>
         </div>
 
+        {/* Theme toggle section */}
         <div className={cn(
           "p-4 flex justify-center border-t border-slate-200 dark:border-slate-700",
           collapsed ? "px-2" : "px-4"

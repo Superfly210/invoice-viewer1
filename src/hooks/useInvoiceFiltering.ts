@@ -75,19 +75,17 @@ export const useInvoiceFiltering = () => {
 
     // Filter by status
     if (statusFilter !== "all") {
-      const statusMap = {
-        pending: null, // or empty status means pending
-        approved: "Approved",
-        hold: "Hold"
-      };
-      
       if (statusFilter === "pending") {
         filtered = filtered.filter(invoice => 
-          !invoice.Status || invoice.Status === "Pending Approval"
+          invoice.Status === "Pending Approval" || !invoice.Status
         );
-      } else {
+      } else if (statusFilter === "approved") {
         filtered = filtered.filter(invoice => 
-          invoice.Status === statusMap[statusFilter]
+          invoice.Status === "Approved"
+        );
+      } else if (statusFilter === "hold") {
+        filtered = filtered.filter(invoice => 
+          invoice.Status === "On Hold"
         );
       }
     }

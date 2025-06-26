@@ -86,7 +86,7 @@ export const useToastNotifications = (currentInvoiceId?: number | null) => {
   };
 
   const handleQuarantine = () => {
-    updateInvoiceStatus("Hold");
+    updateInvoiceStatus("On Hold");
   };
 
   const handleForward = (userId: string, userName: string) => {
