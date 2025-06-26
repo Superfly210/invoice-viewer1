@@ -4,7 +4,7 @@ import { InvoiceData } from "@/components/InvoiceData";
 import { MetadataPanel } from "@/components/MetadataPanel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TableIcon, FileTextIcon } from "lucide-react";
-import { useInvoiceDataFetching } from "@/hooks/useInvoiceDataFetching";
+import { useInvoiceFiltering } from "@/hooks/useInvoiceFiltering";
 
 interface InvoiceDataPanelProps {
   currentInvoiceIndex: number;
@@ -13,7 +13,9 @@ interface InvoiceDataPanelProps {
 
 export const InvoiceDataPanel = ({ currentInvoiceIndex, onSectionChange }: InvoiceDataPanelProps) => {
   const [activeTab, setActiveTab] = useState("data");
-  const { currentInvoice, isLoading } = useInvoiceDataFetching(currentInvoiceIndex);
+  const { filteredInvoices, isLoading } = useInvoiceFiltering();
+  
+  const currentInvoice = filteredInvoices[currentInvoiceIndex] || null;
   
   const handleTabChange = (value: string) => {
     setActiveTab(value);

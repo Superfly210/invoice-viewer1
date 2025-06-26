@@ -6,7 +6,8 @@ import {
   ChevronLeft,
   ChevronRight,
   PauseCircle,
-  ChevronDown
+  ChevronDown,
+  Filter
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,6 +16,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -27,6 +35,10 @@ type ActionBarProps = {
   totalInvoices: number;
   onPrevious: () => void;
   onNext: () => void;
+  userFilter: "all" | "mine";
+  onUserFilterChange: (filter: "all" | "mine") => void;
+  statusFilter: "all" | "pending" | "approved" | "hold";
+  onStatusFilterChange: (filter: "all" | "pending" | "approved" | "hold") => void;
 };
 
 export const ActionBarWithThemeToggle = ({
@@ -38,6 +50,10 @@ export const ActionBarWithThemeToggle = ({
   totalInvoices,
   onPrevious,
   onNext,
+  userFilter,
+  onUserFilterChange,
+  statusFilter,
+  onStatusFilterChange,
 }: ActionBarProps) => {
   const { data: profiles = [] } = useQuery({
     queryKey: ['profiles'],
@@ -54,24 +70,50 @@ export const ActionBarWithThemeToggle = ({
 
   return (
     <div className="flex justify-between items-center p-4 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
-      <div className="flex items-center space-x-2">
-        <Button 
-          onClick={onPrevious}
-          variant="outline"
-          disabled={currentInvoice <= 1}
-        >
-          <ChevronLeft className="h-4 w-4" />
-        </Button>
-        <div className="text-sm font-medium">
-          Invoice {currentInvoice} of {totalInvoices}
+      <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-2">
+          <Button 
+            onClick={onPrevious}
+            variant="outline"
+            disabled={currentInvoice <= 1}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <div className="text-sm font-medium">
+            Invoice {currentInvoice} of {totalInvoices}
+          </div>
+          <Button 
+            onClick={onNext}
+            variant="outline"
+            disabled={currentInvoice >= totalInvoices}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
         </div>
-        <Button 
-          onClick={onNext}
-          variant="outline"
-          disabled={currentInvoice >= totalInvoices}
-        >
-          <ChevronRight className="h-4 w-4" />
-        </Button>
+
+        <div className="flex items-center space-x-2">
+          <Select value={userFilter} onValueChange={(value: "all" | "mine") => onUserFilterChange(value)}>
+            <SelectTrigger className="w-32">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Invoices</SelectItem>
+              <SelectItem value="mine">My Invoices</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={statusFilter} onValueChange={(value: "all" | "pending" | "approved" | "hold") => onStatusFilterChange(value)}>
+            <SelectTrigger className="w-40">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="pending">Pending Approval</SelectItem>
+              <SelectItem value="approved">Approved</SelectItem>
+              <SelectItem value="hold">On Hold</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
       
       <div className="flex items-center space-x-3">

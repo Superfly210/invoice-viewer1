@@ -10,27 +10,32 @@ import {
 import { PanelBottomIcon } from "lucide-react";
 import { InvoiceDataPanel } from "@/components/invoice/InvoiceDataPanel";
 import { DocumentViewer } from "@/components/document/DocumentViewer";
-import { useInvoiceData } from "@/hooks/useInvoiceData";
 import { useToastNotifications } from "@/hooks/useToastNotifications";
-import { useInvoiceDataFetching } from "@/hooks/useInvoiceDataFetching";
+import { useInvoiceFiltering } from "@/hooks/useInvoiceFiltering";
 
 interface InvoiceReviewerProps {
   onSectionChange?: (section: string) => void;
 }
 
 export const InvoiceReviewer = ({ onSectionChange }: InvoiceReviewerProps) => {
-  const [currentInvoiceIndex, setCurrentInvoiceIndex] = useState(0);
+  const [currentFilteredIndex, setCurrentFilteredIndex] = useState(0);
   const [pdfCurrentPage, setPdfCurrentPage] = useState(1);
   const [pdfTotalPages, setPdfTotalPages] = useState(3);
   
-  const { 
-    totalInvoices, 
-    currentPdfUrl, 
-    currentInvoiceId, 
-    currentEmailInfoId 
-  } = useInvoiceData(currentInvoiceIndex);
+  const {
+    filteredInvoices,
+    isLoading,
+    userFilter,
+    setUserFilter,
+    statusFilter,
+    setStatusFilter,
+    totalFilteredCount,
+  } = useInvoiceFiltering();
 
-  const { currentInvoice } = useInvoiceDataFetching(currentInvoiceIndex);
+  const currentInvoice = filteredInvoices[currentFilteredIndex] || null;
+  const currentInvoiceId = currentInvoice?.id || null;
+  const currentEmailInfoId = currentInvoice?.Email_Info_ID || null;
+  const currentPdfUrl = currentInvoice?.Google_Drive_URL || null;
   
   const {
     handleApprove,
@@ -40,19 +45,19 @@ export const InvoiceReviewer = ({ onSectionChange }: InvoiceReviewerProps) => {
   } = useToastNotifications(currentInvoiceId);
 
   const handlePrevious = () => {
-    console.log("Previous clicked, current index:", currentInvoiceIndex);
-    const newIndex = Math.max(0, currentInvoiceIndex - 1);
-    setCurrentInvoiceIndex(newIndex);
-    setPdfCurrentPage(1); // Reset to first page when changing invoices
+    console.log("Previous clicked, current index:", currentFilteredIndex);
+    const newIndex = Math.max(0, currentFilteredIndex - 1);
+    setCurrentFilteredIndex(newIndex);
+    setPdfCurrentPage(1);
     console.log("New index:", newIndex);
   };
 
   const handleNext = () => {
-    console.log("Next clicked, current index:", currentInvoiceIndex, "total:", totalInvoices);
-    if (currentInvoiceIndex < totalInvoices - 1) {
-      const newIndex = currentInvoiceIndex + 1;
-      setCurrentInvoiceIndex(newIndex);
-      setPdfCurrentPage(1); // Reset to first page when changing invoices
+    console.log("Next clicked, current index:", currentFilteredIndex, "total:", totalFilteredCount);
+    if (currentFilteredIndex < totalFilteredCount - 1) {
+      const newIndex = currentFilteredIndex + 1;
+      setCurrentFilteredIndex(newIndex);
+      setPdfCurrentPage(1);
       console.log("New index:", newIndex);
     }
   };
@@ -63,7 +68,17 @@ export const InvoiceReviewer = ({ onSectionChange }: InvoiceReviewerProps) => {
     setPdfTotalPages(totalPages);
   };
 
-  console.log("InvoiceReviewer rendering with index:", currentInvoiceIndex);
+  const handleUserFilterChange = (filter: "all" | "mine") => {
+    setUserFilter(filter);
+    setCurrentFilteredIndex(0); // Reset to first invoice when filter changes
+  };
+
+  const handleStatusFilterChange = (filter: "all" | "pending" | "approved" | "hold") => {
+    setStatusFilter(filter);
+    setCurrentFilteredIndex(0); // Reset to first invoice when filter changes
+  };
+
+  console.log("InvoiceReviewer rendering with index:", currentFilteredIndex);
 
   return (
     <>
@@ -72,17 +87,21 @@ export const InvoiceReviewer = ({ onSectionChange }: InvoiceReviewerProps) => {
         onDeny={handleDeny}
         onQuarantine={handleQuarantine}
         onForward={handleForward}
-        currentInvoice={currentInvoiceIndex + 1}
-        totalInvoices={totalInvoices}
+        currentInvoice={currentFilteredIndex + 1}
+        totalInvoices={totalFilteredCount}
         onPrevious={handlePrevious}
         onNext={handleNext}
+        userFilter={userFilter}
+        onUserFilterChange={handleUserFilterChange}
+        statusFilter={statusFilter}
+        onStatusFilterChange={handleStatusFilterChange}
       />
       <ResizablePanelGroup direction="vertical" className="flex-1">
         <ResizablePanel defaultSize={70} minSize={30}>
           <ResizablePanelGroup direction="horizontal" className="h-full">
             <ResizablePanel defaultSize={50} minSize={30}>
               <InvoiceDataPanel 
-                currentInvoiceIndex={currentInvoiceIndex}
+                currentInvoiceIndex={currentFilteredIndex}
                 onSectionChange={onSectionChange} 
               />
             </ResizablePanel>

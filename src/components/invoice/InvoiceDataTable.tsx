@@ -97,21 +97,11 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
           </TableRow>
           <TableRow>
             <TableCell className="font-medium w-1/3 text-left">Responsible User</TableCell>
-            <TableCell className="text-left">
-              <EditableTableCell
-                value={currentInvoice["Responsible User"]}
-                onSave={(newValue) => handleFieldUpdate('Responsible User', newValue)}
-              />
-            </TableCell>
+            <TableCell className="text-left">{currentInvoice["Responsible User"] || 'N/A'}</TableCell>
           </TableRow>
           <TableRow>
             <TableCell className="font-medium w-1/3 text-left">Status</TableCell>
-            <TableCell className="text-left">
-              <EditableTableCell
-                value={currentInvoice.Status}
-                onSave={(newValue) => handleFieldUpdate('Status', newValue)}
-              />
-            </TableCell>
+            <TableCell className="text-left">{currentInvoice.Status || 'N/A'}</TableCell>
           </TableRow>
           <TableRow>
             <TableCell className="font-medium w-1/3 text-left">Invoice Number</TableCell>
