@@ -4,18 +4,16 @@ import { InvoiceData } from "@/components/InvoiceData";
 import { MetadataPanel } from "@/components/MetadataPanel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TableIcon, FileTextIcon } from "lucide-react";
-import { useInvoiceFiltering } from "@/hooks/useInvoiceFiltering";
+import { AttachmentInfo } from "@/hooks/useInvoiceDataFetching";
 
 interface InvoiceDataPanelProps {
-  currentInvoiceIndex: number;
+  currentInvoice: AttachmentInfo | null;
+  isLoading: boolean;
   onSectionChange?: (section: string) => void;
 }
 
-export const InvoiceDataPanel = ({ currentInvoiceIndex, onSectionChange }: InvoiceDataPanelProps) => {
+export const InvoiceDataPanel = ({ currentInvoice, isLoading, onSectionChange }: InvoiceDataPanelProps) => {
   const [activeTab, setActiveTab] = useState("data");
-  const { filteredInvoices, isLoading } = useInvoiceFiltering();
-  
-  const currentInvoice = filteredInvoices[currentInvoiceIndex] || null;
   
   const handleTabChange = (value: string) => {
     setActiveTab(value);
@@ -24,7 +22,7 @@ export const InvoiceDataPanel = ({ currentInvoiceIndex, onSectionChange }: Invoi
     }
   };
 
-  console.log("InvoiceDataPanel - currentInvoiceIndex:", currentInvoiceIndex, "currentInvoice:", currentInvoice);
+  console.log("InvoiceDataPanel - currentInvoice:", currentInvoice);
 
   return (
     <div className="h-full overflow-auto p-4">

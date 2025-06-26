@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { ActionBarWithThemeToggle } from "@/components/ActionBarWithThemeToggle";
 import { LineItemsPanel } from "@/components/LineItemsPanel";
@@ -101,7 +100,8 @@ export const InvoiceReviewer = ({ onSectionChange }: InvoiceReviewerProps) => {
           <ResizablePanelGroup direction="horizontal" className="h-full">
             <ResizablePanel defaultSize={50} minSize={30}>
               <InvoiceDataPanel 
-                currentInvoiceIndex={currentFilteredIndex}
+                currentInvoice={currentInvoice}
+                isLoading={isLoading}
                 onSectionChange={onSectionChange} 
               />
             </ResizablePanel>
