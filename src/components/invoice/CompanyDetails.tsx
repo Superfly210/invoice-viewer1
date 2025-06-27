@@ -86,7 +86,7 @@ export const CompanyDetails = ({
                   </TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell className="font-medium w-1/3 text-left">Company City</TableCell>
+                  <TableCell className="font-medium w-48 text-left">Company City</TableCell>
                   <TableCell className="text-left">
                     <EditableTableCell value={currentInvoice.Invoicing_Comp_City} onSave={newValue => handleFieldUpdate('Invoicing_Comp_City', newValue)} />
                   </TableCell>
@@ -98,25 +98,25 @@ export const CompanyDetails = ({
                   </TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell className="font-medium w-1/3 text-left">Postal Code</TableCell>
+                  <TableCell className="font-medium w-48 text-left">Postal Code</TableCell>
                   <TableCell className="text-left">
                     <EditableTableCell value={currentInvoice.Invoicing_Comp_Postal_Code} onSave={newValue => handleFieldUpdate('Invoicing_Comp_Postal_Code', newValue)} />
                   </TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell className="font-medium w-1/3 text-left">GST Number</TableCell>
+                  <TableCell className="font-medium w-48 text-left">GST Number</TableCell>
                   <TableCell className="text-left">
                     <EditableTableCell value={cleanValue(currentInvoice.GST_Number)} onSave={newValue => handleFieldUpdate('GST_Number', newValue)} />
                   </TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell className="font-medium w-1/3 text-left">WCB Number</TableCell>
+                  <TableCell className="font-medium w-48 text-left">WCB Number</TableCell>
                   <TableCell className="text-left">
                     <EditableTableCell value={cleanValue(currentInvoice.WCB_Number)} onSave={newValue => handleFieldUpdate('WCB_Number', newValue)} />
                   </TableCell>
                 </TableRow>
                 {currentInvoice.Google_Drive_URL && <TableRow>
-                    <TableCell className="font-medium w-1/3 text-left">Google Drive URL</TableCell>
+                    <TableCell className="font-medium w-48 text-left">Google Drive URL</TableCell>
                     <TableCell className="text-left">
                       <EditableTableCell value={currentInvoice.Google_Drive_URL} onSave={newValue => handleFieldUpdate('Google_Drive_URL', newValue)} />
                     </TableCell>
