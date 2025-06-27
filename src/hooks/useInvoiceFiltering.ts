@@ -5,8 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { AttachmentInfo } from "./useInvoiceDataFetching";
 
 export const useInvoiceFiltering = () => {
-  const [userFilter, setUserFilter] = useState<"all" | "mine">("all");
-  const [statusFilter, setStatusFilter] = useState<"all" | "pending" | "approved" | "hold">("all");
+  const [userFilter, setUserFilter] = useState<"all" | "mine">("mine");
+  const [statusFilter, setStatusFilter] = useState<"all" | "pending" | "approved" | "hold">("pending");
 
   // Get current user
   const { data: user } = useQuery({

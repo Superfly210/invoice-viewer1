@@ -88,11 +88,23 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
           </TableRow>
           <TableRow>
             <TableCell className="font-medium w-1/3 text-left">Email ID</TableCell>
+            <TableCell className="text-left">{currentInvoice.Email_ID || 'N/A'}</TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell className="font-medium w-1/3 text-left">Google Drive URL</TableCell>
             <TableCell className="text-left">
-              <EditableTableCell
-                value={currentInvoice.Email_ID}
-                onSave={(newValue) => handleFieldUpdate('Email_ID', newValue)}
-              />
+              {currentInvoice.Google_Drive_URL ? (
+                <a 
+                  href={currentInvoice.Google_Drive_URL} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:text-blue-800 underline"
+                >
+                  View Document
+                </a>
+              ) : (
+                'N/A'
+              )}
             </TableCell>
           </TableRow>
           <TableRow>

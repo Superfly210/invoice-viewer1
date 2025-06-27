@@ -1,11 +1,25 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Loader2, AlertCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Loader2, AlertCircle, Plus, X } from "lucide-react";
 import { EditableLineItemCell } from "./invoice/EditableLineItemCell";
 import { useQueryClient } from "@tanstack/react-query";
 import { formatCurrency, parseCurrencyValue } from "@/lib/currencyFormatter";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+
 type LineItem = {
   id: number;
   invoice_id: number;
@@ -21,9 +35,11 @@ type LineItem = {
   Ticket_Work_Order: string | null;
   created_at: string;
 };
+
 interface LineItemsPanelProps {
   currentInvoiceId: number | null;
 }
+
 export const LineItemsPanel = ({
   currentInvoiceId
 }: LineItemsPanelProps) => {
@@ -34,6 +50,7 @@ export const LineItemsPanel = ({
     toast
   } = useToast();
   const queryClient = useQueryClient();
+  
   useEffect(() => {
     console.log("LineItemsPanel - currentInvoiceId changed to:", currentInvoiceId);
     setError(null);
@@ -44,6 +61,7 @@ export const LineItemsPanel = ({
       setIsLoading(false);
     }
   }, [currentInvoiceId]);
+  
   const fetchLineItems = async (invoiceId: number) => {
     try {
       setIsLoading(true);
@@ -88,6 +106,7 @@ export const LineItemsPanel = ({
       setIsLoading(false);
     }
   };
+  
   const handleFieldUpdate = async (lineItemId: number, field: string, newValue: string) => {
     try {
       console.log(`Updating line item ${lineItemId} ${field} to:`, newValue);
@@ -134,6 +153,85 @@ export const LineItemsPanel = ({
     }
   };
 
+  const handleAddLineItem = async () => {
+    if (!currentInvoiceId) return;
+
+    try {
+      const { error } = await supabase
+        .from('Line_Items')
+        .insert({
+          invoice_id: currentInvoiceId,
+          Description: '',
+          Unit_of_Measure: '',
+          AFE_number: '',
+          Cost_Center: '',
+          Cost_Code: '',
+          Rate: null,
+          Quantity: null,
+          Total: null,
+          Date_of_Work: '',
+          Ticket_Work_Order: ''
+        });
+
+      if (error) {
+        console.error('Error adding line item:', error);
+        toast({
+          title: "Error",
+          description: "Failed to add line item",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Success",
+          description: "Line item added successfully"
+        });
+        // Refresh the line items data
+        fetchLineItems(currentInvoiceId);
+      }
+    } catch (error) {
+      console.error('Error adding line item:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add line item",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleDeleteLineItem = async (lineItemId: number) => {
+    try {
+      const { error } = await supabase
+        .from('Line_Items')
+        .delete()
+        .eq('id', lineItemId);
+
+      if (error) {
+        console.error('Error deleting line item:', error);
+        toast({
+          title: "Error",
+          description: "Failed to delete line item",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Success",
+          description: "Line item deleted successfully"
+        });
+        // Refresh the line items data
+        if (currentInvoiceId) {
+          fetchLineItems(currentInvoiceId);
+        }
+      }
+    } catch (error) {
+      console.error('Error deleting line item:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete line item",
+        variant: "destructive"
+      });
+    }
+  };
+
   // Display the value in a readable format
   const displayValue = (value: any, fieldName: string) => {
     if (value === null || value === undefined) return '';
@@ -147,12 +245,14 @@ export const LineItemsPanel = ({
     }
     return String(value);
   };
+  
   if (isLoading) {
     return <div className="flex justify-center items-center h-64">
         <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
         <span className="ml-2">Loading line items...</span>
       </div>;
   }
+  
   if (error) {
     return <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-8 text-center h-full">
         <div className="flex justify-center items-center mb-4">
@@ -167,6 +267,7 @@ export const LineItemsPanel = ({
         </div>
       </div>;
   }
+  
   if (!currentInvoiceId) {
     return <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-8 text-center h-full">
         <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-200 mb-4">No Invoice Selected</h2>
@@ -175,28 +276,23 @@ export const LineItemsPanel = ({
         </p>
       </div>;
   }
-  if (lineItems.length === 0) {
-    return <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-8 text-center h-full">
-        <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-200 mb-4">No Line Items Available</h2>
-        <p className="text-slate-600 dark:text-slate-400 mb-6">
-          This invoice doesn't have any line items recorded.
-        </p>
-        <div className="text-sm text-slate-500 mt-6">
-          Current invoice ID: {currentInvoiceId}
-        </div>
-      </div>;
-  }
+  
   return <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-4 h-full overflow-auto">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-200">
           Line Items for Invoice #{currentInvoiceId} ({lineItems.length} items)
         </h2>
+        <Button onClick={handleAddLineItem} size="sm" className="flex items-center">
+          <Plus className="h-4 w-4 mr-1" />
+          Add Line Item
+        </Button>
       </div>
       
       <div className="overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="w-8"></TableHead>
               <TableHead>Description</TableHead>
               <TableHead>Work Date</TableHead>
               <TableHead>Ticket/Order</TableHead>
@@ -211,6 +307,29 @@ export const LineItemsPanel = ({
           </TableHeader>
           <TableBody>
             {lineItems.map(item => <TableRow key={item.id}>
+                <TableCell>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-red-500 hover:text-red-700">
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure you want to delete?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This action cannot be undone. This will permanently delete the line item.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => handleDeleteLineItem(item.id)}>
+                          Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </TableCell>
                 <TableCell>
                   <EditableLineItemCell value={item.Description} onSave={newValue => handleFieldUpdate(item.id, 'Description', newValue)} />
                 </TableCell>
