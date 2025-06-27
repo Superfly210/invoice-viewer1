@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { ActionBarWithThemeToggle } from "@/components/ActionBarWithThemeToggle";
 import { LineItemsPanel } from "@/components/LineItemsPanel";
@@ -40,6 +41,8 @@ export const InvoiceReviewer = ({ onSectionChange }: InvoiceReviewerProps) => {
     handleApprove,
     handleDeny,
     handleQuarantine,
+    handleNotAnInvoice,
+    handleApproveAndForward,
     handleForward
   } = useToastNotifications(currentInvoiceId);
 
@@ -85,6 +88,8 @@ export const InvoiceReviewer = ({ onSectionChange }: InvoiceReviewerProps) => {
         onApprove={handleApprove}
         onDeny={handleDeny}
         onQuarantine={handleQuarantine}
+        onNotAnInvoice={handleNotAnInvoice}
+        onApproveAndForward={handleApproveAndForward}
         onForward={handleForward}
         currentInvoice={currentFilteredIndex + 1}
         totalInvoices={totalFilteredCount}

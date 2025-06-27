@@ -79,19 +79,19 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
       <Table>
         <TableBody>
           <TableRow>
-            <TableCell className="font-medium w-1/3 text-left">ID</TableCell>
+            <TableCell className="font-medium w-48 text-left">ID</TableCell>
             <TableCell className="text-left">{currentInvoice.id}</TableCell>
           </TableRow>
           <TableRow>
-            <TableCell className="font-medium w-1/3 text-left">Created At</TableCell>
+            <TableCell className="font-medium w-48 text-left">Created At</TableCell>
             <TableCell className="text-left">{new Date(currentInvoice.created_at).toLocaleString()}</TableCell>
           </TableRow>
           <TableRow>
-            <TableCell className="font-medium w-1/3 text-left">Email ID</TableCell>
+            <TableCell className="font-medium w-48 text-left">Email ID</TableCell>
             <TableCell className="text-left">{currentInvoice.Email_ID || 'N/A'}</TableCell>
           </TableRow>
           <TableRow>
-            <TableCell className="font-medium w-1/3 text-left">Google Drive URL</TableCell>
+            <TableCell className="font-medium w-48 text-left">Google Drive URL</TableCell>
             <TableCell className="text-left">
               {currentInvoice.Google_Drive_URL ? (
                 <a 
@@ -108,15 +108,15 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
             </TableCell>
           </TableRow>
           <TableRow>
-            <TableCell className="font-medium w-1/3 text-left">Responsible User</TableCell>
+            <TableCell className="font-medium w-48 text-left">Responsible User</TableCell>
             <TableCell className="text-left">{currentInvoice["Responsible User"] || 'N/A'}</TableCell>
           </TableRow>
           <TableRow>
-            <TableCell className="font-medium w-1/3 text-left">Status</TableCell>
+            <TableCell className="font-medium w-48 text-left">Status</TableCell>
             <TableCell className="text-left">{currentInvoice.Status || 'N/A'}</TableCell>
           </TableRow>
           <TableRow>
-            <TableCell className="font-medium w-1/3 text-left">Invoice Number</TableCell>
+            <TableCell className="font-medium w-48 text-left">Invoice Number</TableCell>
             <TableCell className="text-left">
               <EditableTableCell
                 value={currentInvoice.Invoice_Number}
@@ -125,7 +125,7 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
             </TableCell>
           </TableRow>
           <TableRow>
-            <TableCell className="font-medium w-1/3 text-left">Invoice Date</TableCell>
+            <TableCell className="font-medium w-48 text-left">Invoice Date</TableCell>
             <TableCell className="text-left">
               <EditableTableCell
                 value={currentInvoice.Invoice_Date}
@@ -136,7 +136,7 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
           </TableRow>
           
           <TableRow>
-            <TableCell className="font-medium w-1/3 text-left">Company Name</TableCell>
+            <TableCell className="font-medium w-48 text-left">Company Name</TableCell>
             <TableCell className="text-left">
               <EditableTableCell
                 value={currentInvoice.Invoicing_Comp_Name}
@@ -148,7 +148,7 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
           <CompanyDetails currentInvoice={currentInvoice} />
           
           <TableRow>
-            <TableCell className="font-medium w-1/3 text-left">Subtotal</TableCell>
+            <TableCell className="font-medium w-48 text-left">Subtotal</TableCell>
             <TableCell className="text-left">
               <EditableTableCell
                 value={currentInvoice.Sub_Total ? formatCurrency(currentInvoice.Sub_Total) : null}
@@ -158,7 +158,7 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
             </TableCell>
           </TableRow>
           <TableRow>
-            <TableCell className="font-medium w-1/3 text-left">GST Total</TableCell>
+            <TableCell className="font-medium w-48 text-left">GST Total</TableCell>
             <TableCell className="text-left">
               <EditableTableCell
                 value={currentInvoice.GST_Total ? formatCurrency(currentInvoice.GST_Total) : null}
@@ -168,7 +168,7 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
             </TableCell>
           </TableRow>
           <TableRow>
-            <TableCell className="font-medium w-1/3 text-left">Total</TableCell>
+            <TableCell className="font-medium w-48 text-left">Total</TableCell>
             <TableCell className="text-left">
               <EditableTableCell
                 value={currentInvoice.Total ? formatCurrency(currentInvoice.Total) : null}

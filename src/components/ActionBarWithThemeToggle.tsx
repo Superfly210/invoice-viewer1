@@ -7,7 +7,9 @@ import {
   ChevronRight,
   PauseCircle,
   ChevronDown,
-  Filter
+  Filter,
+  FileX,
+  Send
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,6 +32,8 @@ type ActionBarProps = {
   onApprove: () => void;
   onDeny: () => void;
   onQuarantine: () => void;
+  onNotAnInvoice: () => void;
+  onApproveAndForward: (userId: string, userName: string) => void;
   onForward: (userId: string, userName: string) => void;
   currentInvoice: number;
   totalInvoices: number;
@@ -45,6 +49,8 @@ export const ActionBarWithThemeToggle = ({
   onApprove,
   onDeny,
   onQuarantine,
+  onNotAnInvoice,
+  onApproveAndForward,
   onForward,
   currentInvoice,
   totalInvoices,
@@ -123,11 +129,36 @@ export const ActionBarWithThemeToggle = ({
         >
           <CheckCircle className="h-4 w-4 mr-2" /> Approve
         </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button className="bg-green-500 hover:bg-green-600 text-white min-w-[120px]">
+              <Send className="h-4 w-4 mr-2" /> 
+              Approve & Forward
+              <ChevronDown className="h-4 w-4 ml-2" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            {profiles.map((profile) => (
+              <DropdownMenuItem
+                key={profile.id}
+                onClick={() => onApproveAndForward(profile.id, profile.full_name || profile.username || 'Unknown User')}
+              >
+                {profile.full_name || profile.username || 'Unknown User'}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
         <Button 
           onClick={onDeny}
           className="bg-red-500 hover:bg-red-600 text-white min-w-[100px]"
         >
           <XCircle className="h-4 w-4 mr-2" /> Deny
+        </Button>
+        <Button 
+          onClick={onNotAnInvoice}
+          className="bg-red-500 hover:bg-red-600 text-white min-w-[120px]"
+        >
+          <FileX className="h-4 w-4 mr-2" /> Not an Invoice
         </Button>
         <Button 
           onClick={onQuarantine}

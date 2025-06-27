@@ -89,6 +89,17 @@ export const useToastNotifications = (currentInvoiceId?: number | null) => {
     updateInvoiceStatus("On Hold");
   };
 
+  const handleNotAnInvoice = () => {
+    updateInvoiceStatus("Not an Invoice");
+  };
+
+  const handleApproveAndForward = (userId: string, userName: string) => {
+    // First approve the invoice
+    updateInvoiceStatus("Approved");
+    // Then forward it
+    updateResponsibleUser(userName);
+  };
+
   const handleForward = (userId: string, userName: string) => {
     updateResponsibleUser(userName);
   };
@@ -97,6 +108,8 @@ export const useToastNotifications = (currentInvoiceId?: number | null) => {
     handleApprove,
     handleDeny,
     handleQuarantine,
+    handleNotAnInvoice,
+    handleApproveAndForward,
     handleForward,
   };
 };
