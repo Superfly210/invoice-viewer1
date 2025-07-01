@@ -135,17 +135,6 @@ export const CompanyDetails = ({
                     />
                   </TableCell>
                 </TableRow>
-                {currentInvoice.Google_Drive_URL && (
-                  <TableRow className="h-12">
-                    <TableCell className="font-medium w-48 text-left py-3">Google Drive URL</TableCell>
-                    <TableCell className="text-left py-3">
-                      <EditableTableCell 
-                        value={currentInvoice.Google_Drive_URL} 
-                        onSave={newValue => handleFieldUpdate('Google_Drive_URL', newValue)} 
-                      />
-                    </TableCell>
-                  </TableRow>
-                )}
               </TableBody>
             </CollapsibleContent>
           </Collapsible>

@@ -79,7 +79,7 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
       <Table>
         <TableBody>
           <TableRow className="h-16">
-            <TableCell className="font-medium w-48 text-left py-3">{currentInvoice.id}</TableCell>
+            <TableCell className="font-medium w-48 text-left py-3">ID</TableCell>
             <TableCell className="text-left py-3">{currentInvoice.id}</TableCell>
           </TableRow>
           <TableRow className="h-16">
