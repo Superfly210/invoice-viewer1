@@ -79,20 +79,20 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
       <Table>
         <TableBody>
           <TableRow className="h-16">
-            <TableCell className="font-medium w-48 text-left py-3 min-h-[64px] flex items-center">{currentInvoice.id}</TableCell>
-            <TableCell className="text-left py-3 min-h-[64px] flex items-center">{currentInvoice.id}</TableCell>
+            <TableCell className="font-medium w-48 text-left py-3">{currentInvoice.id}</TableCell>
+            <TableCell className="text-left py-3">{currentInvoice.id}</TableCell>
           </TableRow>
           <TableRow className="h-16">
-            <TableCell className="font-medium w-48 text-left py-3 min-h-[64px] flex items-center">Created At</TableCell>
-            <TableCell className="text-left py-3 min-h-[64px] flex items-center">{new Date(currentInvoice.created_at).toLocaleString()}</TableCell>
+            <TableCell className="font-medium w-48 text-left py-3">Created At</TableCell>
+            <TableCell className="text-left py-3">{new Date(currentInvoice.created_at).toLocaleString()}</TableCell>
           </TableRow>
           <TableRow className="h-16">
-            <TableCell className="font-medium w-48 text-left py-3 min-h-[64px] flex items-center">Email ID</TableCell>
-            <TableCell className="text-left py-3 min-h-[64px] flex items-center">{currentInvoice.Email_ID || 'N/A'}</TableCell>
+            <TableCell className="font-medium w-48 text-left py-3">Email ID</TableCell>
+            <TableCell className="text-left py-3">{currentInvoice.Email_ID || 'N/A'}</TableCell>
           </TableRow>
           <TableRow className="h-16">
-            <TableCell className="font-medium w-48 text-left py-3 min-h-[64px] flex items-center">Google Drive URL</TableCell>
-            <TableCell className="text-left py-3 min-h-[64px] flex items-center">
+            <TableCell className="font-medium w-48 text-left py-3">Google Drive URL</TableCell>
+            <TableCell className="text-left py-3">
               {currentInvoice.Google_Drive_URL ? (
                 <a 
                   href={currentInvoice.Google_Drive_URL} 
@@ -108,12 +108,12 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
             </TableCell>
           </TableRow>
           <TableRow className="h-16">
-            <TableCell className="font-medium w-48 text-left py-3 min-h-[64px] flex items-center">Responsible User</TableCell>
-            <TableCell className="text-left py-3 min-h-[64px] flex items-center">{currentInvoice["Responsible User"] || 'N/A'}</TableCell>
+            <TableCell className="font-medium w-48 text-left py-3">Responsible User</TableCell>
+            <TableCell className="text-left py-3">{currentInvoice["Responsible User"] || 'N/A'}</TableCell>
           </TableRow>
           <TableRow className="h-16">
-            <TableCell className="font-medium w-48 text-left py-3 min-h-[64px] flex items-center">Status</TableCell>
-            <TableCell className="text-left py-3 min-h-[64px] flex items-center">{currentInvoice.Status || 'N/A'}</TableCell>
+            <TableCell className="font-medium w-48 text-left py-3">Status</TableCell>
+            <TableCell className="text-left py-3">{currentInvoice.Status || 'N/A'}</TableCell>
           </TableRow>
           <TableRow className="h-16">
             <TableCell className="font-medium w-48 text-left py-3">Invoice Number</TableCell>
