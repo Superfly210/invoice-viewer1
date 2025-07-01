@@ -78,21 +78,21 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
     <div className="overflow-x-auto">
       <Table>
         <TableBody>
-          <TableRow>
-            <TableCell className="font-medium w-48 text-left">ID</TableCell>
-            <TableCell className="text-left">{currentInvoice.id}</TableCell>
+          <TableRow className="h-12">
+            <TableCell className="font-medium w-48 text-left py-3">ID</TableCell>
+            <TableCell className="text-left py-3">{currentInvoice.id}</TableCell>
           </TableRow>
-          <TableRow>
-            <TableCell className="font-medium w-48 text-left">Created At</TableCell>
-            <TableCell className="text-left">{new Date(currentInvoice.created_at).toLocaleString()}</TableCell>
+          <TableRow className="h-12">
+            <TableCell className="font-medium w-48 text-left py-3">Created At</TableCell>
+            <TableCell className="text-left py-3">{new Date(currentInvoice.created_at).toLocaleString()}</TableCell>
           </TableRow>
-          <TableRow>
-            <TableCell className="font-medium w-48 text-left">Email ID</TableCell>
-            <TableCell className="text-left">{currentInvoice.Email_ID || 'N/A'}</TableCell>
+          <TableRow className="h-12">
+            <TableCell className="font-medium w-48 text-left py-3">Email ID</TableCell>
+            <TableCell className="text-left py-3">{currentInvoice.Email_ID || 'N/A'}</TableCell>
           </TableRow>
-          <TableRow>
-            <TableCell className="font-medium w-48 text-left">Google Drive URL</TableCell>
-            <TableCell className="text-left">
+          <TableRow className="h-12">
+            <TableCell className="font-medium w-48 text-left py-3">Google Drive URL</TableCell>
+            <TableCell className="text-left py-3">
               {currentInvoice.Google_Drive_URL ? (
                 <a 
                   href={currentInvoice.Google_Drive_URL} 
@@ -107,26 +107,26 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
               )}
             </TableCell>
           </TableRow>
-          <TableRow>
-            <TableCell className="font-medium w-48 text-left">Responsible User</TableCell>
-            <TableCell className="text-left">{currentInvoice["Responsible User"] || 'N/A'}</TableCell>
+          <TableRow className="h-12">
+            <TableCell className="font-medium w-48 text-left py-3">Responsible User</TableCell>
+            <TableCell className="text-left py-3">{currentInvoice["Responsible User"] || 'N/A'}</TableCell>
           </TableRow>
-          <TableRow>
-            <TableCell className="font-medium w-48 text-left">Status</TableCell>
-            <TableCell className="text-left">{currentInvoice.Status || 'N/A'}</TableCell>
+          <TableRow className="h-12">
+            <TableCell className="font-medium w-48 text-left py-3">Status</TableCell>
+            <TableCell className="text-left py-3">{currentInvoice.Status || 'N/A'}</TableCell>
           </TableRow>
-          <TableRow>
-            <TableCell className="font-medium w-48 text-left">Invoice Number</TableCell>
-            <TableCell className="text-left">
+          <TableRow className="h-12">
+            <TableCell className="font-medium w-48 text-left py-3">Invoice Number</TableCell>
+            <TableCell className="text-left py-3">
               <EditableTableCell
                 value={currentInvoice.Invoice_Number}
                 onSave={(newValue) => handleFieldUpdate('Invoice_Number', newValue)}
               />
             </TableCell>
           </TableRow>
-          <TableRow>
-            <TableCell className="font-medium w-48 text-left">Invoice Date</TableCell>
-            <TableCell className="text-left">
+          <TableRow className="h-12">
+            <TableCell className="font-medium w-48 text-left py-3">Invoice Date</TableCell>
+            <TableCell className="text-left py-3">
               <EditableTableCell
                 value={currentInvoice.Invoice_Date}
                 onSave={(newValue) => handleFieldUpdate('Invoice_Date', newValue)}
@@ -135,9 +135,9 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
             </TableCell>
           </TableRow>
           
-          <TableRow>
-            <TableCell className="font-medium w-48 text-left">Company Name</TableCell>
-            <TableCell className="text-left">
+          <TableRow className="h-12">
+            <TableCell className="font-medium w-48 text-left py-3">Company Name</TableCell>
+            <TableCell className="text-left py-3">
               <EditableTableCell
                 value={currentInvoice.Invoicing_Comp_Name}
                 onSave={(newValue) => handleFieldUpdate('Invoicing_Comp_Name', newValue)}
@@ -147,9 +147,9 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
           
           <CompanyDetails currentInvoice={currentInvoice} />
           
-          <TableRow>
-            <TableCell className="font-medium w-48 text-left">Subtotal</TableCell>
-            <TableCell className="text-left">
+          <TableRow className="h-12">
+            <TableCell className="font-medium w-48 text-left py-3">Subtotal</TableCell>
+            <TableCell className="text-left py-3">
               <EditableTableCell
                 value={currentInvoice.Sub_Total ? formatCurrency(currentInvoice.Sub_Total) : null}
                 onSave={(newValue) => handleFieldUpdate('Sub_Total', newValue)}
@@ -157,9 +157,9 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
               />
             </TableCell>
           </TableRow>
-          <TableRow>
-            <TableCell className="font-medium w-48 text-left">GST Total</TableCell>
-            <TableCell className="text-left">
+          <TableRow className="h-12">
+            <TableCell className="font-medium w-48 text-left py-3">GST Total</TableCell>
+            <TableCell className="text-left py-3">
               <EditableTableCell
                 value={currentInvoice.GST_Total ? formatCurrency(currentInvoice.GST_Total) : null}
                 onSave={(newValue) => handleFieldUpdate('GST_Total', newValue)}
@@ -167,9 +167,9 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
               />
             </TableCell>
           </TableRow>
-          <TableRow>
-            <TableCell className="font-medium w-48 text-left">Total</TableCell>
-            <TableCell className="text-left">
+          <TableRow className="h-12">
+            <TableCell className="font-medium w-48 text-left py-3">Total</TableCell>
+            <TableCell className="text-left py-3">
               <EditableTableCell
                 value={currentInvoice.Total ? formatCurrency(currentInvoice.Total) : null}
                 onSave={(newValue) => handleFieldUpdate('Total', newValue)}

@@ -81,54 +81,54 @@ export const CompanyDetails = ({
             </CollapsibleTrigger>
             <CollapsibleContent className="p-0">
               <TableBody>
-                <TableRow>
-                  <TableCell className="font-medium w-48 text-left p-4">Company Street</TableCell>
-                  <TableCell className="text-left p-4">
+                <TableRow className="h-12">
+                  <TableCell className="font-medium w-48 text-left py-3">Company Street</TableCell>
+                  <TableCell className="text-left py-3">
                     <EditableTableCell 
                       value={cleanValue(currentInvoice.Invoicing_Comp_Street)} 
                       onSave={newValue => handleFieldUpdate('Invoicing_Comp_Street', newValue)} 
                     />
                   </TableCell>
                 </TableRow>
-                <TableRow>
-                  <TableCell className="font-medium w-48 text-left p-4">Company City</TableCell>
-                  <TableCell className="text-left p-4">
+                <TableRow className="h-12">
+                  <TableCell className="font-medium w-48 text-left py-3">Company City</TableCell>
+                  <TableCell className="text-left py-3">
                     <EditableTableCell 
                       value={currentInvoice.Invoicing_Comp_City} 
                       onSave={newValue => handleFieldUpdate('Invoicing_Comp_City', newValue)} 
                     />
                   </TableCell>
                 </TableRow>
-                <TableRow>
-                  <TableCell className="font-medium w-48 text-left p-4">Company State/Province</TableCell>
-                  <TableCell className="text-left p-4">
+                <TableRow className="h-12">
+                  <TableCell className="font-medium w-48 text-left py-3">Company State/Province</TableCell>
+                  <TableCell className="text-left py-3">
                     <EditableTableCell 
                       value={currentInvoice.Invoicing_Comp_State_Prov} 
                       onSave={newValue => handleFieldUpdate('Invoicing_Comp_State_Province', newValue)} 
                     />
                   </TableCell>
                 </TableRow>
-                <TableRow>
-                  <TableCell className="font-medium w-48 text-left p-4">Postal Code</TableCell>
-                  <TableCell className="text-left p-4">
+                <TableRow className="h-12">
+                  <TableCell className="font-medium w-48 text-left py-3">Postal Code</TableCell>
+                  <TableCell className="text-left py-3">
                     <EditableTableCell 
                       value={currentInvoice.Invoicing_Comp_Postal_Code} 
                       onSave={newValue => handleFieldUpdate('Invoicing_Comp_Postal_Code', newValue)} 
                     />
                   </TableCell>
                 </TableRow>
-                <TableRow>
-                  <TableCell className="font-medium w-48 text-left p-4">GST Number</TableCell>
-                  <TableCell className="text-left p-4">
+                <TableRow className="h-12">
+                  <TableCell className="font-medium w-48 text-left py-3">GST Number</TableCell>
+                  <TableCell className="text-left py-3">
                     <EditableTableCell 
                       value={cleanValue(currentInvoice.GST_Number)} 
                       onSave={newValue => handleFieldUpdate('GST_Number', newValue)} 
                     />
                   </TableCell>
                 </TableRow>
-                <TableRow>
-                  <TableCell className="font-medium w-48 text-left p-4">WCB Number</TableCell>
-                  <TableCell className="text-left p-4">
+                <TableRow className="h-12">
+                  <TableCell className="font-medium w-48 text-left py-3">WCB Number</TableCell>
+                  <TableCell className="text-left py-3">
                     <EditableTableCell 
                       value={cleanValue(currentInvoice.WCB_Number)} 
                       onSave={newValue => handleFieldUpdate('WCB_Number', newValue)} 
@@ -136,9 +136,9 @@ export const CompanyDetails = ({
                   </TableCell>
                 </TableRow>
                 {currentInvoice.Google_Drive_URL && (
-                  <TableRow>
-                    <TableCell className="font-medium w-48 text-left p-4">Google Drive URL</TableCell>
-                    <TableCell className="text-left p-4">
+                  <TableRow className="h-12">
+                    <TableCell className="font-medium w-48 text-left py-3">Google Drive URL</TableCell>
+                    <TableCell className="text-left py-3">
                       <EditableTableCell 
                         value={currentInvoice.Google_Drive_URL} 
                         onSave={newValue => handleFieldUpdate('Google_Drive_URL', newValue)} 

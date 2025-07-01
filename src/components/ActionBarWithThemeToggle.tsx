@@ -125,13 +125,13 @@ export const ActionBarWithThemeToggle = ({
       <div className="flex items-center space-x-3">
         <Button 
           onClick={onApprove}
-          className="bg-green-500 hover:bg-green-600 text-white min-w-[100px]"
+          className="bg-green-500 hover:bg-green-600 text-white w-[160px]"
         >
           <CheckCircle className="h-4 w-4 mr-2" /> Approve
         </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button className="bg-green-500 hover:bg-green-600 text-white min-w-[120px]">
+            <Button className="bg-green-500 hover:bg-green-600 text-white w-[160px]">
               <Send className="h-4 w-4 mr-2" /> 
               Approve & Forward
               <ChevronDown className="h-4 w-4 ml-2" />
@@ -150,25 +150,25 @@ export const ActionBarWithThemeToggle = ({
         </DropdownMenu>
         <Button 
           onClick={onDeny}
-          className="bg-red-500 hover:bg-red-600 text-white min-w-[100px]"
+          className="bg-red-500 hover:bg-red-600 text-white w-[160px]"
         >
           <XCircle className="h-4 w-4 mr-2" /> Deny
         </Button>
         <Button 
           onClick={onNotAnInvoice}
-          className="bg-red-500 hover:bg-red-600 text-white min-w-[120px]"
+          className="bg-red-500 hover:bg-red-600 text-white w-[160px]"
         >
           <FileX className="h-4 w-4 mr-2" /> Not an Invoice
         </Button>
         <Button 
           onClick={onQuarantine}
-          className="bg-[#FEF7CD] hover:bg-[#F6E68E] text-amber-800 min-w-[100px] dark:bg-amber-700 dark:hover:bg-amber-800 dark:text-white"
+          className="bg-[#FEF7CD] hover:bg-[#F6E68E] text-amber-800 w-[160px] dark:bg-amber-700 dark:hover:bg-amber-800 dark:text-white"
         >
           <PauseCircle className="h-4 w-4 mr-2" /> Hold
         </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button className="min-w-[100px]">
+            <Button className="w-[160px]">
               <CornerUpRight className="h-4 w-4 mr-2" /> 
               Forward
               <ChevronDown className="h-4 w-4 ml-2" />
