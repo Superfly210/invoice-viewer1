@@ -8,7 +8,6 @@ import {
   PauseCircle,
   ChevronDown,
   Filter,
-  FileX,
   Send
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -74,6 +73,14 @@ export const ActionBarWithThemeToggle = ({
     },
   });
 
+  const handleDenyOption = (option: string) => {
+    if (option === "not-invoice") {
+      onNotAnInvoice();
+    } else if (option === "improper-coding") {
+      onDeny();
+    }
+  };
+
   return (
     <div className="flex justify-between items-center p-4 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
       <div className="flex items-center space-x-4">
@@ -131,8 +138,8 @@ export const ActionBarWithThemeToggle = ({
         </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button className="bg-green-500 hover:bg-green-600 text-white w-[160px]">
-              <Send className="h-4 w-4 mr-2" /> 
+            <Button className="bg-green-400 hover:bg-green-500 text-white w-[160px]">
+              <CornerUpRight className="h-4 w-4 mr-2" /> 
               Approve & Forward
               <ChevronDown className="h-4 w-4 ml-2" />
             </Button>
@@ -148,18 +155,23 @@ export const ActionBarWithThemeToggle = ({
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
-        <Button 
-          onClick={onDeny}
-          className="bg-red-500 hover:bg-red-600 text-white w-[160px]"
-        >
-          <XCircle className="h-4 w-4 mr-2" /> Deny
-        </Button>
-        <Button 
-          onClick={onNotAnInvoice}
-          className="bg-red-500 hover:bg-red-600 text-white w-[160px]"
-        >
-          <FileX className="h-4 w-4 mr-2" /> Not an Invoice
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button className="bg-red-500 hover:bg-red-600 text-white w-[160px]">
+              <XCircle className="h-4 w-4 mr-2" /> 
+              Deny
+              <ChevronDown className="h-4 w-4 ml-2" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuItem onClick={() => handleDenyOption("improper-coding")}>
+              Improper Coding
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleDenyOption("not-invoice")}>
+              Not an Invoice
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
         <Button 
           onClick={onQuarantine}
           className="bg-[#FEF7CD] hover:bg-[#F6E68E] text-amber-800 w-[160px] dark:bg-amber-700 dark:hover:bg-amber-800 dark:text-white"
