@@ -62,6 +62,7 @@ export type Database = {
         Row: {
           AFE_Numbers: string | null
           Attach_Markdown: string | null
+          Company_Routed: boolean | null
           "Cost Centers": string | null
           "Cost Codes": string | null
           created_at: string
@@ -92,6 +93,7 @@ export type Database = {
         Insert: {
           AFE_Numbers?: string | null
           Attach_Markdown?: string | null
+          Company_Routed?: boolean | null
           "Cost Centers"?: string | null
           "Cost Codes"?: string | null
           created_at?: string
@@ -122,6 +124,7 @@ export type Database = {
         Update: {
           AFE_Numbers?: string | null
           Attach_Markdown?: string | null
+          Company_Routed?: boolean | null
           "Cost Centers"?: string | null
           "Cost Codes"?: string | null
           created_at?: string
@@ -331,6 +334,44 @@ export type Database = {
           "x-recieved"?: string | null
         }
         Relationships: []
+      }
+      invoice_coding: {
+        Row: {
+          afe_number: string | null
+          cost_center: string | null
+          cost_code: string | null
+          created_at: string
+          id: number
+          invoice_id: number | null
+          total: number | null
+        }
+        Insert: {
+          afe_number?: string | null
+          cost_center?: string | null
+          cost_code?: string | null
+          created_at?: string
+          id?: number
+          invoice_id?: number | null
+          total?: number | null
+        }
+        Update: {
+          afe_number?: string | null
+          cost_center?: string | null
+          cost_code?: string | null
+          created_at?: string
+          id?: number
+          invoice_id?: number | null
+          total?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_coding_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "Attachment_Info"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       Line_Items: {
         Row: {

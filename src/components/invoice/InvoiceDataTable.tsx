@@ -1,7 +1,7 @@
-
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { CompanyDetails } from "./CompanyDetails";
 import { EditableTableCell } from "./EditableTableCell";
+import { InvoiceCodingTable } from "./InvoiceCodingTable";
 import { AttachmentInfo } from "@/hooks/useInvoiceDataFetching";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -175,6 +175,12 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
                 onSave={(newValue) => handleFieldUpdate('Total', newValue)}
                 type="text"
               />
+            </TableCell>
+          </TableRow>
+          
+          <TableRow>
+            <TableCell colSpan={2} className="p-0">
+              <InvoiceCodingTable invoiceId={currentInvoice.id} />
             </TableCell>
           </TableRow>
         </TableBody>
