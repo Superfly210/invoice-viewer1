@@ -2,6 +2,7 @@ import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { CompanyDetails } from "./CompanyDetails";
 import { EditableTableCell } from "./EditableTableCell";
 import { InvoiceCodingTable } from "./InvoiceCodingTable";
+import { VendorRoutingBadge } from "./VendorRoutingBadge";
 import { AttachmentInfo } from "@/hooks/useInvoiceDataFetching";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -137,11 +138,12 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
           
           <TableRow className="h-16">
             <TableCell className="font-medium w-48 text-left py-3">Company Name</TableCell>
-            <TableCell className="text-left py-3">
+            <TableCell className="text-left py-3 flex items-center">
               <EditableTableCell
                 value={currentInvoice.Invoicing_Comp_Name}
                 onSave={(newValue) => handleFieldUpdate('Invoicing_Comp_Name', newValue)}
               />
+              <VendorRoutingBadge currentInvoice={currentInvoice} />
             </TableCell>
           </TableRow>
           

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import {
   Table,
@@ -20,6 +19,7 @@ import { Plus, Upload } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 type Profile = {
   id: string;
@@ -211,58 +211,60 @@ export function AFETable() {
           Refresh
         </Button>
       </div>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>AFE Number</TableHead>
-            <TableHead>Responsible User</TableHead>
-            <TableHead className="text-right">Invoices Awaiting Approval</TableHead>
-            <TableHead className="text-right">AFE Estimate</TableHead>
-            <TableHead className="text-right">Approved Amount</TableHead>
-            <TableHead className="text-right">Awaiting Approval Amount</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {afes && afes.length > 0 ? (
-            afes.map((afe) => (
-              <TableRow key={afe.id}>
-                <TableCell>{afe.afe_number}</TableCell>
-                <TableCell>
-                  <Select
-                    value={afe.responsible_user_id || ""}
-                    onValueChange={(value) => handleUserChange(afe.id, value)}
-                  >
-                    <SelectTrigger className="w-[200px]">
-                      <SelectValue placeholder="Select user" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {profiles?.map((profile) => (
-                        <SelectItem key={profile.id} value={profile.id}>
-                          {profile.full_name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </TableCell>
-                <TableCell className="text-right">{afe.invoices_awaiting_approval || 0}</TableCell>
-                <TableCell className="text-right">${afe.afe_estimate.toLocaleString()}</TableCell>
-                <TableCell className="text-right">${afe.approved_amount.toLocaleString()}</TableCell>
-                <TableCell className="text-right">${afe.awaiting_approval_amount.toLocaleString()}</TableCell>
-              </TableRow>
-            ))
-          ) : (
+      <ScrollArea className="h-[600px] w-full">
+        <Table>
+          <TableHeader>
             <TableRow>
-              <TableCell colSpan={6} className="text-center text-gray-500">
-                No AFE data found. Records in database: {afes?.length || 0}
-                <br />
-                <Button variant="outline" onClick={handleRefresh} className="mt-2">
-                  Try Refresh
-                </Button>
-              </TableCell>
+              <TableHead>AFE Number</TableHead>
+              <TableHead>Responsible User</TableHead>
+              <TableHead className="text-right">Invoices Awaiting Approval</TableHead>
+              <TableHead className="text-right">AFE Estimate</TableHead>
+              <TableHead className="text-right">Approved Amount</TableHead>
+              <TableHead className="text-right">Awaiting Approval Amount</TableHead>
             </TableRow>
-          )}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {afes && afes.length > 0 ? (
+              afes.map((afe) => (
+                <TableRow key={afe.id}>
+                  <TableCell>{afe.afe_number}</TableCell>
+                  <TableCell>
+                    <Select
+                      value={afe.responsible_user_id || ""}
+                      onValueChange={(value) => handleUserChange(afe.id, value)}
+                    >
+                      <SelectTrigger className="w-[200px]">
+                        <SelectValue placeholder="Select user" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {profiles?.map((profile) => (
+                          <SelectItem key={profile.id} value={profile.id}>
+                            {profile.full_name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </TableCell>
+                  <TableCell className="text-right">{afe.invoices_awaiting_approval || 0}</TableCell>
+                  <TableCell className="text-right">${afe.afe_estimate.toLocaleString()}</TableCell>
+                  <TableCell className="text-right">${afe.approved_amount.toLocaleString()}</TableCell>
+                  <TableCell className="text-right">${afe.awaiting_approval_amount.toLocaleString()}</TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={6} className="text-center text-gray-500">
+                  No AFE data found. Records in database: {afes?.length || 0}
+                  <br />
+                  <Button variant="outline" onClick={handleRefresh} className="mt-2">
+                    Try Refresh
+                  </Button>
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </ScrollArea>
     </div>
   );
 }

@@ -170,7 +170,7 @@ export const InvoiceCodingTable = ({ invoiceId }: InvoiceCodingTableProps) => {
               <TableHead className="text-xs">AFE Number</TableHead>
               <TableHead className="text-xs">Cost Center</TableHead>
               <TableHead className="text-xs">Cost Code</TableHead>
-              <TableHead className="text-xs text-right">Total</TableHead>
+              <TableHead className="text-xs text-left">Total</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -204,7 +204,7 @@ export const InvoiceCodingTable = ({ invoiceId }: InvoiceCodingTableProps) => {
                     onSave={(newValue) => handleFieldUpdate(coding.id, 'cost_code', newValue)}
                   />
                 </TableCell>
-                <TableCell className="py-2 text-right">
+                <TableCell className="py-2 text-left">
                   <EditableLineItemCell
                     value={coding.total ? formatCurrency(coding.total) : null}
                     onSave={(newValue) => handleFieldUpdate(coding.id, 'total', newValue)}
