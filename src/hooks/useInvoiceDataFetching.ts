@@ -23,6 +23,7 @@ export type AttachmentInfo = {
   Email_ID: string | null;
   "Responsible User": string | null;
   Status: string | null;
+  Company_Routed: boolean | null;
 }
 
 export const useInvoiceDataFetching = (currentInvoiceIndex: number) => {
@@ -59,7 +60,8 @@ export const useInvoiceDataFetching = (currentInvoiceIndex: number) => {
         Email_Info_ID: item.Email_Info_ID,
         Email_ID: item.Email_ID,
         "Responsible User": item["Responsible User"],
-        Status: item.Status
+        Status: item.Status,
+        Company_Routed: item.Company_Routed
       })) || [];
 
       console.log("Fetched invoices:", processedData.length);

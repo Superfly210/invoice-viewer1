@@ -54,7 +54,8 @@ export const useInvoiceFiltering = () => {
         Email_Info_ID: item.Email_Info_ID,
         Email_ID: item.Email_ID,
         "Responsible User": item["Responsible User"],
-        Status: item.Status
+        Status: item.Status,
+        Company_Routed: item.Company_Routed
       })) || [];
 
       return processedData as AttachmentInfo[];
