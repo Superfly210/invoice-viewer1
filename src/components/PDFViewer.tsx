@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { Minus, Plus, Maximize, ChevronUp, ChevronDown, Loader2, RotateCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -247,7 +246,7 @@ export const PDFViewer = ({ pdfUrl, onPageChange }: PDFViewerProps) => {
             src={processedUrl}
             className="w-full h-full border-0"
             title="PDF Document"
-            sandbox="allow-scripts allow-same-origin allow-popups"
+            sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
             onLoad={() => {
               console.log("PDF iframe loaded");
               // Apply any rotation that was set
@@ -255,6 +254,11 @@ export const PDFViewer = ({ pdfUrl, onPageChange }: PDFViewerProps) => {
                 iframeRef.current.style.transform = `rotate(${rotation}deg)`;
                 iframeRef.current.style.transformOrigin = 'center';
               }
+            }}
+            style={{
+              userSelect: 'text',
+              WebkitUserSelect: 'text',
+              MozUserSelect: 'text',
             }}
           />
         ) : (

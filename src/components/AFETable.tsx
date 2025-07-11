@@ -159,7 +159,7 @@ export function AFETable() {
 
   if (isLoading) {
     return (
-      <div className="rounded-md border">
+      <div className="rounded-md border h-full flex flex-col">
         <div className="flex justify-end p-4 space-x-2">
           <Button variant="outline" onClick={handleImportAFE}>
             <Upload className="mr-2 h-4 w-4" /> Import AFE Data
@@ -168,7 +168,7 @@ export function AFETable() {
             <Plus className="mr-2 h-4 w-4" /> Add AFE
           </Button>
         </div>
-        <div className="p-4 text-center">
+        <div className="flex-1 flex items-center justify-center">
           <p>Loading AFE data...</p>
         </div>
       </div>
@@ -178,7 +178,7 @@ export function AFETable() {
   if (error) {
     console.error("AFE Table error:", error);
     return (
-      <div className="rounded-md border">
+      <div className="rounded-md border h-full flex flex-col">
         <div className="flex justify-end p-4 space-x-2">
           <Button variant="outline" onClick={handleImportAFE}>
             <Upload className="mr-2 h-4 w-4" /> Import AFE Data
@@ -190,16 +190,18 @@ export function AFETable() {
             Refresh
           </Button>
         </div>
-        <div className="p-4 text-center">
-          <p className="text-red-600">Error loading AFE data: {error.message}</p>
-          <p className="text-sm text-gray-500 mt-2">Check console for more details</p>
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <p className="text-red-600">Error loading AFE data: {error.message}</p>
+            <p className="text-sm text-gray-500 mt-2">Check console for more details</p>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="rounded-md border">
+    <div className="rounded-md border h-full flex flex-col">
       <div className="flex justify-end p-4 space-x-2">
         <Button variant="outline" onClick={handleImportAFE}>
           <Upload className="mr-2 h-4 w-4" /> Import AFE Data
@@ -211,60 +213,62 @@ export function AFETable() {
           Refresh
         </Button>
       </div>
-      <ScrollArea className="h-[600px] w-full">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>AFE Number</TableHead>
-              <TableHead>Responsible User</TableHead>
-              <TableHead className="text-right">Invoices Awaiting Approval</TableHead>
-              <TableHead className="text-right">AFE Estimate</TableHead>
-              <TableHead className="text-right">Approved Amount</TableHead>
-              <TableHead className="text-right">Awaiting Approval Amount</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {afes && afes.length > 0 ? (
-              afes.map((afe) => (
-                <TableRow key={afe.id}>
-                  <TableCell>{afe.afe_number}</TableCell>
-                  <TableCell>
-                    <Select
-                      value={afe.responsible_user_id || ""}
-                      onValueChange={(value) => handleUserChange(afe.id, value)}
-                    >
-                      <SelectTrigger className="w-[200px]">
-                        <SelectValue placeholder="Select user" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {profiles?.map((profile) => (
-                          <SelectItem key={profile.id} value={profile.id}>
-                            {profile.full_name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </TableCell>
-                  <TableCell className="text-right">{afe.invoices_awaiting_approval || 0}</TableCell>
-                  <TableCell className="text-right">${afe.afe_estimate.toLocaleString()}</TableCell>
-                  <TableCell className="text-right">${afe.approved_amount.toLocaleString()}</TableCell>
-                  <TableCell className="text-right">${afe.awaiting_approval_amount.toLocaleString()}</TableCell>
-                </TableRow>
-              ))
-            ) : (
+      <div className="flex-1 overflow-hidden">
+        <ScrollArea className="h-full w-full">
+          <Table>
+            <TableHeader>
               <TableRow>
-                <TableCell colSpan={6} className="text-center text-gray-500">
-                  No AFE data found. Records in database: {afes?.length || 0}
-                  <br />
-                  <Button variant="outline" onClick={handleRefresh} className="mt-2">
-                    Try Refresh
-                  </Button>
-                </TableCell>
+                <TableHead>AFE Number</TableHead>
+                <TableHead>Responsible User</TableHead>
+                <TableHead className="text-right">Invoices Awaiting Approval</TableHead>
+                <TableHead className="text-right">AFE Estimate</TableHead>
+                <TableHead className="text-right">Approved Amount</TableHead>
+                <TableHead className="text-right">Awaiting Approval Amount</TableHead>
               </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </ScrollArea>
+            </TableHeader>
+            <TableBody>
+              {afes && afes.length > 0 ? (
+                afes.map((afe) => (
+                  <TableRow key={afe.id}>
+                    <TableCell>{afe.afe_number}</TableCell>
+                    <TableCell>
+                      <Select
+                        value={afe.responsible_user_id || ""}
+                        onValueChange={(value) => handleUserChange(afe.id, value)}
+                      >
+                        <SelectTrigger className="w-[200px]">
+                          <SelectValue placeholder="Select user" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {profiles?.map((profile) => (
+                            <SelectItem key={profile.id} value={profile.id}>
+                              {profile.full_name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </TableCell>
+                    <TableCell className="text-right">{afe.invoices_awaiting_approval || 0}</TableCell>
+                    <TableCell className="text-right">${afe.afe_estimate.toLocaleString()}</TableCell>
+                    <TableCell className="text-right">${afe.approved_amount.toLocaleString()}</TableCell>
+                    <TableCell className="text-right">${afe.awaiting_approval_amount.toLocaleString()}</TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center text-gray-500">
+                    No AFE data found. Records in database: {afes?.length || 0}
+                    <br />
+                    <Button variant="outline" onClick={handleRefresh} className="mt-2">
+                      Try Refresh
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </ScrollArea>
+      </div>
     </div>
   );
 }

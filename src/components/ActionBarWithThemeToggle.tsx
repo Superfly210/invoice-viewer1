@@ -81,6 +81,11 @@ export const ActionBarWithThemeToggle = ({
     }
   };
 
+  const handleAllFilters = () => {
+    onUserFilterChange("all");
+    onStatusFilterChange("all");
+  };
+
   return (
     <div className="flex justify-between items-center p-4 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
       <div className="flex items-center space-x-4">
@@ -126,6 +131,14 @@ export const ActionBarWithThemeToggle = ({
               <SelectItem value="hold">On Hold</SelectItem>
             </SelectContent>
           </Select>
+
+          <Button 
+            onClick={handleAllFilters}
+            variant="outline"
+            className="text-sm"
+          >
+            All
+          </Button>
         </div>
       </div>
       
