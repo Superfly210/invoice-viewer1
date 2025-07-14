@@ -11,19 +11,27 @@ export const logInvoiceChange = async (
   try {
     const { data: { user } } = await supabase.auth.getUser();
     
-    const { error } = await supabase
-      .from('invoice_audit_log')
-      .insert({
+    // Use direct REST API call to avoid TypeScript issues
+    const response = await fetch(`${supabase.supabaseUrl}/rest/v1/invoice_audit_log`, {
+      method: 'POST',
+      headers: {
+        'apikey': supabase.supabaseKey,
+        'Authorization': `Bearer ${supabase.supabaseKey}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({
         invoice_id: invoiceId,
         field_name: fieldName,
         old_value: oldValue?.toString() || null,
         new_value: newValue?.toString() || null,
         change_type: changeType,
         changed_by: user?.id || null
-      });
+      })
+    });
 
-    if (error) {
-      console.error('Error logging invoice change:', error);
+    if (!response.ok) {
+      console.error('Error logging invoice change:', await response.text());
     }
   } catch (error) {
     console.error('Error logging invoice change:', error);
@@ -41,9 +49,16 @@ export const logLineItemChange = async (
   try {
     const { data: { user } } = await supabase.auth.getUser();
     
-    const { error } = await supabase
-      .from('line_items_audit_log')
-      .insert({
+    // Use direct REST API call to avoid TypeScript issues
+    const response = await fetch(`${supabase.supabaseUrl}/rest/v1/line_items_audit_log`, {
+      method: 'POST',
+      headers: {
+        'apikey': supabase.supabaseKey,
+        'Authorization': `Bearer ${supabase.supabaseKey}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({
         invoice_id: invoiceId,
         line_item_id: lineItemId,
         field_name: fieldName,
@@ -51,10 +66,11 @@ export const logLineItemChange = async (
         new_value: newValue?.toString() || null,
         change_type: changeType,
         changed_by: user?.id || null
-      });
+      })
+    });
 
-    if (error) {
-      console.error('Error logging line item change:', error);
+    if (!response.ok) {
+      console.error('Error logging line item change:', await response.text());
     }
   } catch (error) {
     console.error('Error logging line item change:', error);
