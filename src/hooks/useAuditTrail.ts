@@ -20,35 +20,25 @@ export const useAuditTrail = (invoiceId: number) => {
     queryFn: async () => {
       console.log('Fetching audit trail for invoice:', invoiceId);
       
-      // Fetch invoice audit logs using raw SQL to avoid type issues
-      const { data: invoiceAuditData, error: invoiceError } = await supabase
-        .rpc('sql', {
-          query: `
-            SELECT id, field_name, old_value, new_value, change_type, changed_by, changed_at
-            FROM invoice_audit_log 
-            WHERE invoice_id = $1 
-            ORDER BY changed_at DESC
-          `,
-          params: [invoiceId]
-        });
-
-      // For now, let's use a direct approach since the tables exist but types aren't updated
       let combinedLogs: AuditLogEntry[] = [];
 
       try {
-        // Try to fetch from the audit tables directly
-        const invoiceResponse = await fetch(`${supabase.supabaseUrl}/rest/v1/invoice_audit_log?invoice_id=eq.${invoiceId}&order=changed_at.desc`, {
+        // Fetch from the audit tables directly using REST API
+        const SUPABASE_URL = "https://bumyvuiywdnffhmayxcz.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ1bXl2dWl5d2RuZmZobWF5eGN6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE5Njc3MDgsImV4cCI6MjA1NzU0MzcwOH0.20yKpjbuWYIPNwc4SwqMoZNXZv4wUksa1xuGdXaGe78";
+
+        const invoiceResponse = await fetch(`${SUPABASE_URL}/rest/v1/invoice_audit_log?invoice_id=eq.${invoiceId}&order=changed_at.desc`, {
           headers: {
-            'apikey': supabase.supabaseKey,
-            'Authorization': `Bearer ${supabase.supabaseKey}`,
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
             'Content-Type': 'application/json'
           }
         });
 
-        const lineItemsResponse = await fetch(`${supabase.supabaseUrl}/rest/v1/line_items_audit_log?invoice_id=eq.${invoiceId}&order=changed_at.desc`, {
+        const lineItemsResponse = await fetch(`${SUPABASE_URL}/rest/v1/line_items_audit_log?invoice_id=eq.${invoiceId}&order=changed_at.desc`, {
           headers: {
-            'apikey': supabase.supabaseKey,
-            'Authorization': `Bearer ${supabase.supabaseKey}`,
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
             'Content-Type': 'application/json'
           }
         });
