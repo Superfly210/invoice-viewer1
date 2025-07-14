@@ -1,3 +1,4 @@
+
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { CompanyDetails } from "./CompanyDetails";
 import { EditableTableCell } from "./EditableTableCell";
@@ -8,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { formatCurrency, parseCurrencyValue } from "@/lib/currencyFormatter";
+import { logInvoiceChange } from "@/utils/auditLogger";
 
 interface InvoiceDataTableProps {
   currentInvoice: AttachmentInfo;
@@ -20,6 +22,9 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
   const handleFieldUpdate = async (field: string, newValue: string) => {
     try {
       console.log(`Updating ${field} to:`, newValue);
+      
+      // Get old value for audit trail
+      const oldValue = currentInvoice[field as keyof AttachmentInfo];
       
       // Optimistic update - immediately update the cache
       queryClient.setQueryData(['attachment-info'], (oldData: AttachmentInfo[] | undefined) => {
@@ -55,6 +60,9 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
           variant: "destructive",
         });
       } else {
+        // Log the change to audit trail
+        await logInvoiceChange(currentInvoice.id, field, oldValue, newValue);
+        
         toast({
           title: "Success",
           description: `${field} updated successfully`,
@@ -62,6 +70,7 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
         // Refresh to ensure data consistency
         queryClient.invalidateQueries({ queryKey: ['attachment-info'] });
         queryClient.invalidateQueries({ queryKey: ['attachment-info-summary'] });
+        queryClient.invalidateQueries({ queryKey: ['audit-trail', currentInvoice.id] });
       }
     } catch (error) {
       console.error('Error updating field:', error);

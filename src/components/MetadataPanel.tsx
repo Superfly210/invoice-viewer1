@@ -1,11 +1,12 @@
 
 import { useState, useEffect } from "react";
-import { ChevronDown, ChevronUp, MessageSquare, Send } from "lucide-react";
+import { ChevronDown, ChevronUp, MessageSquare, Send, Edit3, Trash2, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAuditTrail } from "@/hooks/useAuditTrail";
 
 type Comment = {
   id: string;
@@ -33,6 +34,7 @@ export const MetadataPanel = ({ currentInvoiceId }: MetadataPanelProps) => {
   const [expandedSections, setExpandedSections] = useState({
     history: true,
     comments: true,
+    auditTrail: true,
   });
   
   const [commentText, setCommentText] = useState("");
@@ -40,6 +42,8 @@ export const MetadataPanel = ({ currentInvoiceId }: MetadataPanelProps) => {
   const [emailHistory, setEmailHistory] = useState<EmailInfo[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+
+  const { data: auditTrail = [], isLoading: auditLoading } = useAuditTrail(currentInvoiceId || 0);
 
   useEffect(() => {
     if (currentInvoiceId) {
@@ -93,7 +97,7 @@ export const MetadataPanel = ({ currentInvoiceId }: MetadataPanelProps) => {
     }
   };
 
-  const toggleSection = (section: 'history' | 'comments') => {
+  const toggleSection = (section: 'history' | 'comments' | 'auditTrail') => {
     setExpandedSections(prev => ({
       ...prev,
       [section]: !prev[section],
@@ -117,6 +121,54 @@ export const MetadataPanel = ({ currentInvoiceId }: MetadataPanelProps) => {
   const formatEmailDate = (dateString: string | null, createdAt: string) => {
     const date = dateString ? new Date(dateString) : new Date(createdAt);
     return date.toLocaleString();
+  };
+
+  const formatAuditChange = (entry: any) => {
+    const changeTypeIcons = {
+      INSERT: <Plus className="h-3 w-3 text-green-600" />,
+      UPDATE: <Edit3 className="h-3 w-3 text-blue-600" />,
+      DELETE: <Trash2 className="h-3 w-3 text-red-600" />
+    };
+
+    const sourceLabel = entry.source_type === 'invoice' ? 'Invoice' : 'Line Item';
+    
+    return (
+      <div key={entry.id} className="flex items-start space-x-3 p-3 bg-slate-50 rounded-md">
+        <div className="flex-shrink-0 mt-1">
+          {changeTypeIcons[entry.change_type as keyof typeof changeTypeIcons]}
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center space-x-2 mb-1">
+            <span className="text-sm font-medium text-slate-700">
+              {sourceLabel} - {entry.field_name}
+            </span>
+            <span className="text-xs text-slate-500">
+              {entry.change_type}
+            </span>
+          </div>
+          {entry.change_type === 'UPDATE' && (
+            <div className="text-xs text-slate-600">
+              <span className="text-red-600">From: {entry.old_value || 'null'}</span>
+              <span className="mx-2">→</span>
+              <span className="text-green-600">To: {entry.new_value || 'null'}</span>
+            </div>
+          )}
+          {entry.change_type === 'INSERT' && (
+            <div className="text-xs text-green-600">
+              Added: {entry.new_value || 'N/A'}
+            </div>
+          )}
+          {entry.change_type === 'DELETE' && (
+            <div className="text-xs text-red-600">
+              Removed: {entry.old_value || 'N/A'}
+            </div>
+          )}
+          <div className="text-xs text-slate-500 mt-1">
+            {new Date(entry.changed_at).toLocaleString()}
+          </div>
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -167,6 +219,33 @@ export const MetadataPanel = ({ currentInvoiceId }: MetadataPanelProps) => {
                 ))
               ) : (
                 <div className="text-center text-slate-500">No email history available</div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Audit Trail Section */}
+        <div className="border border-slate-200 rounded-md overflow-hidden">
+          <button
+            onClick={() => toggleSection('auditTrail')}
+            className="w-full flex justify-between items-center p-3 bg-slate-50 text-left font-medium text-slate-700 hover:bg-slate-100"
+          >
+            Change History
+            {expandedSections.auditTrail ? (
+              <ChevronUp className="h-5 w-5 text-slate-500" />
+            ) : (
+              <ChevronDown className="h-5 w-5 text-slate-500" />
+            )}
+          </button>
+          
+          {expandedSections.auditTrail && (
+            <div className="p-3 space-y-2 max-h-96 overflow-y-auto">
+              {auditLoading ? (
+                <div className="text-center text-slate-500">Loading change history...</div>
+              ) : auditTrail.length > 0 ? (
+                auditTrail.map(formatAuditChange)
+              ) : (
+                <div className="text-center text-slate-500">No changes recorded yet</div>
               )}
             </div>
           )}
