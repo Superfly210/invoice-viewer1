@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { formatCurrency, parseCurrencyValue } from "@/lib/currencyFormatter";
 import { logInvoiceChange } from "@/utils/auditLogger";
+import { useAuth } from "@/components/AuthProvider";
 
 interface InvoiceDataTableProps {
   currentInvoice: AttachmentInfo;
@@ -18,6 +19,7 @@ interface InvoiceDataTableProps {
 export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   const handleFieldUpdate = async (field: string, newValue: string) => {
     try {
@@ -84,6 +86,38 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
     }
   };
 
+  // Helper function to get status highlighting
+  const getStatusHighlighting = (status: string | null) => {
+    if (!status) return "";
+    
+    switch (status) {
+      case "Pending Approval":
+        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100";
+      case "Approved":
+        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100";
+      case "On Hold":
+        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100";
+      case "Denied":
+        return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100";
+      default:
+        return "";
+    }
+  };
+
+  // Helper function to get responsible user highlighting
+  const getResponsibleUserHighlighting = (responsibleUser: string | null) => {
+    if (!responsibleUser || !user) return "";
+    
+    // Compare with current user's email or id
+    const isCurrentUser = responsibleUser === user.email || responsibleUser === user.id;
+    
+    if (isCurrentUser) {
+      return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100";
+    } else {
+      return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100";
+    }
+  };
+
   return (
     <div className="overflow-x-auto">
       <Table>
@@ -119,11 +153,19 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
           </TableRow>
           <TableRow className="h-16">
             <TableCell className="font-medium w-48 text-left py-3">Responsible User</TableCell>
-            <TableCell className="text-left py-3">{currentInvoice["Responsible User"] || 'N/A'}</TableCell>
+            <TableCell className="text-left py-3">
+              <span className={`px-2 py-1 rounded ${getResponsibleUserHighlighting(currentInvoice["Responsible User"])}`}>
+                {currentInvoice["Responsible User"] || 'N/A'}
+              </span>
+            </TableCell>
           </TableRow>
           <TableRow className="h-16">
             <TableCell className="font-medium w-48 text-left py-3">Status</TableCell>
-            <TableCell className="text-left py-3">{currentInvoice.Status || 'N/A'}</TableCell>
+            <TableCell className="text-left py-3">
+              <span className={`px-2 py-1 rounded ${getStatusHighlighting(currentInvoice.Status)}`}>
+                {currentInvoice.Status || 'N/A'}
+              </span>
+            </TableCell>
           </TableRow>
           <TableRow className="h-16">
             <TableCell className="font-medium w-48 text-left py-3">Invoice Number</TableCell>

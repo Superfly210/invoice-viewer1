@@ -2,6 +2,7 @@
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
+import { logInvoiceChange } from "@/utils/auditLogger";
 
 export const useToastNotifications = (currentInvoiceId?: number | null) => {
   const { toast } = useToast();
@@ -18,6 +19,13 @@ export const useToastNotifications = (currentInvoiceId?: number | null) => {
     }
 
     try {
+      // Get current invoice data for old value
+      const { data: currentInvoice } = await supabase
+        .from('Attachment_Info')
+        .select('Status')
+        .eq('id', currentInvoiceId)
+        .single();
+
       const { error } = await supabase
         .from('Attachment_Info')
         .update({ Status: status })
@@ -25,8 +33,12 @@ export const useToastNotifications = (currentInvoiceId?: number | null) => {
 
       if (error) throw error;
 
+      // Log the change to audit trail
+      await logInvoiceChange(currentInvoiceId, 'Status', currentInvoice?.Status, status);
+
       // Invalidate queries to refresh data
       queryClient.invalidateQueries({ queryKey: ['attachment-info'] });
+      queryClient.invalidateQueries({ queryKey: ['audit-trail', currentInvoiceId] });
       
       toast({
         title: "Success",
@@ -53,6 +65,13 @@ export const useToastNotifications = (currentInvoiceId?: number | null) => {
     }
 
     try {
+      // Get current invoice data for old value
+      const { data: currentInvoice } = await supabase
+        .from('Attachment_Info')
+        .select('"Responsible User"')
+        .eq('id', currentInvoiceId)
+        .single();
+
       const { error } = await supabase
         .from('Attachment_Info')
         .update({ "Responsible User": responsibleUser })
@@ -60,8 +79,12 @@ export const useToastNotifications = (currentInvoiceId?: number | null) => {
 
       if (error) throw error;
 
+      // Log the change to audit trail
+      await logInvoiceChange(currentInvoiceId, 'Responsible User', currentInvoice?.["Responsible User"], responsibleUser);
+
       // Invalidate queries to refresh data
       queryClient.invalidateQueries({ queryKey: ['attachment-info'] });
+      queryClient.invalidateQueries({ queryKey: ['audit-trail', currentInvoiceId] });
       
       toast({
         title: "Success",

@@ -8,6 +8,7 @@ import { Loader2, AlertCircle, Plus, X } from "lucide-react";
 import { EditableLineItemCell } from "./invoice/EditableLineItemCell";
 import { useQueryClient } from "@tanstack/react-query";
 import { formatCurrency, parseCurrencyValue } from "@/lib/currencyFormatter";
+import { logLineItemChange } from "@/utils/auditLogger";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -111,6 +112,10 @@ export const LineItemsPanel = ({
     try {
       console.log(`Updating line item ${lineItemId} ${field} to:`, newValue);
 
+      // Get old value for audit trail
+      const currentItem = lineItems.find(item => item.id === lineItemId);
+      const oldValue = currentItem?.[field as keyof LineItem];
+
       // Convert string values to appropriate types
       let processedValue: any = newValue;
       if (field === 'Rate' || field === 'Total') {
@@ -134,6 +139,11 @@ export const LineItemsPanel = ({
           variant: "destructive"
         });
       } else {
+        // Log the change to audit trail
+        if (currentInvoiceId) {
+          await logLineItemChange(currentInvoiceId, lineItemId, field, oldValue, newValue);
+        }
+        
         toast({
           title: "Success",
           description: `${field} updated successfully`
@@ -142,6 +152,8 @@ export const LineItemsPanel = ({
         if (currentInvoiceId) {
           fetchLineItems(currentInvoiceId);
         }
+        // Invalidate audit trail query
+        queryClient.invalidateQueries({ queryKey: ['audit-trail', currentInvoiceId] });
       }
     } catch (error) {
       console.error('Error updating line item field:', error);
@@ -181,12 +193,17 @@ export const LineItemsPanel = ({
           variant: "destructive"
         });
       } else {
+        // Log the addition to audit trail
+        await logLineItemChange(currentInvoiceId, null, 'Line Item', null, 'Added', 'INSERT');
+        
         toast({
           title: "Success",
           description: "Line item added successfully"
         });
         // Refresh the line items data
         fetchLineItems(currentInvoiceId);
+        // Invalidate audit trail query
+        queryClient.invalidateQueries({ queryKey: ['audit-trail', currentInvoiceId] });
       }
     } catch (error) {
       console.error('Error adding line item:', error);
@@ -213,6 +230,11 @@ export const LineItemsPanel = ({
           variant: "destructive"
         });
       } else {
+        // Log the deletion to audit trail
+        if (currentInvoiceId) {
+          await logLineItemChange(currentInvoiceId, lineItemId, 'Line Item', 'Deleted', null, 'DELETE');
+        }
+        
         toast({
           title: "Success",
           description: "Line item deleted successfully"
@@ -221,6 +243,8 @@ export const LineItemsPanel = ({
         if (currentInvoiceId) {
           fetchLineItems(currentInvoiceId);
         }
+        // Invalidate audit trail query
+        queryClient.invalidateQueries({ queryKey: ['audit-trail', currentInvoiceId] });
       }
     } catch (error) {
       console.error('Error deleting line item:', error);
