@@ -42,6 +42,8 @@ type ActionBarProps = {
   onUserFilterChange: (filter: "all" | "mine") => void;
   statusFilter: "all" | "pending" | "approved" | "hold";
   onStatusFilterChange: (filter: "all" | "pending" | "approved" | "hold") => void;
+  sortOrder: "newest" | "oldest";
+  onSortOrderChange: (order: "newest" | "oldest") => void;
 };
 
 export const ActionBarWithThemeToggle = ({
@@ -59,6 +61,8 @@ export const ActionBarWithThemeToggle = ({
   onUserFilterChange,
   statusFilter,
   onStatusFilterChange,
+  sortOrder,
+  onSortOrderChange,
 }: ActionBarProps) => {
   const { data: profiles = [] } = useQuery({
     queryKey: ['profiles'],
@@ -138,6 +142,14 @@ export const ActionBarWithThemeToggle = ({
             className="text-sm"
           >
             All
+          </Button>
+
+          <Button 
+            onClick={() => onSortOrderChange(sortOrder === "newest" ? "oldest" : "newest")}
+            variant="outline"
+            className="text-sm"
+          >
+            {sortOrder === "newest" ? "Oldest" : "Newest"}
           </Button>
         </div>
       </div>

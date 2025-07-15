@@ -335,6 +335,39 @@ export type Database = {
         }
         Relationships: []
       }
+      invoice_audit_log: {
+        Row: {
+          change_type: string
+          changed_at: string
+          changed_by: string | null
+          field_name: string
+          id: string
+          invoice_id: number
+          new_value: string | null
+          old_value: string | null
+        }
+        Insert: {
+          change_type?: string
+          changed_at?: string
+          changed_by?: string | null
+          field_name: string
+          id?: string
+          invoice_id: number
+          new_value?: string | null
+          old_value?: string | null
+        }
+        Update: {
+          change_type?: string
+          changed_at?: string
+          changed_by?: string | null
+          field_name?: string
+          id?: string
+          invoice_id?: number
+          new_value?: string | null
+          old_value?: string | null
+        }
+        Relationships: []
+      }
       invoice_coding: {
         Row: {
           afe_number: string | null
@@ -428,6 +461,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      line_items_audit_log: {
+        Row: {
+          change_type: string
+          changed_at: string
+          changed_by: string | null
+          field_name: string
+          id: string
+          invoice_id: number
+          line_item_id: number | null
+          new_value: string | null
+          old_value: string | null
+        }
+        Insert: {
+          change_type?: string
+          changed_at?: string
+          changed_by?: string | null
+          field_name: string
+          id?: string
+          invoice_id: number
+          line_item_id?: number | null
+          new_value?: string | null
+          old_value?: string | null
+        }
+        Update: {
+          change_type?: string
+          changed_at?: string
+          changed_by?: string | null
+          field_name?: string
+          id?: string
+          invoice_id?: number
+          line_item_id?: number | null
+          new_value?: string | null
+          old_value?: string | null
+        }
+        Relationships: []
       }
       n8n_chat_histories: {
         Row: {

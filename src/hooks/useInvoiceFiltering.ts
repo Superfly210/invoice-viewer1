@@ -7,6 +7,7 @@ import { AttachmentInfo } from "./useInvoiceDataFetching";
 export const useInvoiceFiltering = () => {
   const [userFilter, setUserFilter] = useState<"all" | "mine">("mine");
   const [statusFilter, setStatusFilter] = useState<"all" | "pending" | "approved" | "hold">("pending");
+  const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("oldest");
 
   // Get current user
   const { data: user } = useQuery({
@@ -26,12 +27,12 @@ export const useInvoiceFiltering = () => {
   });
 
   const { data: invoices = [], isLoading } = useQuery({
-    queryKey: ['attachment-info'],
+    queryKey: ['attachment-info', sortOrder],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('Attachment_Info')
         .select('*')
-        .order('id', { ascending: true });
+        .order('id', { ascending: sortOrder === "oldest" });
 
       if (error) throw error;
 
@@ -94,13 +95,15 @@ export const useInvoiceFiltering = () => {
     return filtered;
   }, [invoices, userFilter, statusFilter, user]);
 
-  return {
+    return {
     filteredInvoices,
     isLoading,
     userFilter,
     setUserFilter,
     statusFilter,
     setStatusFilter,
+    sortOrder,
+    setSortOrder,
     totalFilteredCount: filteredInvoices.length,
   };
 };

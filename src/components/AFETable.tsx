@@ -1,20 +1,26 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { ChevronUp, ChevronDown } from "lucide-react";
+
+type SortField = 'afe_number' | 'AFE_Description' | 'afe_estimate' | 'approved_amount' | 'awaiting_approval_amount' | 'created_at';
+type SortOrder = 'asc' | 'desc';
 
 export const AFETable = () => {
   const queryClient = useQueryClient();
+  const [sortField, setSortField] = useState<SortField>('created_at');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
   
   const { data: afeData = [], isLoading } = useQuery({
-    queryKey: ['afe-data'],
+    queryKey: ['afe-data', sortField, sortOrder],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('afe')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order(sortField, { ascending: sortOrder === 'asc' });
 
       if (error) throw error;
       return data;
@@ -44,9 +50,37 @@ export const AFETable = () => {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['afe-data'] });
+      queryClient.invalidateQueries({ queryKey: ['afe-data', sortField, sortOrder] });
     },
   });
+
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortOrder('asc');
+    }
+  };
+
+  const SortableHeader = ({ field, children }: { field: SortField; children: React.ReactNode }) => (
+    <TableHead 
+      className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 select-none"
+      onClick={() => handleSort(field)}
+    >
+      <div className="flex items-center justify-between">
+        <span>{children}</span>
+        <div className="flex flex-col ml-1">
+          <ChevronUp 
+            className={`h-3 w-3 ${sortField === field && sortOrder === 'asc' ? 'text-primary' : 'text-gray-400'}`}
+          />
+          <ChevronDown 
+            className={`h-3 w-3 -mt-1 ${sortField === field && sortOrder === 'desc' ? 'text-primary' : 'text-gray-400'}`}
+          />
+        </div>
+      </div>
+    </TableHead>
+  );
 
   if (isLoading) {
     return <div className="text-center py-4">Loading AFE data...</div>;
@@ -58,13 +92,13 @@ export const AFETable = () => {
         <Table>
           <TableHeader className="sticky top-0 bg-background z-10">
             <TableRow>
-              <TableHead>AFE Number</TableHead>
-              <TableHead>Description</TableHead>
+              <SortableHeader field="afe_number">AFE Number</SortableHeader>
+              <SortableHeader field="AFE_Description">Description</SortableHeader>
               <TableHead>Responsible User</TableHead>
-              <TableHead>Estimate</TableHead>
-              <TableHead>Approved Amount</TableHead>
-              <TableHead>Awaiting Approval</TableHead>
-              <TableHead>Created At</TableHead>
+              <SortableHeader field="afe_estimate">Estimate</SortableHeader>
+              <SortableHeader field="approved_amount">Approved Amount</SortableHeader>
+              <SortableHeader field="awaiting_approval_amount">Awaiting Approval</SortableHeader>
+              <SortableHeader field="created_at">Created At</SortableHeader>
             </TableRow>
           </TableHeader>
           <TableBody>

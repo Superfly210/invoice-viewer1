@@ -29,6 +29,8 @@ export const InvoiceReviewer = ({ onSectionChange }: InvoiceReviewerProps) => {
     setUserFilter,
     statusFilter,
     setStatusFilter,
+    sortOrder,
+    setSortOrder,
     totalFilteredCount,
   } = useInvoiceFiltering();
 
@@ -80,6 +82,11 @@ export const InvoiceReviewer = ({ onSectionChange }: InvoiceReviewerProps) => {
     setCurrentFilteredIndex(0); // Reset to first invoice when filter changes
   };
 
+  const handleSortOrderChange = (order: "newest" | "oldest") => {
+    setSortOrder(order);
+    setCurrentFilteredIndex(0); // Reset to first invoice when sort order changes
+  };
+
   console.log("InvoiceReviewer rendering with index:", currentFilteredIndex);
 
   return (
@@ -99,6 +106,8 @@ export const InvoiceReviewer = ({ onSectionChange }: InvoiceReviewerProps) => {
         onUserFilterChange={handleUserFilterChange}
         statusFilter={statusFilter}
         onStatusFilterChange={handleStatusFilterChange}
+        sortOrder={sortOrder}
+        onSortOrderChange={handleSortOrderChange}
       />
       <ResizablePanelGroup direction="vertical" className="flex-1">
         <ResizablePanel defaultSize={70} minSize={30}>
