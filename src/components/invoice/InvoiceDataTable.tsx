@@ -11,6 +11,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { formatCurrency, parseCurrencyValue } from "@/lib/currencyFormatter";
 import { logInvoiceChange } from "@/utils/auditLogger";
 import { useAuth } from "@/components/AuthProvider";
+import { useQuery } from "@tanstack/react-query";
 
 interface InvoiceDataTableProps {
   currentInvoice: AttachmentInfo;
@@ -20,6 +21,26 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { user } = useAuth();
+
+  // Fetch current user's profile to compare with responsible user
+  const { data: currentUserProfile } = useQuery({
+    queryKey: ['current-user-profile', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('full_name, username')
+        .eq('id', user.id)
+        .single();
+      
+      if (error) {
+        console.error('Error fetching user profile:', error);
+        return null;
+      }
+      return data;
+    },
+    enabled: !!user?.id,
+  });
 
   const handleFieldUpdate = async (field: string, newValue: string) => {
     try {
@@ -106,10 +127,11 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
 
   // Helper function to get responsible user highlighting
   const getResponsibleUserHighlighting = (responsibleUser: string | null) => {
-    if (!responsibleUser || !user) return "";
+    if (!responsibleUser || !user || !currentUserProfile) return "";
     
-    // Compare with current user's email or id
-    const isCurrentUser = responsibleUser === user.email || responsibleUser === user.id;
+    // Compare with current user's full name or username
+    const currentUserName = currentUserProfile.full_name || currentUserProfile.username;
+    const isCurrentUser = responsibleUser === currentUserName;
     
     if (isCurrentUser) {
       return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100";

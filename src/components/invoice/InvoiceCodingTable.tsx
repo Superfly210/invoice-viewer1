@@ -8,6 +8,7 @@ import { EditableLineItemCell } from "./EditableLineItemCell";
 import { X, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
+import { useAuth } from "@/components/AuthProvider";
 
 interface InvoiceCodingTableProps {
   invoiceId: number;
@@ -25,6 +26,7 @@ export const InvoiceCodingTable = ({ invoiceId }: InvoiceCodingTableProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isAddingRow, setIsAddingRow] = useState(false);
+  const { user } = useAuth();
 
   const { data: codingData = [], isLoading } = useQuery({
     queryKey: ['invoice-coding', invoiceId],
@@ -44,6 +46,15 @@ export const InvoiceCodingTable = ({ invoiceId }: InvoiceCodingTableProps) => {
   const handleFieldUpdate = async (codingId: number, field: string, newValue: string) => {
     try {
       console.log(`Updating coding ${codingId} ${field} to:`, newValue);
+      
+      // Get old value for audit trail
+      const { data: oldData } = await supabase
+        .from('invoice_coding')
+        .select(field)
+        .eq('id', codingId)
+        .single();
+      
+      const oldValue = oldData ? oldData[field] : null;
       
       // Convert string values to appropriate types for database
       let processedValue: any = newValue;
@@ -65,11 +76,25 @@ export const InvoiceCodingTable = ({ invoiceId }: InvoiceCodingTableProps) => {
           variant: "destructive",
         });
       } else {
+        // Log the change to audit trail
+        await supabase
+          .from('line_items_audit_log')
+          .insert({
+            invoice_id: invoiceId,
+            line_item_id: codingId,
+            field_name: `coding_${field}`,
+            old_value: oldValue ? String(oldValue) : null,
+            new_value: String(processedValue),
+            changed_by: user?.id,
+            change_type: 'UPDATE'
+          });
+        
         toast({
           title: "Success",
           description: `${field} updated successfully`,
         });
         queryClient.invalidateQueries({ queryKey: ['invoice-coding', invoiceId] });
+        queryClient.invalidateQueries({ queryKey: ['audit-trail', invoiceId] });
       }
     } catch (error) {
       console.error('Error updating coding field:', error);
@@ -83,6 +108,13 @@ export const InvoiceCodingTable = ({ invoiceId }: InvoiceCodingTableProps) => {
 
   const handleDeleteRow = async (codingId: number) => {
     try {
+      // Get the row data before deletion for audit trail
+      const { data: deletedData } = await supabase
+        .from('invoice_coding')
+        .select('*')
+        .eq('id', codingId)
+        .single();
+
       const { error } = await supabase
         .from('invoice_coding')
         .delete()
@@ -96,11 +128,27 @@ export const InvoiceCodingTable = ({ invoiceId }: InvoiceCodingTableProps) => {
           variant: "destructive",
         });
       } else {
+        // Log the deletion to audit trail
+        if (deletedData) {
+          await supabase
+            .from('line_items_audit_log')
+            .insert({
+              invoice_id: invoiceId,
+              line_item_id: codingId,
+              field_name: 'coding_row',
+              old_value: JSON.stringify(deletedData),
+              new_value: null,
+              changed_by: user?.id,
+              change_type: 'DELETE'
+            });
+        }
+        
         toast({
           title: "Success",
           description: "Row deleted successfully",
         });
         queryClient.invalidateQueries({ queryKey: ['invoice-coding', invoiceId] });
+        queryClient.invalidateQueries({ queryKey: ['audit-trail', invoiceId] });
       }
     } catch (error) {
       console.error('Error deleting coding row:', error);
@@ -115,7 +163,7 @@ export const InvoiceCodingTable = ({ invoiceId }: InvoiceCodingTableProps) => {
   const handleAddRow = async () => {
     try {
       setIsAddingRow(true);
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('invoice_coding')
         .insert({
           invoice_id: invoiceId,
@@ -123,7 +171,9 @@ export const InvoiceCodingTable = ({ invoiceId }: InvoiceCodingTableProps) => {
           cost_center: '',
           cost_code: '',
           total: 0
-        });
+        })
+        .select()
+        .single();
 
       if (error) {
         console.error('Error adding coding row:', error);
@@ -133,11 +183,25 @@ export const InvoiceCodingTable = ({ invoiceId }: InvoiceCodingTableProps) => {
           variant: "destructive",
         });
       } else {
+        // Log the addition to audit trail
+        await supabase
+          .from('line_items_audit_log')
+          .insert({
+            invoice_id: invoiceId,
+            line_item_id: data.id,
+            field_name: 'coding_row',
+            old_value: null,
+            new_value: JSON.stringify(data),
+            changed_by: user?.id,
+            change_type: 'INSERT'
+          });
+        
         toast({
           title: "Success",
           description: "New row added successfully",
         });
         queryClient.invalidateQueries({ queryKey: ['invoice-coding', invoiceId] });
+        queryClient.invalidateQueries({ queryKey: ['audit-trail', invoiceId] });
       }
     } catch (error) {
       console.error('Error adding coding row:', error);
