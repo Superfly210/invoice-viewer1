@@ -301,15 +301,16 @@ export const LineItemsPanel = ({
       </div>;
   }
   
+  // Calculate the total sum of all line items
+  const totalSum = lineItems.reduce((sum, item) => {
+    return sum + (item.Total || 0);
+  }, 0);
+
   return <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-4 h-full overflow-auto">
-      <div className="flex justify-between items-center mb-4">
+      <div className="mb-4">
         <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-200">
           Line Items for Invoice #{currentInvoiceId} ({lineItems.length} items)
         </h2>
-        <Button onClick={handleAddLineItem} size="sm" className="flex items-center">
-          <Plus className="h-4 w-4 mr-1" />
-          Add Line Item
-        </Button>
       </div>
       
       <div className="overflow-x-auto">
@@ -385,8 +386,24 @@ export const LineItemsPanel = ({
                   <EditableLineItemCell value={item.Total ? formatCurrency(item.Total) : null} onSave={newValue => handleFieldUpdate(item.id, 'Total', newValue)} type="text" />
                 </TableCell>
               </TableRow>)}
+            {/* Total row */}
+            <TableRow className="border-t-2 border-slate-300 dark:border-slate-600 font-semibold">
+              <TableCell colSpan={10} className="text-right text-slate-800 dark:text-slate-200">
+                Total:
+              </TableCell>
+              <TableCell className="text-right text-slate-800 dark:text-slate-200">
+                {formatCurrency(totalSum)}
+              </TableCell>
+            </TableRow>
           </TableBody>
         </Table>
+      </div>
+      
+      <div className="mt-4 flex justify-center">
+        <Button onClick={handleAddLineItem} size="sm" className="flex items-center">
+          <Plus className="h-4 w-4 mr-1" />
+          Add Line Item
+        </Button>
       </div>
     </div>;
 };
