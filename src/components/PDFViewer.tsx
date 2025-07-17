@@ -44,7 +44,8 @@ export const PDFViewer = ({ pdfUrl, onPageChange }: PDFViewerProps) => {
       // Reset zoom level and page to defaults when loading a new PDF
       setZoomLevel(100);
       setCurrentPage(1);
-      setTotalPages(6); // Set realistic default for demos
+      // Try to get actual page count from the PDF or use a reasonable default
+      setTotalPages(1);
       
     } catch (err) {
       console.error("Error processing PDF URL:", err);
@@ -64,57 +65,27 @@ export const PDFViewer = ({ pdfUrl, onPageChange }: PDFViewerProps) => {
 
   const zoomIn = () => {
     setZoomLevel(prev => Math.min(prev + 10, 200));
-    if (iframeRef.current && iframeRef.current.contentWindow) {
-      try {
-        const iframe = iframeRef.current;
-        iframe.style.transform = `scale(${(zoomLevel + 10) / 100}) rotate(${rotation}deg)`;
-        iframe.style.transformOrigin = 'top left';
-      } catch (err) {
-        console.error("Error during zoom in:", err);
-      }
-    }
+    // Note: Zoom controls don't work with Google Drive embedded PDFs due to iframe limitations
+    console.log("Zoom in to:", zoomLevel + 10);
   };
 
   const zoomOut = () => {
     setZoomLevel(prev => Math.max(prev - 10, 50));
-    if (iframeRef.current && iframeRef.current.contentWindow) {
-      try {
-        const iframe = iframeRef.current;
-        iframe.style.transform = `scale(${(zoomLevel - 10) / 100}) rotate(${rotation}deg)`;
-        iframe.style.transformOrigin = 'top left';
-      } catch (err) {
-        console.error("Error during zoom out:", err);
-      }
-    }
+    // Note: Zoom controls don't work with Google Drive embedded PDFs due to iframe limitations
+    console.log("Zoom out to:", zoomLevel - 10);
   };
 
   const fitToWidth = () => {
     setZoomLevel(100);
-    if (iframeRef.current) {
-      try {
-        const iframe = iframeRef.current;
-        iframe.style.transform = `rotate(${rotation}deg)`;
-        iframe.style.width = '100%';
-        iframe.style.height = '100%';
-      } catch (err) {
-        console.error("Error fitting to width:", err);
-      }
-    }
+    // Note: Fit to width doesn't work with Google Drive embedded PDFs due to iframe limitations
+    console.log("Fit to width");
   };
 
   const rotateView = () => {
     const newRotation = (rotation + 90) % 360;
     setRotation(newRotation);
-    
-    if (iframeRef.current) {
-      try {
-        const iframe = iframeRef.current;
-        iframe.style.transform = `scale(${zoomLevel / 100}) rotate(${newRotation}deg)`;
-        iframe.style.transformOrigin = 'center';
-      } catch (err) {
-        console.error("Error rotating view:", err);
-      }
-    }
+    // Note: Rotation doesn't work with Google Drive embedded PDFs due to iframe limitations
+    console.log("Rotate to:", newRotation);
   };
 
   const previousPage = () => {
@@ -122,41 +93,18 @@ export const PDFViewer = ({ pdfUrl, onPageChange }: PDFViewerProps) => {
       const newPage = currentPage - 1;
       console.log("Going to previous page:", newPage);
       setCurrentPage(newPage);
-      
-      // For Google Drive embedded PDFs, try URL navigation
-      if (iframeRef.current && processedUrl) {
-        try {
-          if (processedUrl.includes('drive.google.com/file/d/')) {
-            const baseUrl = processedUrl.split('#')[0];
-            const newUrl = `${baseUrl}#page=${newPage}`;
-            iframeRef.current.src = newUrl;
-          }
-        } catch (err) {
-          console.error("Error navigating to previous page:", err);
-        }
-      }
+      // Note: Page navigation doesn't work with Google Drive embedded PDFs due to iframe limitations
+      // Google Drive preview controls its own navigation internally
     }
   };
 
   const nextPage = () => {
-    if (currentPage < totalPages) {
-      const newPage = currentPage + 1;
-      console.log("Going to next page:", newPage);
-      setCurrentPage(newPage);
-      
-      // For Google Drive embedded PDFs, try URL navigation
-      if (iframeRef.current && processedUrl) {
-        try {
-          if (processedUrl.includes('drive.google.com/file/d/')) {
-            const baseUrl = processedUrl.split('#')[0];
-            const newUrl = `${baseUrl}#page=${newPage}`;
-            iframeRef.current.src = newUrl;
-          }
-        } catch (err) {
-          console.error("Error navigating to next page:", err);
-        }
-      }
-    }
+    // Since we can't detect the actual page count from Google Drive, allow navigation
+    const newPage = currentPage + 1;
+    console.log("Going to next page:", newPage);
+    setCurrentPage(newPage);
+    // Note: Page navigation doesn't work with Google Drive embedded PDFs due to iframe limitations
+    // Google Drive preview controls its own navigation internally
   };
 
   return (
@@ -212,13 +160,13 @@ export const PDFViewer = ({ pdfUrl, onPageChange }: PDFViewerProps) => {
             <ChevronUp className="h-4 w-4" />
           </Button>
           <span className="text-sm">
-            Page {currentPage} / {totalPages}
+            Page {currentPage}
           </span>
           <Button 
             onClick={nextPage} 
             variant="outline" 
             size="icon" 
-            disabled={currentPage === totalPages}
+            disabled={false}
             className="h-8 w-8"
             title="Next Page"
           >

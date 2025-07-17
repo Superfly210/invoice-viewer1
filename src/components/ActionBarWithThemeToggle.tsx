@@ -157,13 +157,13 @@ export const ActionBarWithThemeToggle = ({
       <div className="flex items-center space-x-3">
         <Button 
           onClick={onApprove}
-          className="bg-green-500 hover:bg-green-600 text-white w-[180px]"
+          className="bg-green-500 hover:bg-green-600 text-white w-[200px]"
         >
           <CheckCircle className="h-4 w-4 mr-2" /> Approve
         </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button className="bg-green-400 hover:bg-green-500 text-white w-[180px]">
+            <Button className="bg-green-400 hover:bg-green-500 text-white w-[200px]">
               <CornerUpRight className="h-4 w-4 mr-2" /> 
               Approve & Forward
               <ChevronDown className="h-4 w-4 ml-2" />
@@ -182,7 +182,7 @@ export const ActionBarWithThemeToggle = ({
         </DropdownMenu>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button className="bg-red-500 hover:bg-red-600 text-white w-[180px]">
+            <Button className="bg-red-500 hover:bg-red-600 text-white w-[200px]">
               <XCircle className="h-4 w-4 mr-2" /> 
               Deny
               <ChevronDown className="h-4 w-4 ml-2" />
@@ -199,13 +199,13 @@ export const ActionBarWithThemeToggle = ({
         </DropdownMenu>
         <Button 
           onClick={onQuarantine}
-          className="bg-[#FEF7CD] hover:bg-[#F6E68E] text-amber-800 w-[180px] dark:bg-amber-700 dark:hover:bg-amber-800 dark:text-white"
+          className="bg-[#FEF7CD] hover:bg-[#F6E68E] text-amber-800 w-[200px] dark:bg-amber-700 dark:hover:bg-amber-800 dark:text-white"
         >
           <PauseCircle className="h-4 w-4 mr-2" /> Hold
         </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button className="w-[180px]">
+            <Button className="w-[200px]">
               <CornerUpRight className="h-4 w-4 mr-2" /> 
               Forward
               <ChevronDown className="h-4 w-4 ml-2" />
