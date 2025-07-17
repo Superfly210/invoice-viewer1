@@ -26,8 +26,8 @@ export const InvoiceDataPanel = ({ currentInvoice, isLoading, onSectionChange }:
 
   return (
     <div className="h-full flex flex-col">
-      <div className="sticky top-0 z-10 bg-white dark:bg-slate-900 p-4 border-b border-slate-200 dark:border-slate-700">
-        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full h-full flex flex-col">
+        <div className="sticky top-0 z-10 bg-white dark:bg-slate-900 p-4 border-b border-slate-200 dark:border-slate-700">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="data" className="flex items-center">
               <TableIcon className="h-4 w-4 mr-2" />
@@ -38,16 +38,16 @@ export const InvoiceDataPanel = ({ currentInvoice, isLoading, onSectionChange }:
               Metadata
             </TabsTrigger>
           </TabsList>
-        </Tabs>
-      </div>
-      <div className="flex-1 overflow-auto p-4">
-        <TabsContent value="data" className="mt-0" style={{ display: activeTab === 'data' ? 'block' : 'none' }}>
-          <InvoiceData currentInvoice={currentInvoice} isLoading={isLoading} />
-        </TabsContent>
-        <TabsContent value="metadata" className="mt-0" style={{ display: activeTab === 'metadata' ? 'block' : 'none' }}>
-          <MetadataPanel currentInvoiceId={currentInvoice?.id || null} />
-        </TabsContent>
-      </div>
+        </div>
+        <div className="flex-1 overflow-auto p-4">
+          <TabsContent value="data" className="mt-0">
+            <InvoiceData currentInvoice={currentInvoice} isLoading={isLoading} />
+          </TabsContent>
+          <TabsContent value="metadata" className="mt-0">
+            <MetadataPanel currentInvoiceId={currentInvoice?.id || null} />
+          </TabsContent>
+        </div>
+      </Tabs>
     </div>
   );
 };
