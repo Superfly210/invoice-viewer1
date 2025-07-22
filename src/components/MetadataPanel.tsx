@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { ChevronDown, ChevronUp, MessageSquare, Send, Edit3, Trash2, Plus } from "lucide-react";
+import { ChevronDown, ChevronUp, MessageSquare, Send, Edit3, Trash2, Plus, Clock, ArrowUpDown, Mail } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -32,15 +32,15 @@ interface MetadataPanelProps {
 
 export const MetadataPanel = ({ currentInvoiceId }: MetadataPanelProps) => {
   const [expandedSections, setExpandedSections] = useState({
-    history: true,
+    eventHistory: true,
     comments: true,
-    auditTrail: true,
   });
   
   const [commentText, setCommentText] = useState("");
   const [comments, setComments] = useState<Comment[]>([]);
   const [emailHistory, setEmailHistory] = useState<EmailInfo[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
   const { toast } = useToast();
 
   const { data: auditTrail = [], isLoading: auditLoading } = useAuditTrail(currentInvoiceId || 0);
@@ -97,11 +97,15 @@ export const MetadataPanel = ({ currentInvoiceId }: MetadataPanelProps) => {
     }
   };
 
-  const toggleSection = (section: 'history' | 'comments' | 'auditTrail') => {
+  const toggleSection = (section: 'eventHistory' | 'comments') => {
     setExpandedSections(prev => ({
       ...prev,
       [section]: !prev[section],
     }));
+  };
+
+  const toggleSortOrder = () => {
+    setSortOrder(prev => prev === 'newest' ? 'oldest' : 'newest');
   };
   
   const handleCommentSubmit = () => {
@@ -123,129 +127,164 @@ export const MetadataPanel = ({ currentInvoiceId }: MetadataPanelProps) => {
     return date.toLocaleString();
   };
 
-  const formatAuditChange = (entry: any) => {
+  // Combine and sort event history
+  const getCombinedEventHistory = () => {
+    const events: Array<{ type: 'email' | 'audit', data: any, timestamp: string }> = [];
+
+    // Add email events
+    emailHistory.forEach(email => {
+      events.push({
+        type: 'email',
+        data: email,
+        timestamp: email.Date || email.created_at
+      });
+    });
+
+    // Add audit events
+    auditTrail.forEach(audit => {
+      events.push({
+        type: 'audit',
+        data: audit,
+        timestamp: audit.changed_at
+      });
+    });
+
+    // Sort events
+    events.sort((a, b) => {
+      const dateA = new Date(a.timestamp).getTime();
+      const dateB = new Date(b.timestamp).getTime();
+      return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
+    });
+
+    return events;
+  };
+
+  const renderEventItem = (event: { type: 'email' | 'audit', data: any, timestamp: string }, index: number) => {
+    if (event.type === 'email') {
+      return (
+        <div key={`email-${event.data.id_}`} className="flex items-start space-x-3 p-3 bg-blue-50 rounded-md">
+          <div className="flex-shrink-0 mt-1">
+            <Mail className="h-4 w-4 text-blue-600" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-sm font-medium text-slate-700">Email Received</span>
+              <span className="text-xs text-slate-500">
+                {formatEmailDate(event.data.Date, event.data.created_at)}
+              </span>
+            </div>
+            <div className="text-xs text-slate-600 mb-1">
+              <strong>From:</strong> {event.data.From || "Unknown sender"}
+            </div>
+            <div className="text-xs text-slate-600">
+              <strong>Subject:</strong> {event.data.Subject || "No subject"}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Audit event
     const changeTypeIcons = {
-      INSERT: <Plus className="h-3 w-3 text-green-600" />,
-      UPDATE: <Edit3 className="h-3 w-3 text-blue-600" />,
-      DELETE: <Trash2 className="h-3 w-3 text-red-600" />
+      INSERT: <Plus className="h-4 w-4 text-green-600" />,
+      UPDATE: <Edit3 className="h-4 w-4 text-blue-600" />,
+      DELETE: <Trash2 className="h-4 w-4 text-red-600" />
     };
 
-    const sourceLabel = entry.source_type === 'invoice' ? 'Invoice' : 'Line Item';
+    const sourceLabel = event.data.source_type === 'invoice' ? 'Invoice' : 'Line Item';
     
     return (
-      <div key={entry.id} className="flex items-start space-x-3 p-3 bg-slate-50 rounded-md">
+      <div key={`audit-${event.data.id}`} className="flex items-start space-x-3 p-3 bg-slate-50 rounded-md">
         <div className="flex-shrink-0 mt-1">
-          {changeTypeIcons[entry.change_type as keyof typeof changeTypeIcons]}
+          {changeTypeIcons[event.data.change_type as keyof typeof changeTypeIcons]}
         </div>
         <div className="flex-1 min-w-0">
-          <div className="flex items-center space-x-2 mb-1">
+          <div className="flex items-center justify-between mb-1">
             <span className="text-sm font-medium text-slate-700">
-              {sourceLabel} - {entry.field_name}
+              {sourceLabel} - {event.data.field_name}
             </span>
             <span className="text-xs text-slate-500">
-              {entry.change_type}
+              {new Date(event.data.changed_at).toLocaleString()}
             </span>
           </div>
-          {entry.change_type === 'UPDATE' && (
+          {event.data.user_name && (
+            <div className="text-xs text-slate-600 mb-1">
+              <strong>Changed by:</strong> {event.data.user_name}
+            </div>
+          )}
+          {event.data.change_type === 'UPDATE' && (
             <div className="text-xs text-slate-600">
-              <span className="text-red-600">From: {entry.old_value || 'null'}</span>
+              <span className="text-red-600">From: {event.data.old_value || 'null'}</span>
               <span className="mx-2">→</span>
-              <span className="text-green-600">To: {entry.new_value || 'null'}</span>
+              <span className="text-green-600">To: {event.data.new_value || 'null'}</span>
             </div>
           )}
-          {entry.change_type === 'INSERT' && (
+          {event.data.change_type === 'INSERT' && (
             <div className="text-xs text-green-600">
-              Added: {entry.new_value || 'N/A'}
+              Added: {event.data.new_value || 'N/A'}
             </div>
           )}
-          {entry.change_type === 'DELETE' && (
+          {event.data.change_type === 'DELETE' && (
             <div className="text-xs text-red-600">
-              Removed: {entry.old_value || 'N/A'}
+              Removed: {event.data.old_value || 'N/A'}
             </div>
           )}
-          <div className="text-xs text-slate-500 mt-1">
-            {new Date(entry.changed_at).toLocaleString()}
-          </div>
         </div>
       </div>
     );
   };
 
+  const combinedEvents = getCombinedEventHistory();
+
   return (
     <div className="bg-white rounded-lg shadow-sm">
       <div className="border-b border-slate-200 p-4 flex justify-between items-center">
-        <h2 className="text-xl font-semibold text-slate-800">Invoice Metadata</h2>
+        <h2 className="text-xl font-semibold text-slate-800">Event History</h2>
         <div className="rounded-full px-3 py-1 text-sm bg-amber-100 text-amber-800">
           Pending Review
         </div>
       </div>
 
       <div className="p-4 space-y-4">
-        {/* Email History Section */}
+        {/* Event History Section */}
         <div className="border border-slate-200 rounded-md overflow-hidden">
           <button
-            onClick={() => toggleSection('history')}
+            onClick={() => toggleSection('eventHistory')}
             className="w-full flex justify-between items-center p-3 bg-slate-50 text-left font-medium text-slate-700 hover:bg-slate-100"
           >
-            Email History
-            {expandedSections.history ? (
-              <ChevronUp className="h-5 w-5 text-slate-500" />
-            ) : (
-              <ChevronDown className="h-5 w-5 text-slate-500" />
-            )}
-          </button>
-          
-          {expandedSections.history && (
-            <div className="p-3 space-y-3">
-              {isLoading ? (
-                <div className="text-center text-slate-500">Loading email history...</div>
-              ) : emailHistory.length > 0 ? (
-                emailHistory.map(email => (
-                  <div key={email.id_} className="flex items-center">
-                    <div className="w-6 h-6 flex-shrink-0">
-                      <div className="w-3 h-3 rounded-full mx-auto bg-blue-500"></div>
-                    </div>
-                    <div className="flex-1 flex flex-col md:flex-row md:items-center">
-                      <div className="font-medium text-slate-700">{email.From || "Unknown sender"}</div>
-                      <div className="md:mx-2 text-slate-500">→</div>
-                      <div className="px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
-                        Received
-                      </div>
-                    </div>
-                    <div className="text-xs text-slate-500">
-                      {formatEmailDate(email.Date, email.created_at)}
-                    </div>
-                  </div>
-                ))
+            <div className="flex items-center space-x-2">
+              <Clock className="h-4 w-4" />
+              <span>Event History</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleSortOrder();
+                }}
+                className="h-6 px-2 text-xs"
+              >
+                <ArrowUpDown className="h-3 w-3 mr-1" />
+                {sortOrder === 'newest' ? 'Newest' : 'Oldest'}
+              </Button>
+              {expandedSections.eventHistory ? (
+                <ChevronUp className="h-5 w-5 text-slate-500" />
               ) : (
-                <div className="text-center text-slate-500">No email history available</div>
+                <ChevronDown className="h-5 w-5 text-slate-500" />
               )}
             </div>
-          )}
-        </div>
-
-        {/* Audit Trail Section */}
-        <div className="border border-slate-200 rounded-md overflow-hidden">
-          <button
-            onClick={() => toggleSection('auditTrail')}
-            className="w-full flex justify-between items-center p-3 bg-slate-50 text-left font-medium text-slate-700 hover:bg-slate-100"
-          >
-            Change History
-            {expandedSections.auditTrail ? (
-              <ChevronUp className="h-5 w-5 text-slate-500" />
-            ) : (
-              <ChevronDown className="h-5 w-5 text-slate-500" />
-            )}
           </button>
           
-          {expandedSections.auditTrail && (
-            <div className="p-3 space-y-2 max-h-96 overflow-y-auto">
-              {auditLoading ? (
-                <div className="text-center text-slate-500">Loading change history...</div>
-              ) : auditTrail.length > 0 ? (
-                auditTrail.map(formatAuditChange)
+          {expandedSections.eventHistory && (
+            <div className="p-3 space-y-3 max-h-96 overflow-y-auto">
+              {isLoading || auditLoading ? (
+                <div className="text-center text-slate-500">Loading event history...</div>
+              ) : combinedEvents.length > 0 ? (
+                combinedEvents.map(renderEventItem)
               ) : (
-                <div className="text-center text-slate-500">No changes recorded yet</div>
+                <div className="text-center text-slate-500">No events recorded yet</div>
               )}
             </div>
           )}

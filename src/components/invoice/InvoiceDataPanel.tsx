@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { InvoiceData } from "@/components/InvoiceData";
 import { MetadataPanel } from "@/components/MetadataPanel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { TableIcon, FileTextIcon } from "lucide-react";
+import { TableIcon, Clock } from "lucide-react";
 import { AttachmentInfo } from "@/hooks/useInvoiceDataFetching";
 
 interface InvoiceDataPanelProps {
@@ -33,9 +33,9 @@ export const InvoiceDataPanel = ({ currentInvoice, isLoading, onSectionChange }:
               <TableIcon className="h-4 w-4 mr-2" />
               Invoice Data
             </TabsTrigger>
-            <TabsTrigger value="metadata" className="flex items-center">
-              <FileTextIcon className="h-4 w-4 mr-2" />
-              Metadata
+            <TabsTrigger value="event-history" className="flex items-center">
+              <Clock className="h-4 w-4 mr-2" />
+              Event History
             </TabsTrigger>
           </TabsList>
         </div>
@@ -43,7 +43,7 @@ export const InvoiceDataPanel = ({ currentInvoice, isLoading, onSectionChange }:
           <TabsContent value="data" className="mt-0">
             <InvoiceData currentInvoice={currentInvoice} isLoading={isLoading} />
           </TabsContent>
-          <TabsContent value="metadata" className="mt-0">
+          <TabsContent value="event-history" className="mt-0">
             <MetadataPanel currentInvoiceId={currentInvoice?.id || null} />
           </TabsContent>
         </div>

@@ -12,6 +12,7 @@ export type AuditLogEntry = {
   changed_at: string;
   source_type: 'invoice' | 'line_item';
   line_item_id?: number | null;
+  user_name?: string;
 };
 
 export const useAuditTrail = (invoiceId: number) => {
@@ -23,39 +24,38 @@ export const useAuditTrail = (invoiceId: number) => {
       let combinedLogs: AuditLogEntry[] = [];
 
       try {
-        // Fetch from the audit tables directly using REST API
-        const SUPABASE_URL = "https://bumyvuiywdnffhmayxcz.supabase.co";
-        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ1bXl2dWl5d2RuZmZobWF5eGN6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE5Njc3MDgsImV4cCI6MjA1NzU0MzcwOH0.20yKpjbuWYIPNwc4SwqMoZNXZv4wUksa1xuGdXaGe78";
+        // Use Supabase client to fetch audit data with user information
+        const { data: invoiceAuditData, error: invoiceError } = await supabase
+          .from('invoice_audit_log')
+          .select(`
+            *,
+            profiles!invoice_audit_log_changed_by_fkey(full_name, username)
+          `)
+          .eq('invoice_id', invoiceId)
+          .order('changed_at', { ascending: false });
 
-        const invoiceResponse = await fetch(`${SUPABASE_URL}/rest/v1/invoice_audit_log?invoice_id=eq.${invoiceId}&order=changed_at.desc`, {
-          headers: {
-            'apikey': SUPABASE_KEY,
-            'Authorization': `Bearer ${SUPABASE_KEY}`,
-            'Content-Type': 'application/json'
-          }
-        });
+        const { data: lineItemsAuditData, error: lineItemsError } = await supabase
+          .from('line_items_audit_log')
+          .select(`
+            *,
+            profiles!line_items_audit_log_changed_by_fkey(full_name, username)
+          `)
+          .eq('invoice_id', invoiceId)
+          .order('changed_at', { ascending: false });
 
-        const lineItemsResponse = await fetch(`${SUPABASE_URL}/rest/v1/line_items_audit_log?invoice_id=eq.${invoiceId}&order=changed_at.desc`, {
-          headers: {
-            'apikey': SUPABASE_KEY,
-            'Authorization': `Bearer ${SUPABASE_KEY}`,
-            'Content-Type': 'application/json'
-          }
-        });
-
-        if (invoiceResponse.ok) {
-          const invoiceAuditData = await invoiceResponse.json();
+        if (!invoiceError && invoiceAuditData) {
           combinedLogs.push(...invoiceAuditData.map((log: any) => ({
             ...log,
-            source_type: 'invoice' as const
+            source_type: 'invoice' as const,
+            user_name: log.profiles?.full_name || log.profiles?.username || 'Unknown User'
           })));
         }
 
-        if (lineItemsResponse.ok) {
-          const lineItemsAuditData = await lineItemsResponse.json();
+        if (!lineItemsError && lineItemsAuditData) {
           combinedLogs.push(...lineItemsAuditData.map((log: any) => ({
             ...log,
-            source_type: 'line_item' as const
+            source_type: 'line_item' as const,
+            user_name: log.profiles?.full_name || log.profiles?.username || 'Unknown User'
           })));
         }
       } catch (error) {
