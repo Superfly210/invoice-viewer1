@@ -24,30 +24,51 @@ export const useAuditTrail = (invoiceId: number) => {
       let combinedLogs: AuditLogEntry[] = [];
 
       try {
-        // Use Supabase client to fetch audit data with user information
+        // Fetch audit data with a simple approach due to RLS complexity
         const { data: invoiceAuditData, error: invoiceError } = await supabase
           .from('invoice_audit_log')
-          .select(`
-            *,
-            profiles!invoice_audit_log_changed_by_fkey(full_name, username)
-          `)
+          .select('*')
           .eq('invoice_id', invoiceId)
           .order('changed_at', { ascending: false });
 
         const { data: lineItemsAuditData, error: lineItemsError } = await supabase
           .from('line_items_audit_log')
-          .select(`
-            *,
-            profiles!line_items_audit_log_changed_by_fkey(full_name, username)
-          `)
+          .select('*')
           .eq('invoice_id', invoiceId)
           .order('changed_at', { ascending: false });
+
+        // Fetch user profiles separately to avoid RLS issues
+        const userIds = new Set<string>();
+        if (invoiceAuditData) {
+          invoiceAuditData.forEach((log: any) => {
+            if (log.changed_by) userIds.add(log.changed_by);
+          });
+        }
+        if (lineItemsAuditData) {
+          lineItemsAuditData.forEach((log: any) => {
+            if (log.changed_by) userIds.add(log.changed_by);
+          });
+        }
+
+        // Fetch profiles for all user IDs
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, full_name, username')
+          .in('id', Array.from(userIds));
+
+        // Create a map for quick lookup
+        const profilesMap = new Map();
+        profiles?.forEach((profile: any) => {
+          profilesMap.set(profile.id, profile);
+        });
 
         if (!invoiceError && invoiceAuditData) {
           combinedLogs.push(...invoiceAuditData.map((log: any) => ({
             ...log,
             source_type: 'invoice' as const,
-            user_name: log.profiles?.full_name || log.profiles?.username || 'Unknown User'
+            user_name: profilesMap.get(log.changed_by)?.full_name || 
+                      profilesMap.get(log.changed_by)?.username || 
+                      'Unknown User'
           })));
         }
 
@@ -55,7 +76,9 @@ export const useAuditTrail = (invoiceId: number) => {
           combinedLogs.push(...lineItemsAuditData.map((log: any) => ({
             ...log,
             source_type: 'line_item' as const,
-            user_name: log.profiles?.full_name || log.profiles?.username || 'Unknown User'
+            user_name: profilesMap.get(log.changed_by)?.full_name || 
+                      profilesMap.get(log.changed_by)?.username || 
+                      'Unknown User'
           })));
         }
       } catch (error) {
