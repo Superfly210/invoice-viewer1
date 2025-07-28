@@ -1,6 +1,6 @@
 
 import { useState, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { AttachmentInfo } from "./useInvoiceDataFetching";
 
@@ -8,6 +8,7 @@ export const useInvoiceFiltering = () => {
   const [userFilter, setUserFilter] = useState<"all" | "mine">("mine");
   const [statusFilter, setStatusFilter] = useState<"all" | "pending" | "approved" | "hold">("pending");
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("oldest");
+  const queryClient = useQueryClient();
 
   // Get current user
   const { data: user } = useQuery({
@@ -61,8 +62,14 @@ export const useInvoiceFiltering = () => {
 
       return processedData as AttachmentInfo[];
     },
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
+
+  // Function to refresh data from database
+  const refreshData = () => {
+    queryClient.invalidateQueries({ queryKey: ['attachment-info', sortOrder] });
+    queryClient.invalidateQueries({ queryKey: ['current-user'] });
+  };
 
   const filteredInvoices = useMemo(() => {
     let filtered = [...invoices];
@@ -105,5 +112,6 @@ export const useInvoiceFiltering = () => {
     sortOrder,
     setSortOrder,
     totalFilteredCount: filteredInvoices.length,
+    refreshData,
   };
 };

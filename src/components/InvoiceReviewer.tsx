@@ -12,6 +12,7 @@ import { InvoiceDataPanel } from "@/components/invoice/InvoiceDataPanel";
 import { DocumentViewer } from "@/components/document/DocumentViewer";
 import { useToastNotifications } from "@/hooks/useToastNotifications";
 import { useInvoiceFiltering } from "@/hooks/useInvoiceFiltering";
+import { useToast } from "@/hooks/use-toast";
 
 interface InvoiceReviewerProps {
   onSectionChange?: (section: string) => void;
@@ -21,6 +22,7 @@ export const InvoiceReviewer = ({ onSectionChange }: InvoiceReviewerProps) => {
   const [currentFilteredIndex, setCurrentFilteredIndex] = useState(0);
   const [pdfCurrentPage, setPdfCurrentPage] = useState(1);
   const [pdfTotalPages, setPdfTotalPages] = useState(3);
+  const { toast } = useToast();
   
   const {
     filteredInvoices,
@@ -32,6 +34,7 @@ export const InvoiceReviewer = ({ onSectionChange }: InvoiceReviewerProps) => {
     sortOrder,
     setSortOrder,
     totalFilteredCount,
+    refreshData,
   } = useInvoiceFiltering();
 
   const currentInvoice = filteredInvoices[currentFilteredIndex] || null;
@@ -85,6 +88,16 @@ export const InvoiceReviewer = ({ onSectionChange }: InvoiceReviewerProps) => {
   const handleSortOrderChange = (order: "newest" | "oldest") => {
     setSortOrder(order);
     setCurrentFilteredIndex(0); // Reset to first invoice when sort order changes
+    // Refresh data when sort order changes to ensure we get the latest data
+    refreshData();
+  };
+
+  const handleRefresh = () => {
+    refreshData();
+    toast({
+      title: "Data Refreshed",
+      description: "Invoice data has been refreshed from the database",
+    });
   };
 
   console.log("InvoiceReviewer rendering with index:", currentFilteredIndex);
@@ -108,6 +121,8 @@ export const InvoiceReviewer = ({ onSectionChange }: InvoiceReviewerProps) => {
         onStatusFilterChange={handleStatusFilterChange}
         sortOrder={sortOrder}
         onSortOrderChange={handleSortOrderChange}
+        onRefresh={handleRefresh}
+        isLoading={isLoading}
       />
       <ResizablePanelGroup direction="vertical" className="flex-1">
         <ResizablePanel defaultSize={70} minSize={30}>

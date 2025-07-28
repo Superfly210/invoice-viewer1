@@ -8,7 +8,8 @@ import {
   PauseCircle,
   ChevronDown,
   Filter,
-  Send
+  Send,
+  RefreshCw
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -44,6 +45,8 @@ type ActionBarProps = {
   onStatusFilterChange: (filter: "all" | "pending" | "approved" | "hold") => void;
   sortOrder: "newest" | "oldest";
   onSortOrderChange: (order: "newest" | "oldest") => void;
+  onRefresh: () => void;
+  isLoading?: boolean;
 };
 
 export const ActionBarWithThemeToggle = ({
@@ -63,6 +66,8 @@ export const ActionBarWithThemeToggle = ({
   onStatusFilterChange,
   sortOrder,
   onSortOrderChange,
+  onRefresh,
+  isLoading = false,
 }: ActionBarProps) => {
   const { data: profiles = [] } = useQuery({
     queryKey: ['profiles'],
@@ -150,6 +155,17 @@ export const ActionBarWithThemeToggle = ({
             className="text-sm"
           >
             {sortOrder === "newest" ? "Oldest" : "Newest"}
+          </Button>
+
+          <Button 
+            onClick={onRefresh}
+            variant="outline"
+            className="text-sm"
+            title="Refresh data from database"
+            disabled={isLoading}
+          >
+            <RefreshCw className={`h-4 w-4 mr-1 ${isLoading ? 'animate-spin' : ''}`} />
+            {isLoading ? 'Refreshing...' : 'Refresh'}
           </Button>
         </div>
       </div>
