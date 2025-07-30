@@ -53,9 +53,9 @@ export const InvoiceSummaryTable = () => {
   }
 
   return (
-    <div className="rounded-md border">
+    <div className="h-[calc(100vh-250px)] overflow-auto rounded-md border">
       <Table>
-        <TableHeader>
+        <TableHeader className="sticky top-0 z-10 bg-background">
           <TableRow>
             <TableHead>Invoice Number</TableHead>
             <TableHead>Invoice Date</TableHead>
