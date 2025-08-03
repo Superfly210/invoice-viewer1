@@ -39,19 +39,29 @@ export const useAuditTrail = (invoiceId: number) => {
           });
         }
 
-        const { data: profiles } = await supabase
-          .from('profiles')
-          .select('id, full_name, username')
-          .in('id', Array.from(userIds));
+        let profilesMap = new Map();
+        if (userIds.size > 0) {
+          const { data: profiles } = await supabase
+            .from('profiles')
+            .select('id, full_name, username')
+            .in('id', Array.from(userIds));
 
-        const profilesMap = new Map();
-        profiles?.forEach((profile: any) => {
-          profilesMap.set(profile.id, profile);
-        });
+          profiles?.forEach((profile: any) => {
+            profilesMap.set(profile.id, profile);
+          });
+        }
 
         if (auditData) {
           auditLogs = auditData.map((log: any) => ({
-            ...log,
+            id: log.id,
+            field_name: log.field_name,
+            old_value: log.old_value,
+            new_value: log.new_value,
+            change_type: log.change_type,
+            changed_by: log.changed_by,
+            changed_at: log.changed_at,
+            log_type: log.log_type,
+            item_id: log.item_id,
             user_name: profilesMap.get(log.changed_by)?.full_name || 
                       profilesMap.get(log.changed_by)?.username || 
                       'Unknown User'

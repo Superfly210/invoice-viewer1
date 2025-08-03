@@ -8,7 +8,7 @@ import { Loader2, AlertCircle, Plus, X } from "lucide-react";
 import { EditableLineItemCell } from "./invoice/EditableLineItemCell";
 import { useQueryClient } from "@tanstack/react-query";
 import { formatCurrency, parseCurrencyValue } from "@/lib/currencyFormatter";
-import { logAuditChange } from "@/utils/auditLogger";
+import { logLineItemChange } from "@/utils/auditLogger";
 import {
   AlertDialog,
   AlertDialogAction,

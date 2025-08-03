@@ -61,6 +61,8 @@ export type Database = {
       Attachment_Info: {
         Row: {
           AFE_Numbers: string | null
+          Attach_Extract: string | null
+          Attach_Local_OCR: string | null
           Attach_Markdown: string | null
           Company_Routed: boolean | null
           "Cost Centers": string | null
@@ -81,17 +83,24 @@ export type Database = {
           Invoicing_Comp_Postal_Code: string | null
           Invoicing_Comp_State_Province: string | null
           Invoicing_Comp_Street: string | null
+          md5Checksum: string | null
           Number_Of_Pages: number | null
           Page_Field_Ticket_Starts_On: number | null
           "Responsible User": string | null
+          sha1Checksum: string | null
+          sha256Checksum: string | null
           Status: string | null
           Sub_Total: number | null
           Total: number | null
           Type_of_Document: string | null
           WCB_Number: string | null
+          xmpmm_document_id: string | null
+          xmpmm_instanceid: string | null
         }
         Insert: {
           AFE_Numbers?: string | null
+          Attach_Extract?: string | null
+          Attach_Local_OCR?: string | null
           Attach_Markdown?: string | null
           Company_Routed?: boolean | null
           "Cost Centers"?: string | null
@@ -112,17 +121,24 @@ export type Database = {
           Invoicing_Comp_Postal_Code?: string | null
           Invoicing_Comp_State_Province?: string | null
           Invoicing_Comp_Street?: string | null
+          md5Checksum?: string | null
           Number_Of_Pages?: number | null
           Page_Field_Ticket_Starts_On?: number | null
           "Responsible User"?: string | null
+          sha1Checksum?: string | null
+          sha256Checksum?: string | null
           Status?: string | null
           Sub_Total?: number | null
           Total?: number | null
           Type_of_Document?: string | null
           WCB_Number?: string | null
+          xmpmm_document_id?: string | null
+          xmpmm_instanceid?: string | null
         }
         Update: {
           AFE_Numbers?: string | null
+          Attach_Extract?: string | null
+          Attach_Local_OCR?: string | null
           Attach_Markdown?: string | null
           Company_Routed?: boolean | null
           "Cost Centers"?: string | null
@@ -143,14 +159,19 @@ export type Database = {
           Invoicing_Comp_Postal_Code?: string | null
           Invoicing_Comp_State_Province?: string | null
           Invoicing_Comp_Street?: string | null
+          md5Checksum?: string | null
           Number_Of_Pages?: number | null
           Page_Field_Ticket_Starts_On?: number | null
           "Responsible User"?: string | null
+          sha1Checksum?: string | null
+          sha256Checksum?: string | null
           Status?: string | null
           Sub_Total?: number | null
           Total?: number | null
           Type_of_Document?: string | null
           WCB_Number?: string | null
+          xmpmm_document_id?: string | null
+          xmpmm_instanceid?: string | null
         }
         Relationships: [
           {
@@ -161,6 +182,45 @@ export type Database = {
             referencedColumns: ["id_"]
           },
         ]
+      }
+      audit_log: {
+        Row: {
+          change_type: string
+          changed_at: string
+          changed_by: string | null
+          field_name: string
+          id: string
+          invoice_id: number
+          item_id: number | null
+          log_type: string
+          new_value: string | null
+          old_value: string | null
+        }
+        Insert: {
+          change_type?: string
+          changed_at?: string
+          changed_by?: string | null
+          field_name: string
+          id?: string
+          invoice_id: number
+          item_id?: number | null
+          log_type: string
+          new_value?: string | null
+          old_value?: string | null
+        }
+        Update: {
+          change_type?: string
+          changed_at?: string
+          changed_by?: string | null
+          field_name?: string
+          id?: string
+          invoice_id?: number
+          item_id?: number | null
+          log_type?: string
+          new_value?: string | null
+          old_value?: string | null
+        }
+        Relationships: []
       }
       cost_centers: {
         Row: {
@@ -186,92 +246,24 @@ export type Database = {
         }
         Relationships: []
       }
-      Cost_Code: {
+      cost_codes: {
         Row: {
-          Cost_Code: string | null
+          code: string | null
           created_at: string
+          description: string | null
           id: number
         }
         Insert: {
-          Cost_Code?: string | null
+          code?: string | null
           created_at?: string
+          description?: string | null
           id?: number
         }
         Update: {
-          Cost_Code?: string | null
+          code?: string | null
           created_at?: string
+          description?: string | null
           id?: number
-        }
-        Relationships: []
-      }
-      document_metadata: {
-        Row: {
-          created_at: string | null
-          id: string
-          schema: string | null
-          title: string | null
-          url: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          id: string
-          schema?: string | null
-          title?: string | null
-          url?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          schema?: string | null
-          title?: string | null
-          url?: string | null
-        }
-        Relationships: []
-      }
-      document_rows: {
-        Row: {
-          dataset_id: string | null
-          id: number
-          row_data: Json | null
-        }
-        Insert: {
-          dataset_id?: string | null
-          id?: number
-          row_data?: Json | null
-        }
-        Update: {
-          dataset_id?: string | null
-          id?: number
-          row_data?: Json | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "document_rows_dataset_id_fkey"
-            columns: ["dataset_id"]
-            isOneToOne: false
-            referencedRelation: "document_metadata"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      documents: {
-        Row: {
-          content: string | null
-          embedding: string | null
-          id: number
-          metadata: Json | null
-        }
-        Insert: {
-          content?: string | null
-          embedding?: string | null
-          id?: number
-          metadata?: Json | null
-        }
-        Update: {
-          content?: string | null
-          embedding?: string | null
-          id?: number
-          metadata?: Json | null
         }
         Relationships: []
       }
@@ -335,7 +327,7 @@ export type Database = {
         }
         Relationships: []
       }
-      audit_log: {
+      invoice_audit_log: {
         Row: {
           change_type: string
           changed_at: string
@@ -343,8 +335,6 @@ export type Database = {
           field_name: string
           id: string
           invoice_id: number
-          item_id: number | null
-          log_type: string
           new_value: string | null
           old_value: string | null
         }
@@ -355,8 +345,6 @@ export type Database = {
           field_name: string
           id?: string
           invoice_id: number
-          item_id?: number | null
-          log_type: string
           new_value?: string | null
           old_value?: string | null
         }
@@ -367,30 +355,14 @@ export type Database = {
           field_name?: string
           id?: string
           invoice_id?: number
-          item_id?: number | null
-          log_type?: string
           new_value?: string | null
           old_value?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "audit_log_changed_by_fkey"
-            columns: ["changed_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "audit_log_invoice_id_fkey"
-            columns: ["invoice_id"]
-            isOneToOne: false
-            referencedRelation: "Attachment_Info"
-            referencedColumns: ["id"]
-          }
-        ]
-      },
+        Relationships: []
+      }
       invoice_coding: {
         Row: {
+          afe_cost_center: string | null
           afe_number: string | null
           cost_center: string | null
           cost_code: string | null
@@ -400,6 +372,7 @@ export type Database = {
           total: number | null
         }
         Insert: {
+          afe_cost_center?: string | null
           afe_number?: string | null
           cost_center?: string | null
           cost_code?: string | null
@@ -409,6 +382,7 @@ export type Database = {
           total?: number | null
         }
         Update: {
+          afe_cost_center?: string | null
           afe_number?: string | null
           cost_center?: string | null
           cost_code?: string | null
@@ -483,22 +457,39 @@ export type Database = {
           },
         ]
       }
-      
-      n8n_chat_histories: {
+      line_items_audit_log: {
         Row: {
-          id: number
-          message: Json
-          session_id: string
+          change_type: string
+          changed_at: string
+          changed_by: string | null
+          field_name: string
+          id: string
+          invoice_id: number
+          line_item_id: number | null
+          new_value: string | null
+          old_value: string | null
         }
         Insert: {
-          id?: number
-          message: Json
-          session_id: string
+          change_type?: string
+          changed_at?: string
+          changed_by?: string | null
+          field_name: string
+          id?: string
+          invoice_id: number
+          line_item_id?: number | null
+          new_value?: string | null
+          old_value?: string | null
         }
         Update: {
-          id?: number
-          message?: Json
-          session_id?: string
+          change_type?: string
+          changed_at?: string
+          changed_by?: string | null
+          field_name?: string
+          id?: string
+          invoice_id?: number
+          line_item_id?: number | null
+          new_value?: string | null
+          old_value?: string | null
         }
         Relationships: []
       }
@@ -542,6 +533,8 @@ export type Database = {
           invoicing_company_post_zip_code: string | null
           invoicing_company_province_state: string | null
           invoicing_company_street: string | null
+          match_criteria_1: string | null
+          match_criteria_2: string | null
           Prompt_Line_Items: string | null
           wcb_number: string | null
         }
@@ -554,6 +547,8 @@ export type Database = {
           invoicing_company_post_zip_code?: string | null
           invoicing_company_province_state?: string | null
           invoicing_company_street?: string | null
+          match_criteria_1?: string | null
+          match_criteria_2?: string | null
           Prompt_Line_Items?: string | null
           wcb_number?: string | null
         }
@@ -566,6 +561,8 @@ export type Database = {
           invoicing_company_post_zip_code?: string | null
           invoicing_company_province_state?: string | null
           invoicing_company_street?: string | null
+          match_criteria_1?: string | null
+          match_criteria_2?: string | null
           Prompt_Line_Items?: string | null
           wcb_number?: string | null
         }

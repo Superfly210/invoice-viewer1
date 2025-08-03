@@ -13,18 +13,9 @@ export const logAuditChange = async (
   try {
     const { data: { user } } = await supabase.auth.getUser();
     
-    const SUPABASE_URL = "https://bumyvuiywdnffhmayxcz.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ1bXl2dWl5d2RuZmZobWF5eGN6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE5Njc3MDgsImV4cCI6MjA1NzU0MzcwOH0.20yKpjbuWYIPNwc4SwqMoZNXZv4wUksa1xuGdXaGe78";
-
-    const response = await fetch(`${SUPABASE_URL}/rest/v1/audit_log`, {
-      method: 'POST',
-      headers: {
-        'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${SUPABASE_KEY}`,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=minimal'
-      },
-      body: JSON.stringify({
+    const { error } = await supabase
+      .from('audit_log')
+      .insert({
         invoice_id: invoiceId,
         item_id: itemId,
         log_type: logType,
@@ -33,13 +24,34 @@ export const logAuditChange = async (
         new_value: newValue?.toString() || null,
         change_type: changeType,
         changed_by: user?.id || null
-      })
-    });
+      });
 
-    if (!response.ok) {
-      console.error('Error logging change:', await response.text());
+    if (error) {
+      console.error('Error logging change:', error);
     }
   } catch (error) {
     console.error('Error logging change:', error);
   }
+};
+
+// Helper functions for backward compatibility
+export const logInvoiceChange = async (
+  invoiceId: number,
+  fieldName: string,
+  oldValue: any,
+  newValue: any,
+  changeType: 'UPDATE' | 'INSERT' | 'DELETE' = 'UPDATE'
+) => {
+  return logAuditChange(invoiceId, 'INVOICE', fieldName, oldValue, newValue, null, changeType);
+};
+
+export const logLineItemChange = async (
+  invoiceId: number,
+  itemId: number,
+  fieldName: string,
+  oldValue: any,
+  newValue: any,
+  changeType: 'UPDATE' | 'INSERT' | 'DELETE' = 'UPDATE'
+) => {
+  return logAuditChange(invoiceId, 'LINE_ITEM', fieldName, oldValue, newValue, itemId, changeType);
 };

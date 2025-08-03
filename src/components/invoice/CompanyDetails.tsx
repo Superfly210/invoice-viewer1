@@ -135,33 +135,6 @@ export const CompanyDetails = ({
                     />
                   </TableCell>
                 </TableRow>
-                <TableRow className="h-12">
-                  <TableCell className="font-medium w-48 text-left py-3">Prompt Line Items</TableCell>
-                  <TableCell className="text-left py-3">
-                    <EditableTableCell 
-                      value={cleanValue(currentInvoice.Prompt_Line_Items)} 
-                      onSave={newValue => handleFieldUpdate('Prompt_Line_Items', newValue)} 
-                    />
-                  </TableCell>
-                </TableRow>
-                <TableRow className="h-12">
-                  <TableCell className="font-medium w-48 text-left py-3">Match Criteria 1</TableCell>
-                  <TableCell className="text-left py-3">
-                    <EditableTableCell 
-                      value={cleanValue(currentInvoice.match_criteria_1)} 
-                      onSave={newValue => handleFieldUpdate('match_criteria_1', newValue)} 
-                    />
-                  </TableCell>
-                </TableRow>
-                <TableRow className="h-12">
-                  <TableCell className="font-medium w-48 text-left py-3">Match Criteria 2</TableCell>
-                  <TableCell className="text-left py-3">
-                    <EditableTableCell 
-                      value={cleanValue(currentInvoice.match_criteria_2)} 
-                      onSave={newValue => handleFieldUpdate('match_criteria_2', newValue)} 
-                    />
-                  </TableCell>
-                </TableRow>
               </TableBody>
             </CollapsibleContent>
           </Collapsible>
