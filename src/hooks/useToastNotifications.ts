@@ -2,7 +2,7 @@
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
-import { logInvoiceChange } from "@/utils/auditLogger";
+import { logAuditChange } from "@/utils/auditLogger";
 
 export const useToastNotifications = (currentInvoiceId?: number | null) => {
   const { toast } = useToast();

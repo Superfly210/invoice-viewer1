@@ -335,7 +335,7 @@ export type Database = {
         }
         Relationships: []
       }
-      invoice_audit_log: {
+      audit_log: {
         Row: {
           change_type: string
           changed_at: string
@@ -343,6 +343,8 @@ export type Database = {
           field_name: string
           id: string
           invoice_id: number
+          item_id: number | null
+          log_type: string
           new_value: string | null
           old_value: string | null
         }
@@ -353,6 +355,8 @@ export type Database = {
           field_name: string
           id?: string
           invoice_id: number
+          item_id?: number | null
+          log_type: string
           new_value?: string | null
           old_value?: string | null
         }
@@ -363,11 +367,28 @@ export type Database = {
           field_name?: string
           id?: string
           invoice_id?: number
+          item_id?: number | null
+          log_type?: string
           new_value?: string | null
           old_value?: string | null
         }
-        Relationships: []
-      }
+        Relationships: [
+          {
+            foreignKeyName: "audit_log_changed_by_fkey"
+            columns: ["changed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "audit_log_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "Attachment_Info"
+            referencedColumns: ["id"]
+          }
+        ]
+      },
       invoice_coding: {
         Row: {
           afe_number: string | null
@@ -462,42 +483,7 @@ export type Database = {
           },
         ]
       }
-      line_items_audit_log: {
-        Row: {
-          change_type: string
-          changed_at: string
-          changed_by: string | null
-          field_name: string
-          id: string
-          invoice_id: number
-          line_item_id: number | null
-          new_value: string | null
-          old_value: string | null
-        }
-        Insert: {
-          change_type?: string
-          changed_at?: string
-          changed_by?: string | null
-          field_name: string
-          id?: string
-          invoice_id: number
-          line_item_id?: number | null
-          new_value?: string | null
-          old_value?: string | null
-        }
-        Update: {
-          change_type?: string
-          changed_at?: string
-          changed_by?: string | null
-          field_name?: string
-          id?: string
-          invoice_id?: number
-          line_item_id?: number | null
-          new_value?: string | null
-          old_value?: string | null
-        }
-        Relationships: []
-      }
+      
       n8n_chat_histories: {
         Row: {
           id: number

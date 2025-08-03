@@ -8,9 +8,10 @@ interface EditableTableCellProps {
   value: string | number | null;
   onSave: (newValue: string) => void;
   type?: "text" | "number" | "date";
+  className?: string;
 }
 
-export const EditableTableCell = ({ value, onSave, type = "text" }: EditableTableCellProps) => {
+export const EditableTableCell = ({ value, onSave, type = "text", className }: EditableTableCellProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(value?.toString() || '');
 
@@ -61,8 +62,8 @@ export const EditableTableCell = ({ value, onSave, type = "text" }: EditableTabl
   }
 
   return (
-    <div className="flex items-center justify-between group">
-      <span className="text-left">{displayValue}</span>
+    <div className="flex items-center justify-between group w-full">
+      <span className={`text-left ${className || ''}`}>{displayValue}</span>
       <Button
         size="sm"
         variant="ghost"

@@ -1,14 +1,15 @@
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { formatCurrency, parseCurrencyValue } from "@/lib/currencyFormatter";
 import { EditableLineItemCell } from "./EditableLineItemCell";
 import { X, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useAuth } from "@/components/AuthProvider";
+import { logAuditChange } from "@/utils/auditLogger";
 
 interface InvoiceCodingTableProps {
   invoiceId: number;
@@ -43,22 +44,15 @@ export const InvoiceCodingTable = ({ invoiceId }: InvoiceCodingTableProps) => {
     enabled: !!invoiceId,
   });
 
+  const totalAmount = useMemo(() => {
+    return codingData.reduce((acc, item) => acc + (item.total || 0), 0);
+  }, [codingData]);
+
   const handleFieldUpdate = async (codingId: number, field: string, newValue: string) => {
     try {
-      console.log(`Updating coding ${codingId} ${field} to:`, newValue);
+      const oldValue = codingData.find(item => item.id === codingId)?.[field as keyof InvoiceCoding] || null;
       
-      // Get old value for audit trail
-      const { data: oldData } = await supabase
-        .from('invoice_coding')
-        .select(field)
-        .eq('id', codingId)
-        .single();
-      
-      const oldValue = oldData ? oldData[field] : null;
-      
-      // Convert string values to appropriate types for database
       let processedValue: any = newValue;
-      
       if (field === 'total') {
         processedValue = parseCurrencyValue(newValue);
       }
@@ -76,18 +70,7 @@ export const InvoiceCodingTable = ({ invoiceId }: InvoiceCodingTableProps) => {
           variant: "destructive",
         });
       } else {
-        // Log the change to audit trail
-        await supabase
-          .from('line_items_audit_log')
-          .insert({
-            invoice_id: invoiceId,
-            line_item_id: codingId,
-            field_name: `coding_${field}`,
-            old_value: oldValue ? String(oldValue) : null,
-            new_value: String(processedValue),
-            changed_by: user?.id,
-            change_type: 'UPDATE'
-          });
+        await logAuditChange(invoiceId, 'LINE_ITEM', `coding_${field}`, oldValue, processedValue, codingId);
         
         toast({
           title: "Success",
@@ -108,12 +91,7 @@ export const InvoiceCodingTable = ({ invoiceId }: InvoiceCodingTableProps) => {
 
   const handleDeleteRow = async (codingId: number) => {
     try {
-      // Get the row data before deletion for audit trail
-      const { data: deletedData } = await supabase
-        .from('invoice_coding')
-        .select('*')
-        .eq('id', codingId)
-        .single();
+      const deletedData = codingData.find(item => item.id === codingId);
 
       const { error } = await supabase
         .from('invoice_coding')
@@ -128,19 +106,8 @@ export const InvoiceCodingTable = ({ invoiceId }: InvoiceCodingTableProps) => {
           variant: "destructive",
         });
       } else {
-        // Log the deletion to audit trail
         if (deletedData) {
-          await supabase
-            .from('line_items_audit_log')
-            .insert({
-              invoice_id: invoiceId,
-              line_item_id: codingId,
-              field_name: 'coding_row',
-              old_value: JSON.stringify(deletedData),
-              new_value: null,
-              changed_by: user?.id,
-              change_type: 'DELETE'
-            });
+          await logAuditChange(invoiceId, 'LINE_ITEM', 'coding_row', JSON.stringify(deletedData), null, codingId, 'DELETE');
         }
         
         toast({
@@ -183,18 +150,7 @@ export const InvoiceCodingTable = ({ invoiceId }: InvoiceCodingTableProps) => {
           variant: "destructive",
         });
       } else {
-        // Log the addition to audit trail
-        await supabase
-          .from('line_items_audit_log')
-          .insert({
-            invoice_id: invoiceId,
-            line_item_id: data.id,
-            field_name: 'coding_row',
-            old_value: null,
-            new_value: JSON.stringify(data),
-            changed_by: user?.id,
-            change_type: 'INSERT'
-          });
+        await logAuditChange(invoiceId, 'LINE_ITEM', 'coding_row', null, JSON.stringify(data), data.id, 'INSERT');
         
         toast({
           title: "Success",
@@ -285,19 +241,25 @@ export const InvoiceCodingTable = ({ invoiceId }: InvoiceCodingTableProps) => {
               </TableRow>
             )}
           </TableBody>
+          <TableFooter>
+            <TableRow>
+              <TableCell colSpan={3}>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={handleAddRow}
+                  disabled={isAddingRow}
+                  className="text-green-600 border-green-300 hover:bg-green-50"
+                >
+                  <Plus className="h-3 w-3 mr-1" />
+                  {isAddingRow ? 'Adding...' : 'Add Row'}
+                </Button>
+              </TableCell>
+              <TableCell className="text-right font-medium">Total</TableCell>
+              <TableCell className="text-left font-medium">{formatCurrency(totalAmount)}</TableCell>
+            </TableRow>
+          </TableFooter>
         </Table>
-        <div className="mt-2 flex justify-start">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={handleAddRow}
-            disabled={isAddingRow}
-            className="text-green-600 border-green-300 hover:bg-green-50"
-          >
-            <Plus className="h-3 w-3 mr-1" />
-            {isAddingRow ? 'Adding...' : 'Add Row'}
-          </Button>
-        </div>
       </div>
     </div>
   );

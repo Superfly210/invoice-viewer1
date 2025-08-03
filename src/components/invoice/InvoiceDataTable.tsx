@@ -3,15 +3,21 @@ import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { CompanyDetails } from "./CompanyDetails";
 import { EditableTableCell } from "./EditableTableCell";
 import { InvoiceCodingTable } from "./InvoiceCodingTable";
-import { VendorRoutingBadge } from "./VendorRoutingBadge";
 import { AttachmentInfo } from "@/hooks/useInvoiceDataFetching";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { formatCurrency, parseCurrencyValue } from "@/lib/currencyFormatter";
-import { logInvoiceChange } from "@/utils/auditLogger";
+import { logAuditChange } from "@/utils/auditLogger";
 import { useAuth } from "@/components/AuthProvider";
 import { useQuery } from "@tanstack/react-query";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Button } from "@/components/ui/button";
 
 interface InvoiceDataTableProps {
   currentInvoice: AttachmentInfo;
@@ -22,7 +28,6 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
-  // Fetch current user's profile to compare with responsible user
   const { data: currentUserProfile } = useQuery({
     queryKey: ['current-user-profile', user?.id],
     queryFn: async () => {
@@ -44,12 +49,8 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
 
   const handleFieldUpdate = async (field: string, newValue: string) => {
     try {
-      console.log(`Updating ${field} to:`, newValue);
-      
-      // Get old value for audit trail
       const oldValue = currentInvoice[field as keyof AttachmentInfo];
       
-      // Optimistic update - immediately update the cache
       queryClient.setQueryData(['attachment-info'], (oldData: AttachmentInfo[] | undefined) => {
         if (!oldData) return oldData;
         
@@ -60,11 +61,9 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
         );
       });
       
-      // Convert string values to appropriate types for database
       let processedValue: any = newValue;
       
       if (field === 'Sub_Total' || field === 'GST_Total' || field === 'Total') {
-        // Use the currency parser for monetary fields
         processedValue = parseCurrencyValue(newValue);
       }
 
@@ -75,7 +74,6 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
 
       if (error) {
         console.error('Error updating field:', error);
-        // Revert optimistic update on error
         queryClient.invalidateQueries({ queryKey: ['attachment-info'] });
         toast({
           title: "Error",
@@ -83,21 +81,18 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
           variant: "destructive",
         });
       } else {
-        // Log the change to audit trail
-        await logInvoiceChange(currentInvoice.id, field, oldValue, newValue);
+        await logAuditChange(currentInvoice.id, 'INVOICE', field, oldValue, newValue);
         
         toast({
           title: "Success",
           description: `${field} updated successfully`,
         });
-        // Refresh to ensure data consistency
         queryClient.invalidateQueries({ queryKey: ['attachment-info'] });
         queryClient.invalidateQueries({ queryKey: ['attachment-info-summary'] });
         queryClient.invalidateQueries({ queryKey: ['audit-trail', currentInvoice.id] });
       }
     } catch (error) {
       console.error('Error updating field:', error);
-      // Revert optimistic update on error
       queryClient.invalidateQueries({ queryKey: ['attachment-info'] });
       toast({
         title: "Error",
@@ -107,7 +102,45 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
     }
   };
 
-  // Helper function to get status highlighting
+  const handleAddToVendorTable = async () => {
+    try {
+      const { error } = await supabase
+        .from('vendor_info')
+        .insert({
+          invoicing_company_name: currentInvoice.Invoicing_Comp_Name,
+          invoicing_company_street: currentInvoice.Invoicing_Comp_Street,
+          invoicing_company_city: currentInvoice.Invoicing_Comp_City,
+          invoicing_company_province_state: currentInvoice.Invoicing_Comp_State_Prov,
+          invoicing_company_post_zip_code: currentInvoice.Invoicing_Comp_Postal_Code,
+          gst_number: currentInvoice.GST_Number,
+          wcb_number: currentInvoice.WCB_Number,
+        });
+
+      if (error) throw error;
+
+      const { error: updateError } = await supabase
+        .from('Attachment_Info')
+        .update({ Company_Routed: true })
+        .eq('id', currentInvoice.id);
+
+      if (updateError) throw updateError;
+
+      toast({
+        title: "Success",
+        description: "Vendor information added to vendor table successfully",
+      });
+
+      queryClient.invalidateQueries({ queryKey: ['attachment-info'] });
+    } catch (error) {
+      console.error('Error adding vendor info:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add vendor information",
+        variant: "destructive",
+      });
+    }
+  };
+
   const getStatusHighlighting = (status: string | null) => {
     if (!status) return "";
     
@@ -125,11 +158,9 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
     }
   };
 
-  // Helper function to get responsible user highlighting
   const getResponsibleUserHighlighting = (responsibleUser: string | null) => {
     if (!responsibleUser || !user || !currentUserProfile) return "";
     
-    // Compare with current user's full name or username
     const currentUserName = currentUserProfile.full_name || currentUserProfile.username;
     const isCurrentUser = responsibleUser === currentUserName;
     
@@ -138,6 +169,18 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
     } else {
       return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100";
     }
+  };
+
+  const getCompanyNameHighlighting = () => {
+    return currentInvoice.Company_Routed
+      ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100"
+      : "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-100";
+  };
+
+  const getCompanyNameTooltip = () => {
+    return currentInvoice.Company_Routed
+      ? "Vendor Info Retrieved from Vendor Table"
+      : "Vendor Info Extracted from Invoice";
   };
 
   return (
@@ -209,14 +252,35 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
             </TableCell>
           </TableRow>
           
-          <TableRow className="h-16">
-            <TableCell className="font-medium w-48 text-left py-3">Company Name</TableCell>
+          <TableRow>
+            <TableCell className="font-medium w-48 text-left align-middle">Company Name</TableCell>
             <TableCell className="text-left py-3 flex items-center">
-              <EditableTableCell
-                value={currentInvoice.Invoicing_Comp_Name}
-                onSave={(newValue) => handleFieldUpdate('Invoicing_Comp_Name', newValue)}
-              />
-              <VendorRoutingBadge currentInvoice={currentInvoice} />
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="flex-grow">
+                      <EditableTableCell
+                        value={currentInvoice.Invoicing_Comp_Name}
+                        onSave={(newValue) => handleFieldUpdate('Invoicing_Comp_Name', newValue)}
+                        className={`px-2 py-1 rounded ${getCompanyNameHighlighting()}`}
+                      />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{getCompanyNameTooltip()}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              {!currentInvoice.Company_Routed && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={handleAddToVendorTable}
+                  className="ml-2 bg-orange-100 text-orange-800 border-orange-300 hover:bg-orange-200 rounded-full text-xs px-3 py-1"
+                >
+                  Add to Vendor Table
+                </Button>
+              )}
             </TableCell>
           </TableRow>
           

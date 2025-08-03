@@ -14,11 +14,7 @@ import { useToastNotifications } from "@/hooks/useToastNotifications";
 import { useInvoiceFiltering } from "@/hooks/useInvoiceFiltering";
 import { useToast } from "@/hooks/use-toast";
 
-interface InvoiceReviewerProps {
-  onSectionChange?: (section: string) => void;
-}
-
-export const InvoiceReviewer = ({ onSectionChange }: InvoiceReviewerProps) => {
+export const InvoiceReviewer = () => {
   const [currentFilteredIndex, setCurrentFilteredIndex] = useState(0);
   const [pdfCurrentPage, setPdfCurrentPage] = useState(1);
   const [pdfTotalPages, setPdfTotalPages] = useState(3);
@@ -52,25 +48,20 @@ export const InvoiceReviewer = ({ onSectionChange }: InvoiceReviewerProps) => {
   } = useToastNotifications(currentInvoiceId);
 
   const handlePrevious = () => {
-    console.log("Previous clicked, current index:", currentFilteredIndex);
     const newIndex = Math.max(0, currentFilteredIndex - 1);
     setCurrentFilteredIndex(newIndex);
     setPdfCurrentPage(1);
-    console.log("New index:", newIndex);
   };
 
   const handleNext = () => {
-    console.log("Next clicked, current index:", currentFilteredIndex, "total:", totalFilteredCount);
     if (currentFilteredIndex < totalFilteredCount - 1) {
       const newIndex = currentFilteredIndex + 1;
       setCurrentFilteredIndex(newIndex);
       setPdfCurrentPage(1);
-      console.log("New index:", newIndex);
     }
   };
 
   const handlePdfPageChange = (currentPage: number, totalPages: number) => {
-    console.log("PDF page changed:", currentPage, "of", totalPages);
     setPdfCurrentPage(currentPage);
     setPdfTotalPages(totalPages);
   };
@@ -88,7 +79,6 @@ export const InvoiceReviewer = ({ onSectionChange }: InvoiceReviewerProps) => {
   const handleSortOrderChange = (order: "newest" | "oldest") => {
     setSortOrder(order);
     setCurrentFilteredIndex(0); // Reset to first invoice when sort order changes
-    // Refresh data when sort order changes to ensure we get the latest data
     refreshData();
   };
 
@@ -99,8 +89,6 @@ export const InvoiceReviewer = ({ onSectionChange }: InvoiceReviewerProps) => {
       description: "Invoice data has been refreshed from the database",
     });
   };
-
-  console.log("InvoiceReviewer rendering with index:", currentFilteredIndex);
 
   return (
     <>
@@ -127,11 +115,10 @@ export const InvoiceReviewer = ({ onSectionChange }: InvoiceReviewerProps) => {
       <ResizablePanelGroup direction="vertical" className="flex-1">
         <ResizablePanel defaultSize={70} minSize={30}>
           <ResizablePanelGroup direction="horizontal" className="h-full">
-            <ResizablePanel defaultSize={50} minSize={30}>
+            <ResizablePanel defaultSize={60} minSize={30}>
               <InvoiceDataPanel 
                 currentInvoice={currentInvoice}
                 isLoading={isLoading}
-                onSectionChange={onSectionChange} 
               />
             </ResizablePanel>
             <ResizableHandle withHandle />
