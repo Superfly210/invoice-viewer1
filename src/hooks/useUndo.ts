@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { AuditLogEntry } from "./useAuditTrail";
+import { logAuditChange } from "@/utils/auditLogger";
 
 export const useUndo = () => {
   const { toast } = useToast();
@@ -68,13 +69,27 @@ export const useUndo = () => {
 
       if (error) throw error;
 
+      // Log the undo action in the audit trail
+      await logAuditChange(
+        logEntry.invoice_id,
+        logEntry.log_type,
+        `UNDO: ${logEntry.field_name}`,
+        logEntry.new_value,
+        logEntry.old_value,
+        logEntry.log_type === 'INVOICE' ? null : targetId,
+        'UPDATE'
+      );
+
       toast({
         title: "Success",
-        description: `Successfully reverted the change to ${logEntry.field_name}.`,
+        description: `Successfully reverted ${logEntry.field_name} and logged the undo action.`,
       });
 
+      // Invalidate all relevant queries for immediate UI refresh
       await queryClient.invalidateQueries({ queryKey: ['audit-trail', logEntry.invoice_id] });
       await queryClient.invalidateQueries({ queryKey: ['invoices'] });
+      await queryClient.invalidateQueries({ queryKey: ['line-items', logEntry.invoice_id] });
+      await queryClient.invalidateQueries({ queryKey: ['invoice-coding', logEntry.invoice_id] });
 
 
     } catch (err) {

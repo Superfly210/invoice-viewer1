@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export const logAuditChange = async (
   invoiceId: number,
-  logType: 'INVOICE' | 'LINE_ITEM',
+  logType: 'INVOICE' | 'LINE_ITEM' | 'INVOICE_CODING',
   fieldName: string,
   oldValue: any,
   newValue: any,
