@@ -10,36 +10,52 @@ export const useUndo = () => {
   const queryClient = useQueryClient();
   const [isUndoing, setIsUndoing] = useState(false);
 
-  const getTableName = (logType: 'INVOICE' | 'LINE_ITEM') => {
+  const getTableName = (logType: 'INVOICE' | 'LINE_ITEM' | 'INVOICE_CODING') => {
     const tableMap = {
       'INVOICE': 'Attachment_Info',
-      'LINE_ITEM': 'Line_Items'
+      'LINE_ITEM': 'Line_Items',
+      'INVOICE_CODING': 'invoice_coding'
     } as const;
     return tableMap[logType];
   };
 
   const undoChange = async (logEntry: AuditLogEntry) => {
     setIsUndoing(true);
-    const tableName = getTableName(logEntry.log_type);
+    const tableName = getTableName(logEntry.log_type as any);
     let error = null;
 
     try {
-      if (!logEntry.item_id) {
-        throw new Error("No item_id found in the log entry.");
+      // For INVOICE type, use invoice_id instead of item_id
+      const targetId = logEntry.log_type === 'INVOICE' ? logEntry.invoice_id : logEntry.item_id;
+      
+      if (!targetId) {
+        throw new Error(`No ${logEntry.log_type === 'INVOICE' ? 'invoice_id' : 'item_id'} found in the log entry.`);
       }
+
+      // Handle field name mapping for columns with spaces
+      const fieldName = logEntry.field_name === 'Responsible User' ? '"Responsible User"' : logEntry.field_name;
 
       switch (logEntry.change_type) {
         case 'UPDATE':
-          ({ error } = await supabase
-            .from(tableName)
-            .update({ [logEntry.field_name]: logEntry.old_value })
-            .eq('id', logEntry.item_id));
+          if (logEntry.log_type === 'INVOICE_CODING' || logEntry.field_name.startsWith('coding_')) {
+            // Handle invoice coding fields
+            const cleanFieldName = logEntry.field_name.replace('coding_', '');
+            ({ error } = await supabase
+              .from('invoice_coding')
+              .update({ [cleanFieldName]: logEntry.old_value })
+              .eq('id', targetId));
+          } else {
+            ({ error } = await supabase
+              .from(tableName)
+              .update({ [fieldName]: logEntry.old_value })
+              .eq('id', targetId));
+          }
           break;
         case 'INSERT':
           ({ error } = await supabase
             .from(tableName)
             .delete()
-            .eq('id', logEntry.item_id));
+            .eq('id', targetId));
           break;
         case 'DELETE':
           toast({
@@ -47,7 +63,7 @@ export const useUndo = () => {
             description: "Undo for DELETE operations is not yet implemented.",
             variant: "destructive",
           });
-          break;
+          return;
       }
 
       if (error) throw error;

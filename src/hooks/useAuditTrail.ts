@@ -11,7 +11,7 @@ export type AuditLogEntry = {
   change_type: 'UPDATE' | 'INSERT' | 'DELETE';
   changed_by: string | null;
   changed_at: string;
-  log_type: 'INVOICE' | 'LINE_ITEM';
+  log_type: 'INVOICE' | 'LINE_ITEM' | 'INVOICE_CODING';
   item_id?: number | null;
   user_name?: string;
 };
