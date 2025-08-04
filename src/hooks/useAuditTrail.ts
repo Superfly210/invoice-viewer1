@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export type AuditLogEntry = {
   id: string;
+  invoice_id: number;
   field_name: string;
   old_value: string | null;
   new_value: string | null;
@@ -54,6 +55,7 @@ export const useAuditTrail = (invoiceId: number) => {
         if (auditData) {
           auditLogs = auditData.map((log: any) => ({
             id: log.id,
+            invoice_id: log.invoice_id,
             field_name: log.field_name,
             old_value: log.old_value,
             new_value: log.new_value,

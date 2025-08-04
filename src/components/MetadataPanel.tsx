@@ -1,12 +1,13 @@
 
 import { useState, useEffect } from "react";
-import { ChevronDown, ChevronUp, MessageSquare, Send, Edit3, Trash2, Plus, Clock, ArrowUpDown, Mail } from "lucide-react";
+import { ChevronDown, ChevronUp, MessageSquare, Send, Edit3, Trash2, Plus, Clock, ArrowUpDown, Mail, Undo } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuditTrail } from "@/hooks/useAuditTrail";
+import { useUndo } from "@/hooks/useUndo";
 
 type Comment = {
   id: string;
@@ -42,6 +43,7 @@ export const MetadataPanel = ({ currentInvoiceId }: MetadataPanelProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
   const { toast } = useToast();
+  const { undoChange, isUndoing } = useUndo();
 
   const { data: auditTrail = [], isLoading: auditLoading } = useAuditTrail(currentInvoiceId || 0);
 
@@ -208,8 +210,22 @@ export const MetadataPanel = ({ currentInvoiceId }: MetadataPanelProps) => {
             </span>
           </div>
           {event.data.user_name && (
-            <div className="text-xs text-slate-600 mb-1">
-              <strong>Changed by:</strong> {event.data.user_name}
+            <div className="flex items-center justify-between">
+              <div className="text-xs text-slate-600 mb-1">
+                <strong>Changed by:</strong> {event.data.user_name}
+              </div>
+              {event.data.change_type !== 'DELETE' && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => undoChange(event.data)}
+                  disabled={isUndoing}
+                  className="h-6 px-2 text-xs"
+                >
+                  <Undo className="h-3 w-3 mr-1" />
+                  Undo
+                </Button>
+              )}
             </div>
           )}
           {event.data.change_type === 'UPDATE' && (
@@ -238,12 +254,7 @@ export const MetadataPanel = ({ currentInvoiceId }: MetadataPanelProps) => {
 
   return (
     <div className="bg-white rounded-lg shadow-sm">
-      <div className="border-b border-slate-200 p-4 flex justify-between items-center">
-        <h2 className="text-xl font-semibold text-slate-800">Event History</h2>
-        <div className="rounded-full px-3 py-1 text-sm bg-amber-100 text-amber-800">
-          Pending Review
-        </div>
-      </div>
+      
 
       <div className="p-4 space-y-4">
         {/* Event History Section */}

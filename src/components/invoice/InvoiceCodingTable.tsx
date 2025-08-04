@@ -17,8 +17,7 @@ interface InvoiceCodingTableProps {
 
 type InvoiceCoding = {
   id: number;
-  afe_number: string | null;
-  cost_center: string | null;
+  afe_cost_center: string | null;
   cost_code: string | null;
   total: number | null;
 };
@@ -34,7 +33,7 @@ export const InvoiceCodingTable = ({ invoiceId }: InvoiceCodingTableProps) => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('invoice_coding')
-        .select('id, afe_number, cost_center, cost_code, total')
+        .select('id, afe_cost_center, cost_code, total')
         .eq('invoice_id', invoiceId)
         .order('id', { ascending: true });
 
@@ -134,8 +133,7 @@ export const InvoiceCodingTable = ({ invoiceId }: InvoiceCodingTableProps) => {
         .from('invoice_coding')
         .insert({
           invoice_id: invoiceId,
-          afe_number: '',
-          cost_center: '',
+          afe_cost_center: '',
           cost_code: '',
           total: 0
         })
@@ -187,8 +185,7 @@ export const InvoiceCodingTable = ({ invoiceId }: InvoiceCodingTableProps) => {
           <TableHeader>
             <TableRow>
               <TableHead className="text-xs w-8"></TableHead>
-              <TableHead className="text-xs">AFE Number</TableHead>
-              <TableHead className="text-xs">Cost Center</TableHead>
+              <TableHead className="text-xs">AFE/Cost Center</TableHead>
               <TableHead className="text-xs">Cost Code</TableHead>
               <TableHead className="text-xs text-left">Total</TableHead>
             </TableRow>
@@ -208,14 +205,8 @@ export const InvoiceCodingTable = ({ invoiceId }: InvoiceCodingTableProps) => {
                 </TableCell>
                 <TableCell className="py-2">
                   <EditableLineItemCell
-                    value={coding.afe_number}
-                    onSave={(newValue) => handleFieldUpdate(coding.id, 'afe_number', newValue)}
-                  />
-                </TableCell>
-                <TableCell className="py-2">
-                  <EditableLineItemCell
-                    value={coding.cost_center}
-                    onSave={(newValue) => handleFieldUpdate(coding.id, 'cost_center', newValue)}
+                    value={coding.afe_cost_center}
+                    onSave={(newValue) => handleFieldUpdate(coding.id, 'afe_cost_center', newValue)}
                   />
                 </TableCell>
                 <TableCell className="py-2">
@@ -235,7 +226,7 @@ export const InvoiceCodingTable = ({ invoiceId }: InvoiceCodingTableProps) => {
             ))}
             {codingData.length === 0 && (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-4 text-gray-500 text-sm">
+                <TableCell colSpan={4} className="text-center py-4 text-gray-500 text-sm">
                   No coding data available
                 </TableCell>
               </TableRow>
@@ -243,7 +234,7 @@ export const InvoiceCodingTable = ({ invoiceId }: InvoiceCodingTableProps) => {
           </TableBody>
           <TableFooter>
             <TableRow>
-              <TableCell colSpan={3}>
+              <TableCell colSpan={2}>
                 <Button
                   size="sm"
                   variant="outline"
