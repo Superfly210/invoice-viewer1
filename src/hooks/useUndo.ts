@@ -12,9 +12,9 @@ export const useUndo = () => {
 
   const getTableName = (logType: 'INVOICE' | 'LINE_ITEM') => {
     const tableMap = {
-      'INVOICE': 'invoices',
-      'LINE_ITEM': 'invoice_line_items'
-    };
+      'INVOICE': 'Attachment_Info',
+      'LINE_ITEM': 'Line_Items'
+    } as const;
     return tableMap[logType];
   };
 
