@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { ChevronDown, ChevronUp, MessageSquare, Send, Edit3, Trash2, Plus, Clock, ArrowUpDown, Mail, Undo } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -8,13 +7,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuditTrail } from "@/hooks/useAuditTrail";
 import { useUndo } from "@/hooks/useUndo";
-
-type Comment = {
-  id: string;
-  author: string;
-  text: string;
-  timestamp: string;
-};
+import { useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/components/AuthProvider";
 
 type EmailInfo = {
   id_: number;
@@ -38,12 +32,13 @@ export const MetadataPanel = ({ currentInvoiceId }: MetadataPanelProps) => {
   });
   
   const [commentText, setCommentText] = useState("");
-  const [comments, setComments] = useState<Comment[]>([]);
   const [emailHistory, setEmailHistory] = useState<EmailInfo[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
   const { toast } = useToast();
   const { undoChange, isUndoing } = useUndo();
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
 
   const { data: auditTrail = [], isLoading: auditLoading } = useAuditTrail(currentInvoiceId || 0);
 
@@ -110,18 +105,34 @@ export const MetadataPanel = ({ currentInvoiceId }: MetadataPanelProps) => {
     setSortOrder(prev => prev === 'newest' ? 'oldest' : 'newest');
   };
   
-  const handleCommentSubmit = () => {
-    if (!commentText.trim()) return;
-    
-    const newComment: Comment = {
-      id: `comment-${comments.length + 1}`,
-      author: "Current User",
-      text: commentText,
-      timestamp: new Date().toLocaleString(),
-    };
-    
-    setComments([newComment, ...comments]);
-    setCommentText("");
+  const handleCommentSubmit = async () => {
+    if (!commentText.trim() || !currentInvoiceId || !user) return;
+
+    const { error } = await supabase.from('audit_log').insert([
+      {
+        invoice_id: currentInvoiceId,
+        field_name: 'comment',
+        new_value: commentText,
+        change_type: 'COMMENT',
+        changed_by: user.id,
+        log_type: 'INVOICE',
+      },
+    ]);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to add comment.",
+        variant: "destructive",
+      });
+    } else {
+      setCommentText("");
+      await queryClient.invalidateQueries({ queryKey: ['audit-trail', currentInvoiceId] });
+      toast({
+        title: "Success",
+        description: "Comment added successfully.",
+      });
+    }
   };
 
   const formatEmailDate = (dateString: string | null, createdAt: string) => {
@@ -190,11 +201,38 @@ export const MetadataPanel = ({ currentInvoiceId }: MetadataPanelProps) => {
     const changeTypeIcons = {
       INSERT: <Plus className="h-4 w-4 text-green-600" />,
       UPDATE: <Edit3 className="h-4 w-4 text-blue-600" />,
-      DELETE: <Trash2 className="h-4 w-4 text-red-600" />
+      DELETE: <Trash2 className="h-4 w-4 text-red-600" />,
+      COMMENT: <MessageSquare className="h-4 w-4 text-slate-600" />
     };
 
     const sourceLabel = event.data.source_type === 'invoice' ? 'Invoice' : 'Line Item';
     
+    if (event.data.change_type === 'COMMENT') {
+      return (
+        <div key={`audit-${event.data.id}`} className="flex items-start space-x-3 p-3 bg-slate-50 rounded-md">
+          <div className="flex-shrink-0 mt-1">
+            {changeTypeIcons[event.data.change_type as keyof typeof changeTypeIcons]}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-sm font-medium text-slate-700">Comment</span>
+              <span className="text-xs text-slate-500">
+                {new Date(event.data.changed_at).toLocaleString()}
+              </span>
+            </div>
+            {event.data.user_name && (
+              <div className="text-xs text-slate-600 mb-1">
+                <strong>By:</strong> {event.data.user_name}
+              </div>
+            )}
+            <div className="text-xs text-slate-600">
+              {event.data.new_value}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div key={`audit-${event.data.id}`} className="flex items-start space-x-3 p-3 bg-slate-50 rounded-md">
         <div className="flex-shrink-0 mt-1">
@@ -253,16 +291,11 @@ export const MetadataPanel = ({ currentInvoiceId }: MetadataPanelProps) => {
   const combinedEvents = getCombinedEventHistory();
 
   return (
-    <div className="bg-white rounded-lg shadow-sm">
-      
-
-      <div className="p-4 space-y-4">
+    <div className="rounded-lg shadow-sm flex flex-col h-full">
+      <div className="p-4 flex-grow overflow-y-auto space-y-4">
         {/* Event History Section */}
-        <div className="border border-slate-200 rounded-md overflow-hidden">
-          <button
-            onClick={() => toggleSection('eventHistory')}
-            className="w-full flex justify-between items-center p-3 bg-slate-50 text-left font-medium text-slate-700 hover:bg-slate-100"
-          >
+        <div className="border border-slate-200 rounded-md overflow-hidden flex flex-col h-full">
+          <div className="w-full flex justify-between items-center p-3 bg-slate-50 text-left font-medium text-slate-700">
             <div className="flex items-center space-x-2">
               <Clock className="h-4 w-4" />
               <span>Event History</span>
@@ -271,89 +304,48 @@ export const MetadataPanel = ({ currentInvoiceId }: MetadataPanelProps) => {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  toggleSortOrder();
-                }}
+                onClick={toggleSortOrder}
                 className="h-6 px-2 text-xs"
               >
                 <ArrowUpDown className="h-3 w-3 mr-1" />
                 {sortOrder === 'newest' ? 'Newest' : 'Oldest'}
               </Button>
-              {expandedSections.eventHistory ? (
-                <ChevronUp className="h-5 w-5 text-slate-500" />
-              ) : (
-                <ChevronDown className="h-5 w-5 text-slate-500" />
-              )}
             </div>
-          </button>
+          </div>
           
-          {expandedSections.eventHistory && (
-            <div className="p-3 space-y-3 max-h-96 overflow-y-auto">
-              {isLoading || auditLoading ? (
-                <div className="text-center text-slate-500">Loading event history...</div>
-              ) : combinedEvents.length > 0 ? (
-                combinedEvents.map(renderEventItem)
-              ) : (
-                <div className="text-center text-slate-500">No events recorded yet</div>
-              )}
-            </div>
-          )}
-        </div>
-        
-        {/* Comments Section */}
-        <div className="border border-slate-200 rounded-md overflow-hidden">
-          <button
-            onClick={() => toggleSection('comments')}
-            className="w-full flex justify-between items-center p-3 bg-slate-50 text-left font-medium text-slate-700 hover:bg-slate-100"
-          >
-            Comments
-            {expandedSections.comments ? (
-              <ChevronUp className="h-5 w-5 text-slate-500" />
+          <div className="p-3 space-y-3 flex-grow overflow-y-auto">
+            {isLoading || auditLoading ? (
+              <div className="text-center text-slate-500">Loading event history...</div>
+            ) : combinedEvents.length > 0 ? (
+              combinedEvents.map(renderEventItem)
             ) : (
-              <ChevronDown className="h-5 w-5 text-slate-500" />
+              <div className="text-center text-slate-500">No events recorded yet</div>
             )}
-          </button>
-          
-          {expandedSections.comments && (
-            <div className="p-3">
-              {/* Comment Input */}
-              <div className="mb-4 flex">
-                <Textarea
-                  value={commentText}
-                  onChange={(e) => setCommentText(e.target.value)}
-                  placeholder="Add a comment..."
-                  className="min-h-[80px] flex-1 mr-2"
-                />
-                <Button 
-                  onClick={handleCommentSubmit}
-                  className="bg-blue-500 hover:bg-blue-600 self-end"
-                >
-                  <Send className="h-4 w-4" />
-                </Button>
-              </div>
-              
-              {/* Comments List */}
-              <div className="space-y-3">
-                {comments.length === 0 ? (
-                  <div className="text-center text-slate-500">No comments yet</div>
-                ) : (
-                  comments.map(comment => (
-                    <div key={comment.id} className="p-3 bg-slate-50 rounded-md">
-                      <div className="flex justify-between items-center mb-2">
-                        <div className="font-medium text-slate-700 flex items-center">
-                          <MessageSquare className="h-4 w-4 mr-2 text-slate-400" />
-                          {comment.author}
-                        </div>
-                        <div className="text-xs text-slate-500">{comment.timestamp}</div>
-                      </div>
-                      <div className="text-slate-700">{comment.text}</div>
-                    </div>
-                  ))
-                )}
-              </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Comments Section */}
+      <div className="p-4 border-t border-slate-200">
+        <div className="border border-slate-200 rounded-md overflow-hidden">
+          <div className="p-3">
+            {/* Comment Input */}
+            <div className="flex">
+              <Textarea
+                value={commentText}
+                onChange={(e) => setCommentText(e.target.value)}
+                placeholder="Add a comment..."
+                className="min-h-[80px] flex-1 mr-2"
+              />
+              <Button 
+                onClick={handleCommentSubmit}
+                size="sm"
+              >
+                <Send className="h-4 w-4 mr-2" />
+                Add Comment
+              </Button>
             </div>
-          )}
+          </div>
         </div>
       </div>
     </div>

@@ -53,13 +53,13 @@
   }
 
   .dark {
-    --background: 280 10% 12%; /* Dark purple-gray instead of blue */
+    --background: 222.2 84% 4.9%; /* Gray 900 */
     --foreground: 210 40% 98%;
 
-    --card: 280 10% 12%;
+    --card: 222.2 84% 4.9%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 280 10% 12%;
+    --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
     --primary: 210 40% 98%;

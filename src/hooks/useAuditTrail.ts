@@ -8,7 +8,7 @@ export type AuditLogEntry = {
   field_name: string;
   old_value: string | null;
   new_value: string | null;
-  change_type: 'UPDATE' | 'INSERT' | 'DELETE';
+  change_type: 'UPDATE' | 'INSERT' | 'DELETE' | 'COMMENT';
   changed_by: string | null;
   changed_at: string;
   log_type: 'INVOICE' | 'LINE_ITEM' | 'INVOICE_CODING';

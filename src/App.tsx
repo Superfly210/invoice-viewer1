@@ -10,6 +10,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import AFE from "./pages/AFE";
 import CostCenters from "./pages/CostCenters";
+import CostCodes from "./pages/CostCodes";
 import Permissions from "./pages/Permissions";
 import Vendor from "./pages/Vendor";
 import NotFound from "./pages/NotFound";
@@ -40,6 +41,7 @@ const App = () => (
               <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
               <Route path="/afe" element={<ProtectedRoute><AFE /></ProtectedRoute>} />
               <Route path="/cost-centers" element={<ProtectedRoute><CostCenters /></ProtectedRoute>} />
+              <Route path="/cost-codes" element={<ProtectedRoute><CostCodes /></ProtectedRoute>} />
               <Route path="/permissions" element={<ProtectedRoute><Permissions /></ProtectedRoute>} />
               <Route path="/vendor" element={<ProtectedRoute><Vendor /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />

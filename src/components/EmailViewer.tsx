@@ -143,9 +143,17 @@ export const EmailViewer = ({ currentInvoiceId, emailInfoId }: EmailViewerProps 
           </div>
         </div>
 
+        import DOMPurify from 'dompurify';
+
+// ... (rest of your imports and component code)
+
         <div className="prose max-w-none text-slate-700 mb-6">
           {emailData.Email_Mark_Down ? (
-            <div dangerouslySetInnerHTML={{ __html: emailData.Email_Mark_Down.replace(/\n/g, '<br>') }} />
+            <div
+              dangerouslySetInnerHTML={{
+                __html: DOMPurify.sanitize(emailData.Email_Mark_Down.replace(/\n/g, '<br>')),
+              }}
+            />
           ) : (
             <p>No email content available</p>
           )}

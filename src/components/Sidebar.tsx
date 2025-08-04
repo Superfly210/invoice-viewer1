@@ -89,6 +89,7 @@ export const Sidebar = ({
 
   const adminMenuItems = [
     { id: "cost-centers", label: "Cost Centers", icon: Building, active: activeSection === "cost-centers" },
+    { id: "cost-codes", label: "Cost Codes", icon: TableIcon, active: activeSection === "cost-codes" },
     { id: "permissions", label: "Permissions", icon: Shield, active: activeSection === "permissions" },
   ];
 

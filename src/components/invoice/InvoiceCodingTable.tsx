@@ -178,7 +178,7 @@ export const InvoiceCodingTable = ({ invoiceId }: InvoiceCodingTableProps) => {
   }
 
   return (
-    <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+    <div className="mt-4 p-4 rounded-lg">
       <h4 className="text-sm font-medium text-gray-900 mb-3">Invoice Coding Details</h4>
       <div className="overflow-x-auto">
         <Table>
@@ -237,12 +237,10 @@ export const InvoiceCodingTable = ({ invoiceId }: InvoiceCodingTableProps) => {
               <TableCell colSpan={2}>
                 <Button
                   size="sm"
-                  variant="outline"
                   onClick={handleAddRow}
                   disabled={isAddingRow}
-                  className="text-green-600 border-green-300 hover:bg-green-50"
                 >
-                  <Plus className="h-3 w-3 mr-1" />
+                  <Plus className="h-4 w-4 mr-1" />
                   {isAddingRow ? 'Adding...' : 'Add Row'}
                 </Button>
               </TableCell>
