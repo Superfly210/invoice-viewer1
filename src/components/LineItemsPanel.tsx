@@ -217,6 +217,9 @@ export const LineItemsPanel = ({
 
   const handleDeleteLineItem = async (lineItemId: number) => {
     try {
+      // Get the line item data before deleting
+      const lineItemToDelete = lineItems.find(item => item.id === lineItemId);
+      
       const { error } = await supabase
         .from('Line_Items')
         .delete()
@@ -230,9 +233,9 @@ export const LineItemsPanel = ({
           variant: "destructive"
         });
       } else {
-        // Log the deletion to audit trail
-        if (currentInvoiceId) {
-          await logLineItemChange(currentInvoiceId, lineItemId, 'Line Item', 'Deleted', null, 'DELETE');
+        // Log the deletion to audit trail with full data
+        if (currentInvoiceId && lineItemToDelete) {
+          await logLineItemChange(currentInvoiceId, lineItemId, 'Line Item', JSON.stringify(lineItemToDelete), null, 'DELETE');
         }
         
         toast({

@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { FileText, Paperclip, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import DOMPurify from 'dompurify';
 
 type EmailInfo = {
   id_: number;
@@ -142,10 +143,6 @@ export const EmailViewer = ({ currentInvoiceId, emailInfoId }: EmailViewerProps 
             {emailData.Email_Type && <div>Type: {emailData.Email_Type}</div>}
           </div>
         </div>
-
-        import DOMPurify from 'dompurify';
-
-// ... (rest of your imports and component code)
 
         <div className="prose max-w-none text-slate-700 mb-6">
           {emailData.Email_Mark_Down ? (

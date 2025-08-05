@@ -252,18 +252,16 @@ export const MetadataPanel = ({ currentInvoiceId }: MetadataPanelProps) => {
               <div className="text-xs text-slate-600 mb-1">
                 <strong>Changed by:</strong> {event.data.user_name}
               </div>
-              {event.data.change_type !== 'DELETE' && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => undoChange(event.data)}
-                  disabled={isUndoing}
-                  className="h-6 px-2 text-xs"
-                >
-                  <Undo className="h-3 w-3 mr-1" />
-                  Undo
-                </Button>
-              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => undoChange(event.data)}
+                disabled={isUndoing}
+                className="h-6 px-2 text-xs"
+              >
+                <Undo className="h-3 w-3 mr-1" />
+                {event.data.change_type === 'DELETE' ? 'Restore' : 'Undo'}
+              </Button>
             </div>
           )}
           {event.data.change_type === 'UPDATE' && (

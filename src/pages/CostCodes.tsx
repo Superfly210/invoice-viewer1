@@ -12,9 +12,9 @@ import {
 } from "@/components/ui/table";
 
 type CostCode = {
-  id: string;
+  id: number;
   code: string;
-  description: string;
+  description: string | null;
 };
 
 export default function CostCodes() {
@@ -32,7 +32,7 @@ export default function CostCodes() {
       }
       
       console.log("Cost codes fetched:", data);
-      return data as CostCode[];
+      return data;
     },
   });
 
@@ -70,7 +70,7 @@ export default function CostCodes() {
               costCodes.map((costCode) => (
                 <TableRow key={costCode.id}>
                   <TableCell>{costCode.code}</TableCell>
-                  <TableCell>{costCode.description}</TableCell>
+                  <TableCell>{costCode.description || 'No description'}</TableCell>
                 </TableRow>
               ))
             ) : (

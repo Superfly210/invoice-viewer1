@@ -106,7 +106,7 @@ export const InvoiceCodingTable = ({ invoiceId }: InvoiceCodingTableProps) => {
         });
       } else {
         if (deletedData) {
-          await logAuditChange(invoiceId, 'LINE_ITEM', 'coding_row', JSON.stringify(deletedData), null, codingId, 'DELETE');
+          await logAuditChange(invoiceId, 'INVOICE_CODING', 'coding_row', JSON.stringify(deletedData), null, codingId, 'DELETE');
         }
         
         toast({

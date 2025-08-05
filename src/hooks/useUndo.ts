@@ -59,12 +59,26 @@ export const useUndo = () => {
             .eq('id', targetId));
           break;
         case 'DELETE':
-          toast({
-            title: "Undo Not Supported",
-            description: "Undo for DELETE operations is not yet implemented.",
-            variant: "destructive",
-          });
-          return;
+          // Parse the old_value JSON to restore the deleted record
+          try {
+            const deletedData = JSON.parse(logEntry.old_value || '{}');
+            if (logEntry.log_type === 'INVOICE_CODING') {
+              const { id, ...dataWithoutId } = deletedData;
+              ({ error } = await supabase
+                .from('invoice_coding')
+                .insert(dataWithoutId));
+            } else if (logEntry.log_type === 'LINE_ITEM') {
+              const { id, ...dataWithoutId } = deletedData;
+              ({ error } = await supabase
+                .from('Line_Items')
+                .insert(dataWithoutId));
+            } else {
+              throw new Error('Unsupported delete type for undo');
+            }
+          } catch (parseError) {
+            throw new Error('Failed to parse deleted data');
+          }
+          break;
       }
 
       if (error) throw error;
