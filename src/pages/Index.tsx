@@ -6,6 +6,7 @@ import { InvoiceSigner } from "@/components/InvoiceSigner";
 import { SummarySection } from "@/components/SummarySection";
 import AFE from "@/pages/AFE";
 import CostCenters from "@/pages/CostCenters";
+import CostCodes from "@/pages/CostCodes";
 import Permissions from "@/pages/Permissions";
 import Vendor from "@/pages/Vendor";
 
@@ -44,6 +45,7 @@ const Index = () => {
         {activeSection === "summary" && <SummarySection />}
         {activeSection === "afe" && <AFE />}
         {activeSection === "cost-centers" && <CostCenters />}
+        {activeSection === "cost-codes" && <CostCodes />}
         {activeSection === "permissions" && <Permissions />}
         {activeSection === "vendor" && <Vendor />}
         {activeSection === "inventory" && renderPlaceholder("Inventory Tracker")}
