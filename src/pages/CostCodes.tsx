@@ -22,17 +22,24 @@ export default function CostCodes() {
     queryKey: ['cost_codes'],
     queryFn: async () => {
       console.log("Fetching cost codes...");
-      const { data, error } = await supabase
-        .from('cost_codes')
-        .select('*');
-      
-      if (error) {
-        console.error('Error fetching cost codes:', error);
-        throw error;
+      try {
+        const { data, error } = await supabase
+          .from('cost_codes')
+          .select('*')
+          .order('id');
+        
+        if (error) {
+          console.error('Supabase error fetching cost codes:', error);
+          throw error;
+        }
+        
+        console.log("Cost codes fetched successfully:", data);
+        console.log("Number of cost codes:", data?.length || 0);
+        return data || [];
+      } catch (err) {
+        console.error('Failed to fetch cost codes:', err);
+        throw err;
       }
-      
-      console.log("Cost codes fetched:", data);
-      return data;
     },
   });
 
