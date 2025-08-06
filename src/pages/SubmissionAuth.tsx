@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft } from "lucide-react";
 
-export default function Auth() {
+export default function SubmissionAuth() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -42,7 +43,7 @@ export default function Auth() {
           password,
         });
         if (error) throw error;
-        navigate("/viewer");
+        navigate("/submission-portal");
       }
     } catch (error: any) {
       toast({
@@ -69,7 +70,7 @@ export default function Auth() {
     setLoading(true);
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/viewer-auth`,
+        redirectTo: `${window.location.origin}/submission-auth`,
       });
       if (error) throw error;
       
@@ -104,14 +105,14 @@ export default function Auth() {
         <Card>
           <CardHeader>
             <CardTitle>
-              {isForgotPassword ? "Reset Password" : isSignUp ? "Create Account" : "Nubuck Invoice Viewer Portal"}
+              {isForgotPassword ? "Reset Password" : isSignUp ? "Create Submission Account" : "Invoice Submission Portal"}
             </CardTitle>
             <CardDescription>
               {isForgotPassword
                 ? "Enter your email to receive password reset instructions"
                 : isSignUp
-                ? "Sign up for a new account"
-                : "Sign in to access invoice management"}
+                ? "Sign up for invoice submission access"
+                : "Sign in to submit invoices"}
             </CardDescription>
           </CardHeader>
           <CardContent>

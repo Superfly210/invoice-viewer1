@@ -1,0 +1,460 @@
+
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useToast } from "@/hooks/use-toast";
+import { Upload, Plus, X, LogOut } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { formatCurrency, parseCurrencyValue } from "@/lib/currencyFormatter";
+
+interface CodingRow {
+  id: string;
+  afeNumber: string;
+  costCenter: string;
+  costCode: string;
+  total: string;
+}
+
+export default function SubmissionPortal() {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  
+  // File upload states
+  const [invoiceFile, setInvoiceFile] = useState<File | null>(null);
+  const [supportingDocs, setSupportingDocs] = useState<File[]>([]);
+  
+  // Form 1 - Invoice Details
+  const [invoicingCompany, setInvoicingCompany] = useState("");
+  const [invoiceDate, setInvoiceDate] = useState<Date>();
+  const [subTotal, setSubTotal] = useState("");
+  const [gstTotal, setGstTotal] = useState("");
+  const [invoiceTotal, setInvoiceTotal] = useState("");
+  
+  // Form 2 - Coding Details
+  const [codingRows, setCodingRows] = useState<CodingRow[]>([
+    { id: "1", afeNumber: "", costCenter: "", costCode: "", total: "" }
+  ]);
+  
+  // Form 3 - Contact Info
+  const [emailFields, setEmailFields] = useState<string[]>([""]);
+  const [additionalComments, setAdditionalComments] = useState("");
+  
+  // Final submission
+  const [confirmationChecked, setConfirmationChecked] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate("/");
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, type: 'invoice' | 'supporting') => {
+    const files = e.target.files;
+    if (!files) return;
+    
+    if (type === 'invoice') {
+      setInvoiceFile(files[0]);
+    } else {
+      setSupportingDocs(prev => [...prev, ...Array.from(files)]);
+    }
+  };
+
+  const handleCurrencyChange = (value: string, setter: (val: string) => void) => {
+    const numericValue = parseCurrencyValue(value);
+    if (numericValue !== null) {
+      setter(formatCurrency(numericValue));
+    } else {
+      setter(value);
+    }
+  };
+
+  const addCodingRow = () => {
+    setCodingRows(prev => [...prev, {
+      id: Date.now().toString(),
+      afeNumber: "",
+      costCenter: "",
+      costCode: "",
+      total: ""
+    }]);
+  };
+
+  const removeCodingRow = (id: string) => {
+    setCodingRows(prev => prev.filter(row => row.id !== id));
+  };
+
+  const updateCodingRow = (id: string, field: keyof CodingRow, value: string) => {
+    setCodingRows(prev => prev.map(row => 
+      row.id === id ? { ...row, [field]: value } : row
+    ));
+  };
+
+  const addEmailField = () => {
+    setEmailFields(prev => [...prev, ""]);
+  };
+
+  const removeEmailField = (index: number) => {
+    setEmailFields(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const updateEmailField = (index: number, value: string) => {
+    setEmailFields(prev => prev.map((email, i) => i === index ? value : email));
+  };
+
+  const validateForm = () => {
+    if (!invoiceFile) return "Invoice document is required";
+    if (!invoicingCompany.trim()) return "Invoicing company is required";
+    if (!invoiceDate) return "Invoice date is required";
+    if (!subTotal.trim()) return "Invoice sub total is required";
+    if (!gstTotal.trim()) return "Invoice GST is required";
+    if (!invoiceTotal.trim()) return "Invoice total is required";
+    if (codingRows.length === 0) return "At least one coding row is required";
+    
+    // Check if at least one coding row has either AFE number or both cost center and cost code
+    const hasValidCoding = codingRows.some(row => 
+      row.afeNumber.trim() || (row.costCenter.trim() && row.costCode.trim())
+    );
+    if (!hasValidCoding) return "Each coding row must have either an AFE number or both cost center and cost code";
+    
+    if (!confirmationChecked) return "Please confirm field coding and signature are included";
+    
+    return null;
+  };
+
+  const handleSubmit = async () => {
+    const error = validateForm();
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Validation Error",
+        description: error,
+      });
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      // Here we would normally upload files and save data
+      // For now, just simulate success
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      toast({
+        title: "Invoice submitted successfully",
+        description: "Your invoice has been received and will be processed.",
+      });
+      
+      // Clear all fields
+      setInvoiceFile(null);
+      setSupportingDocs([]);
+      setInvoicingCompany("");
+      setInvoiceDate(undefined);
+      setSubTotal("");
+      setGstTotal("");
+      setInvoiceTotal("");
+      setCodingRows([{ id: "1", afeNumber: "", costCenter: "", costCode: "", total: "" }]);
+      setEmailFields([""]);
+      setAdditionalComments("");
+      setConfirmationChecked(false);
+      
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Submission Error",
+        description: "Failed to submit invoice. Please try again.",
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <div className="border-b bg-card">
+        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+          <h1 className="text-2xl font-bold">Invoice Submission Portal</h1>
+          <Button variant="outline" onClick={handleLogout}>
+            <LogOut className="w-4 h-4 mr-2" />
+            Log Out
+          </Button>
+        </div>
+      </div>
+
+      <div className="container mx-auto px-4 py-8 space-y-8">
+        {/* File Upload Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Upload Documents</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Invoice Upload */}
+            <div>
+              <label className="block text-sm font-medium mb-2">Invoice Document *</label>
+              <div className="border-2 border-dashed border-border rounded-lg p-6 text-center">
+                <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                <p className="text-sm text-muted-foreground mb-2">
+                  {invoiceFile ? invoiceFile.name : "Drag and drop your invoice PDF here, or click to browse"}
+                </p>
+                <input
+                  type="file"
+                  accept=".pdf"
+                  onChange={(e) => handleFileUpload(e, 'invoice')}
+                  className="hidden"
+                  id="invoice-upload"
+                />
+                <Button variant="outline" onClick={() => document.getElementById('invoice-upload')?.click()}>
+                  Choose File
+                </Button>
+              </div>
+            </div>
+
+            {/* Supporting Documents Upload */}
+            <div>
+              <label className="block text-sm font-medium mb-2">Additional Supporting Documents</label>
+              <p className="text-xs text-muted-foreground mb-2">Field ticket backup and/or proof of field approval</p>
+              <div className="border-2 border-dashed border-border rounded-lg p-6 text-center">
+                <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                <p className="text-sm text-muted-foreground mb-2">
+                  {supportingDocs.length > 0 ? `${supportingDocs.length} files selected` : "Drag and drop supporting documents here, or click to browse"}
+                </p>
+                <input
+                  type="file"
+                  multiple
+                  onChange={(e) => handleFileUpload(e, 'supporting')}
+                  className="hidden"
+                  id="supporting-upload"
+                />
+                <Button variant="outline" onClick={() => document.getElementById('supporting-upload')?.click()}>
+                  Choose Files
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Form 1 - Invoice Details */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Invoice Details</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">Invoicing Company *</label>
+              <Input
+                value={invoicingCompany}
+                onChange={(e) => setInvoicingCompany(e.target.value)}
+                placeholder="Enter company name"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium mb-2">Invoice Date *</label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !invoiceDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {invoiceDate ? format(invoiceDate, "PPP") : "Select invoice date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={invoiceDate}
+                    onSelect={setInvoiceDate}
+                    initialFocus
+                    className="pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Invoice Sub Total *</label>
+                <Input
+                  value={subTotal}
+                  onChange={(e) => handleCurrencyChange(e.target.value, setSubTotal)}
+                  placeholder="$0.00"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-2">Invoice GST *</label>
+                <Input
+                  value={gstTotal}
+                  onChange={(e) => handleCurrencyChange(e.target.value, setGstTotal)}
+                  placeholder="$0.00"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-2">Invoice Total *</label>
+                <Input
+                  value={invoiceTotal}
+                  onChange={(e) => handleCurrencyChange(e.target.value, setInvoiceTotal)}
+                  placeholder="$0.00"
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Form 2 - Invoice Coding Details */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Invoice Coding Details</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Each row must have either an AFE Number OR both Cost Center and Cost Code
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {codingRows.map((row, index) => (
+              <div key={row.id} className="grid grid-cols-1 md:grid-cols-5 gap-4 p-4 border rounded-lg">
+                <div>
+                  <label className="block text-xs font-medium mb-1">AFE Number</label>
+                  <Input
+                    value={row.afeNumber}
+                    onChange={(e) => updateCodingRow(row.id, 'afeNumber', e.target.value)}
+                    placeholder="AFE-123"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-xs font-medium mb-1">Cost Center</label>
+                  <Input
+                    value={row.costCenter}
+                    onChange={(e) => updateCodingRow(row.id, 'costCenter', e.target.value)}
+                    placeholder="CC-001"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-xs font-medium mb-1">Cost Code</label>
+                  <Input
+                    value={row.costCode}
+                    onChange={(e) => updateCodingRow(row.id, 'costCode', e.target.value)}
+                    placeholder="Code-001"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-xs font-medium mb-1">Total</label>
+                  <Input
+                    value={row.total}
+                    onChange={(e) => handleCurrencyChange(e.target.value, (val) => updateCodingRow(row.id, 'total', val))}
+                    placeholder="$0.00"
+                  />
+                </div>
+                
+                <div className="flex items-end">
+                  {codingRows.length > 1 && (
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => removeCodingRow(row.id)}
+                      className="text-destructive"
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  )}
+                </div>
+              </div>
+            ))}
+            
+            <Button variant="outline" onClick={addCodingRow}>
+              <Plus className="w-4 h-4 mr-2" />
+              Add Coding Row
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Form 3 - Contact Information */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Contact Information</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">Email Addresses for Additional Correspondence</label>
+              {emailFields.map((email, index) => (
+                <div key={index} className="flex gap-2 mb-2">
+                  <Input
+                    type="email"
+                    value={email}
+                    onChange={(e) => updateEmailField(index, e.target.value)}
+                    placeholder="email@example.com"
+                  />
+                  {emailFields.length > 1 && (
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => removeEmailField(index)}
+                      className="text-destructive"
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  )}
+                </div>
+              ))}
+              <Button variant="outline" size="sm" onClick={addEmailField}>
+                <Plus className="w-4 h-4 mr-2" />
+                Add Email
+              </Button>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium mb-2">Additional Comments</label>
+              <Textarea
+                value={additionalComments}
+                onChange={(e) => setAdditionalComments(e.target.value)}
+                placeholder="Enter any additional comments or notes"
+                rows={4}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Final Submission */}
+        <Card>
+          <CardContent className="pt-6">
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="confirmation"
+                  checked={confirmationChecked}
+                  onCheckedChange={(checked) => setConfirmationChecked(checked as boolean)}
+                />
+                <label htmlFor="confirmation" className="text-sm font-medium">
+                  I confirm field coding and signature are included in the invoice or supporting documents *
+                </label>
+              </div>
+              
+              <Button
+                onClick={handleSubmit}
+                disabled={submitting}
+                className="w-full"
+                size="lg"
+              >
+                {submitting ? "Submitting..." : "Submit Invoice"}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
