@@ -1,4 +1,3 @@
-
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from "@/components/ui/table";
@@ -28,6 +27,37 @@ export const InvoiceCodingTable = ({ invoiceId }: InvoiceCodingTableProps) => {
   const [isAddingRow, setIsAddingRow] = useState(false);
   const { user } = useAuth();
 
+  const { data: costCodes = [], isLoading: isCostCodesLoading } = useQuery<string[]>({
+    queryKey: ['cost-codes'],
+    queryFn: async () => {
+      // Corrected from .select('cost_code') to .select('code')
+      const { data, error } = await supabase.from('cost_codes').select('code');
+      if (error) {
+        console.error("Error fetching cost codes:", error);
+        toast({
+          title: "Error Loading Cost Codes",
+          description: "Could not validate cost codes. Please try again later.",
+          variant: "destructive",
+        });
+        throw error;
+      }
+      // Corrected from item.cost_code to item.code
+      return data.map((item) => item.code);
+    },
+  });
+
+  const normalizedMasterCodes = useMemo(() => {
+    if (isCostCodesLoading) return null;
+    return new Set(costCodes.map(code => code.toLowerCase().trim().replace(/[.\s-]/g, '')));
+  }, [costCodes, isCostCodesLoading]);
+
+  const isCostCodeInvalid = (costCode: string | null) => {
+    if (!normalizedMasterCodes) return false; // Don't validate if master list isn't ready
+    if (!costCode) return true; // Null or empty is invalid
+    const normalizedCostCode = costCode.toLowerCase().trim().replace(/[.\s-]/g, '');
+    return !normalizedMasterCodes.has(normalizedCostCode);
+  };
+
   const { data: codingData = [], isLoading } = useQuery({
     queryKey: ['invoice-coding', invoiceId],
     queryFn: async () => {
@@ -50,7 +80,7 @@ export const InvoiceCodingTable = ({ invoiceId }: InvoiceCodingTableProps) => {
   const handleFieldUpdate = async (codingId: number, field: string, newValue: string) => {
     try {
       const oldValue = codingData.find(item => item.id === codingId)?.[field as keyof InvoiceCoding] || null;
-      
+
       let processedValue: any = newValue;
       if (field === 'total') {
         processedValue = parseCurrencyValue(newValue);
@@ -70,7 +100,7 @@ export const InvoiceCodingTable = ({ invoiceId }: InvoiceCodingTableProps) => {
         });
       } else {
         await logAuditChange(invoiceId, 'LINE_ITEM', `coding_${field}`, oldValue, processedValue, codingId);
-        
+
         toast({
           title: "Success",
           description: `${field} updated successfully`,
@@ -108,7 +138,7 @@ export const InvoiceCodingTable = ({ invoiceId }: InvoiceCodingTableProps) => {
         if (deletedData) {
           await logAuditChange(invoiceId, 'INVOICE_CODING', 'coding_row', JSON.stringify(deletedData), null, codingId, 'DELETE');
         }
-        
+
         toast({
           title: "Success",
           description: "Row deleted successfully",
@@ -149,7 +179,7 @@ export const InvoiceCodingTable = ({ invoiceId }: InvoiceCodingTableProps) => {
         });
       } else {
         await logAuditChange(invoiceId, 'LINE_ITEM', 'coding_row', null, JSON.stringify(data), data.id, 'INSERT');
-        
+
         toast({
           title: "Success",
           description: "New row added successfully",
@@ -180,6 +210,7 @@ export const InvoiceCodingTable = ({ invoiceId }: InvoiceCodingTableProps) => {
   return (
     <div className="mt-4 p-4 rounded-lg">
       <h4 className="text-sm font-medium text-gray-900 mb-3">Invoice Coding Details</h4>
+
       <div className="overflow-x-auto">
         <Table>
           <TableHeader>
@@ -213,6 +244,7 @@ export const InvoiceCodingTable = ({ invoiceId }: InvoiceCodingTableProps) => {
                   <EditableLineItemCell
                     value={coding.cost_code}
                     onSave={(newValue) => handleFieldUpdate(coding.id, 'cost_code', newValue)}
+                    isInvalid={isCostCodeInvalid(coding.cost_code)}
                   />
                 </TableCell>
                 <TableCell className="py-2 text-left">

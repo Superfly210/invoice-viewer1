@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -18,15 +18,18 @@ type CostCode = {
 };
 
 export default function CostCodes() {
+  const [sortColumn, setSortColumn] = useState<keyof CostCode>('id');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+
   const { data: costCodes, isLoading, error } = useQuery({
-    queryKey: ['cost_codes'],
+    queryKey: ['cost_codes', sortColumn, sortDirection],
     queryFn: async () => {
       console.log("Fetching cost codes...");
       try {
         const { data, error } = await supabase
           .from('cost_codes')
           .select('*')
-          .order('id');
+          .order(sortColumn, { ascending: sortDirection === 'asc' });
         
         if (error) {
           console.error('Supabase error fetching cost codes:', error);
@@ -42,6 +45,15 @@ export default function CostCodes() {
       }
     },
   });
+
+  const handleSort = (column: keyof CostCode) => {
+    if (sortColumn === column) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortColumn(column);
+      setSortDirection('asc');
+    }
+  };
 
   if (isLoading) {
     return (
@@ -64,12 +76,16 @@ export default function CostCodes() {
   return (
     <div className="p-6">
       <h1 className="text-2xl font-semibold mb-4">Cost Codes</h1>
-      <div className="rounded-md border">
+      <div className="rounded-md border overflow-y-auto max-h-[calc(100vh-200px)]">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Code</TableHead>
-              <TableHead>Description</TableHead>
+              <TableHead onClick={() => handleSort('code')} className="cursor-pointer">
+                Code {sortColumn === 'code' && (sortDirection === 'asc' ? '▲' : '▼')}
+              </TableHead>
+              <TableHead onClick={() => handleSort('description')} className="cursor-pointer">
+                Description {sortColumn === 'description' && (sortDirection === 'asc' ? '▲' : '▼')}
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
