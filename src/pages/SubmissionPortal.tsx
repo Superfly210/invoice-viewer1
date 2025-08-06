@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, Plus, X, LogOut } from "lucide-react";
+import { Upload, Plus, X, LogOut, FileText } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
@@ -18,8 +18,7 @@ import { formatCurrency, parseCurrencyValue } from "@/lib/currencyFormatter";
 
 interface CodingRow {
   id: string;
-  afeNumber: string;
-  costCenter: string;
+  afeNumberCostCenter: string;
   costCode: string;
   total: string;
 }
@@ -41,7 +40,7 @@ export default function SubmissionPortal() {
   
   // Form 2 - Coding Details
   const [codingRows, setCodingRows] = useState<CodingRow[]>([
-    { id: "1", afeNumber: "", costCenter: "", costCode: "", total: "" }
+    { id: "1", afeNumberCostCenter: "", costCode: "", total: "" }
   ]);
   
   // Form 3 - Contact Info
@@ -68,6 +67,14 @@ export default function SubmissionPortal() {
     }
   };
 
+  const removeInvoiceFile = () => {
+    setInvoiceFile(null);
+  };
+
+  const removeSupportingDoc = (index: number) => {
+    setSupportingDocs(prev => prev.filter((_, i) => i !== index));
+  };
+
   const handleCurrencyChange = (value: string, setter: (val: string) => void) => {
     const numericValue = parseCurrencyValue(value);
     if (numericValue !== null) {
@@ -80,8 +87,7 @@ export default function SubmissionPortal() {
   const addCodingRow = () => {
     setCodingRows(prev => [...prev, {
       id: Date.now().toString(),
-      afeNumber: "",
-      costCenter: "",
+      afeNumberCostCenter: "",
       costCode: "",
       total: ""
     }]);
@@ -118,11 +124,11 @@ export default function SubmissionPortal() {
     if (!invoiceTotal.trim()) return "Invoice total is required";
     if (codingRows.length === 0) return "At least one coding row is required";
     
-    // Check if at least one coding row has either AFE number or both cost center and cost code
+    // Check if at least one coding row has either AFE number/cost center or cost code and total
     const hasValidCoding = codingRows.some(row => 
-      row.afeNumber.trim() || (row.costCenter.trim() && row.costCode.trim())
+      row.afeNumberCostCenter.trim() || (row.costCode.trim() && row.total.trim())
     );
-    if (!hasValidCoding) return "Each coding row must have either an AFE number or both cost center and cost code";
+    if (!hasValidCoding) return "Each coding row must have either an AFE Number/Cost Center or Cost Code and Total";
     
     if (!confirmationChecked) return "Please confirm field coding and signature are included";
     
@@ -159,7 +165,7 @@ export default function SubmissionPortal() {
       setSubTotal("");
       setGstTotal("");
       setInvoiceTotal("");
-      setCodingRows([{ id: "1", afeNumber: "", costCenter: "", costCode: "", total: "" }]);
+      setCodingRows([{ id: "1", afeNumberCostCenter: "", costCode: "", total: "" }]);
       setEmailFields([""]);
       setAdditionalComments("");
       setConfirmationChecked(false);
@@ -181,7 +187,7 @@ export default function SubmissionPortal() {
       <div className="border-b bg-card">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <h1 className="text-2xl font-bold">Invoice Submission Portal</h1>
-          <Button variant="outline" onClick={handleLogout}>
+          <Button onClick={handleLogout}>
             <LogOut className="w-4 h-4 mr-2" />
             Log Out
           </Button>
@@ -198,22 +204,36 @@ export default function SubmissionPortal() {
             {/* Invoice Upload */}
             <div>
               <label className="block text-sm font-medium mb-2">Invoice Document *</label>
-              <div className="border-2 border-dashed border-border rounded-lg p-6 text-center">
-                <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                <p className="text-sm text-muted-foreground mb-2">
-                  {invoiceFile ? invoiceFile.name : "Drag and drop your invoice PDF here, or click to browse"}
-                </p>
-                <input
-                  type="file"
-                  accept=".pdf"
-                  onChange={(e) => handleFileUpload(e, 'invoice')}
-                  className="hidden"
-                  id="invoice-upload"
-                />
-                <Button variant="outline" onClick={() => document.getElementById('invoice-upload')?.click()}>
-                  Choose File
-                </Button>
-              </div>
+              {!invoiceFile ? (
+                <div className="border-2 border-dashed border-border rounded-lg p-6 text-center">
+                  <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                  <p className="text-sm text-muted-foreground mb-2">
+                    Drag and drop your invoice PDF here, or click to browse
+                  </p>
+                  <input
+                    type="file"
+                    accept=".pdf"
+                    onChange={(e) => handleFileUpload(e, 'invoice')}
+                    className="hidden"
+                    id="invoice-upload"
+                  />
+                  <Button onClick={() => document.getElementById('invoice-upload')?.click()}>
+                    Choose File
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex items-center space-x-2 p-3 bg-muted rounded-lg">
+                  <FileText className="h-8 w-8 text-blue-500" />
+                  <span className="flex-1 text-sm">{invoiceFile.name}</span>
+                  <Button
+                    size="sm"
+                    onClick={removeInvoiceFile}
+                    className="text-destructive hover:text-destructive"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
             </div>
 
             {/* Supporting Documents Upload */}
@@ -223,7 +243,7 @@ export default function SubmissionPortal() {
               <div className="border-2 border-dashed border-border rounded-lg p-6 text-center">
                 <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
                 <p className="text-sm text-muted-foreground mb-2">
-                  {supportingDocs.length > 0 ? `${supportingDocs.length} files selected` : "Drag and drop supporting documents here, or click to browse"}
+                  Drag and drop supporting documents here, or click to browse
                 </p>
                 <input
                   type="file"
@@ -232,10 +252,29 @@ export default function SubmissionPortal() {
                   className="hidden"
                   id="supporting-upload"
                 />
-                <Button variant="outline" onClick={() => document.getElementById('supporting-upload')?.click()}>
+                <Button onClick={() => document.getElementById('supporting-upload')?.click()}>
                   Choose Files
                 </Button>
               </div>
+              
+              {/* Display uploaded supporting documents */}
+              {supportingDocs.length > 0 && (
+                <div className="mt-4 space-y-2">
+                  {supportingDocs.map((file, index) => (
+                    <div key={index} className="flex items-center space-x-2 p-3 bg-muted rounded-lg">
+                      <FileText className="h-8 w-8 text-blue-500" />
+                      <span className="flex-1 text-sm">{file.name}</span>
+                      <Button
+                        size="sm"
+                        onClick={() => removeSupportingDoc(index)}
+                        className="text-destructive hover:text-destructive"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -318,27 +357,18 @@ export default function SubmissionPortal() {
           <CardHeader>
             <CardTitle>Invoice Coding Details</CardTitle>
             <p className="text-sm text-muted-foreground">
-              Each row must have either an AFE Number OR both Cost Center and Cost Code
+              Each row must have either an AFE Number OR Cost Center, Cost Code and Total
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
             {codingRows.map((row, index) => (
-              <div key={row.id} className="grid grid-cols-1 md:grid-cols-5 gap-4 p-4 border rounded-lg">
+              <div key={row.id} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 border rounded-lg">
                 <div>
-                  <label className="block text-xs font-medium mb-1">AFE Number</label>
+                  <label className="block text-xs font-medium mb-1">AFE Number/Cost Center</label>
                   <Input
-                    value={row.afeNumber}
-                    onChange={(e) => updateCodingRow(row.id, 'afeNumber', e.target.value)}
-                    placeholder="AFE-123"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-xs font-medium mb-1">Cost Center</label>
-                  <Input
-                    value={row.costCenter}
-                    onChange={(e) => updateCodingRow(row.id, 'costCenter', e.target.value)}
-                    placeholder="CC-001"
+                    value={row.afeNumberCostCenter}
+                    onChange={(e) => updateCodingRow(row.id, 'afeNumberCostCenter', e.target.value)}
+                    placeholder="AFE-123 or CC-001"
                   />
                 </div>
                 
@@ -363,10 +393,9 @@ export default function SubmissionPortal() {
                 <div className="flex items-end">
                   {codingRows.length > 1 && (
                     <Button
-                      variant="outline"
                       size="icon"
                       onClick={() => removeCodingRow(row.id)}
-                      className="text-destructive"
+                      className="text-destructive-foreground bg-destructive hover:bg-destructive/90"
                     >
                       <X className="w-4 h-4" />
                     </Button>
@@ -375,7 +404,7 @@ export default function SubmissionPortal() {
               </div>
             ))}
             
-            <Button variant="outline" onClick={addCodingRow}>
+            <Button onClick={addCodingRow}>
               <Plus className="w-4 h-4 mr-2" />
               Add Coding Row
             </Button>
@@ -400,17 +429,16 @@ export default function SubmissionPortal() {
                   />
                   {emailFields.length > 1 && (
                     <Button
-                      variant="outline"
                       size="icon"
                       onClick={() => removeEmailField(index)}
-                      className="text-destructive"
+                      className="text-destructive-foreground bg-destructive hover:bg-destructive/90"
                     >
                       <X className="w-4 h-4" />
                     </Button>
                   )}
                 </div>
               ))}
-              <Button variant="outline" size="sm" onClick={addEmailField}>
+              <Button size="sm" onClick={addEmailField}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Email
               </Button>
