@@ -104,7 +104,7 @@ export default function Auth() {
         <Card>
           <CardHeader>
             <CardTitle>
-              {isForgotPassword ? "Reset Password" : isSignUp ? "Create Account" : "Nubuck Invoice Viewer Portal"}
+                                {isForgotPassword ? "Reset Password" : isSignUp ? "Create Account" : "Invoice Viewer Portal"}
             </CardTitle>
             <CardDescription>
               {isForgotPassword

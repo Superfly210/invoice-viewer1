@@ -50,7 +50,7 @@ export default function Landing() {
               <div className="mx-auto w-16 h-16 bg-secondary/10 rounded-full flex items-center justify-center mb-4">
                 <Eye className="w-8 h-8 text-secondary-foreground" />
               </div>
-              <CardTitle className="text-xl">Nubuck Invoice Viewer Portal</CardTitle>
+              <CardTitle className="text-xl">Invoice Viewer Portal</CardTitle>
               <CardDescription>
                 Review, approve, and manage submitted invoices
               </CardDescription>

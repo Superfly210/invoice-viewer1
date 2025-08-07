@@ -338,9 +338,13 @@ export const MetadataPanel = ({ currentInvoiceId }: MetadataPanelProps) => {
               <Button 
                 onClick={handleCommentSubmit}
                 size="sm"
+                className="flex flex-col h-auto p-2"
               >
-                <Send className="h-4 w-4 mr-2" />
-                Add Comment
+                <div className="flex items-center">
+                  <Plus className="h-4 w-4 mr-1" />
+                  <span>Add</span>
+                </div>
+                <span>Comment</span>
               </Button>
             </div>
           </div>

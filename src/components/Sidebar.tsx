@@ -130,14 +130,14 @@ export const Sidebar = ({
                 className={cn(
                   "w-full flex items-center px-4 py-3 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors",
                   item.active && 
-                  "bg-blue-50 dark:bg-blue-900/30 border-l-4 border-blue-500 font-semibold text-blue-700 dark:text-blue-400"
+                  "bg-[rgb(15,23,41)] !important text-white font-semibold"
                 )}
               >
                 <item.icon 
                   className={cn(
                     "h-5 w-5", 
                     item.active 
-                      ? "text-blue-600 dark:text-blue-400" 
+                      ? "text-white !important" 
                       : "text-slate-500 dark:text-slate-400"
                   )} 
                 />
@@ -178,10 +178,10 @@ export const Sidebar = ({
                         onClick={() => onSectionChange(item.id)}
                         className={cn(
                           "flex items-center w-full py-2 px-3 text-sm text-slate-600 dark:text-slate-300 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700",
-                          item.active && "bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400"
+                          item.active && "bg-[rgb(15,23,41)] !important text-white"
                         )}
                       >
-                        <item.icon className="h-4 w-4 mr-2 text-slate-500 dark:text-slate-400" />
+                                                <item.icon className={cn("h-4 w-4 mr-2", item.active ? "text-white !important" : "text-slate-500 dark:text-slate-400")} />
                         {item.label}
                       </button>
                     </li>
