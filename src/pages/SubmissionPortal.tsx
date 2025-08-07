@@ -14,7 +14,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { formatCurrency, parseCurrencyValue } from "@/lib/currencyFormatter";
+import { formatCurrency, parseCurrencyValue, handleCurrencyInput } from "@/lib/currencyFormatter";
 
 interface CodingRow {
   id: string;
@@ -76,11 +76,14 @@ export default function SubmissionPortal() {
   };
 
   const handleCurrencyChange = (value: string, setter: (val: string) => void) => {
+    // Allow free typing and only clean up invalid characters
+    setter(handleCurrencyInput(value));
+  };
+
+  const formatCurrencyOnBlur = (value: string, setter: (val: string) => void) => {
     const numericValue = parseCurrencyValue(value);
     if (numericValue !== null) {
       setter(formatCurrency(numericValue));
-    } else {
-      setter(value);
     }
   };
 
@@ -148,9 +151,49 @@ export default function SubmissionPortal() {
 
     setSubmitting(true);
     try {
-      // Here we would normally upload files and save data
-      // For now, just simulate success
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("User not authenticated");
+
+      const userId = user.id;
+      
+      // Upload invoice file
+      const invoiceFileName = `${userId}/${Date.now()}-${invoiceFile!.name}`;
+      const { error: invoiceUploadError } = await supabase.storage
+        .from('submission-files')
+        .upload(invoiceFileName, invoiceFile!);
+
+      if (invoiceUploadError) throw invoiceUploadError;
+
+      // Upload supporting documents
+      const supportingDocPaths: string[] = [];
+      for (const doc of supportingDocs) {
+        const docFileName = `${userId}/${Date.now()}-${doc.name}`;
+        const { error: docUploadError } = await supabase.storage
+          .from('submission-files')
+          .upload(docFileName, doc);
+        
+        if (docUploadError) throw docUploadError;
+        supportingDocPaths.push(docFileName);
+      }
+
+      // Save submission data to database
+      const { error: insertError } = await supabase
+        .from('invoice_submissions')
+        .insert({
+          invoicing_company: invoicingCompany,
+          invoice_date: invoiceDate!.toISOString().split('T')[0],
+          sub_total: parseCurrencyValue(subTotal),
+          gst_total: parseCurrencyValue(gstTotal),
+          invoice_total: parseCurrencyValue(invoiceTotal),
+          invoice_file_path: invoiceFileName,
+          supporting_docs_paths: supportingDocPaths,
+          coding_details: JSON.parse(JSON.stringify(codingRows)),
+          contact_emails: emailFields.filter(email => email.trim()),
+          additional_comments: additionalComments.trim() || null,
+          submitted_by: userId
+        });
+
+      if (insertError) throw insertError;
       
       toast({
         title: "Invoice submitted successfully",
@@ -171,10 +214,11 @@ export default function SubmissionPortal() {
       setConfirmationChecked(false);
       
     } catch (error) {
+      console.error("Submission error:", error);
       toast({
         variant: "destructive",
         title: "Submission Error",
-        description: "Failed to submit invoice. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to submit invoice. Please try again.",
       });
     } finally {
       setSubmitting(false);
@@ -327,6 +371,7 @@ export default function SubmissionPortal() {
                 <Input
                   value={subTotal}
                   onChange={(e) => handleCurrencyChange(e.target.value, setSubTotal)}
+                  onBlur={(e) => formatCurrencyOnBlur(e.target.value, setSubTotal)}
                   placeholder="$0.00"
                 />
               </div>
@@ -336,6 +381,7 @@ export default function SubmissionPortal() {
                 <Input
                   value={gstTotal}
                   onChange={(e) => handleCurrencyChange(e.target.value, setGstTotal)}
+                  onBlur={(e) => formatCurrencyOnBlur(e.target.value, setGstTotal)}
                   placeholder="$0.00"
                 />
               </div>
@@ -345,6 +391,7 @@ export default function SubmissionPortal() {
                 <Input
                   value={invoiceTotal}
                   onChange={(e) => handleCurrencyChange(e.target.value, setInvoiceTotal)}
+                  onBlur={(e) => formatCurrencyOnBlur(e.target.value, setInvoiceTotal)}
                   placeholder="$0.00"
                 />
               </div>
@@ -386,6 +433,7 @@ export default function SubmissionPortal() {
                   <Input
                     value={row.total}
                     onChange={(e) => handleCurrencyChange(e.target.value, (val) => updateCodingRow(row.id, 'total', val))}
+                    onBlur={(e) => formatCurrencyOnBlur(e.target.value, (val) => updateCodingRow(row.id, 'total', val))}
                     placeholder="$0.00"
                   />
                 </div>

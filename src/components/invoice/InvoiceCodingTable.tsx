@@ -8,6 +8,7 @@ import { X, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useMemo } from "react";
 import { useAuth } from "@/components/AuthProvider";
+import { useSubtotalComparison } from "@/hooks/useSubtotalComparison";
 import { logAuditChange } from "@/utils/auditLogger";
 
 interface InvoiceCodingTableProps {
@@ -26,6 +27,34 @@ export const InvoiceCodingTable = ({ invoiceId }: InvoiceCodingTableProps) => {
   const queryClient = useQueryClient();
   const [isAddingRow, setIsAddingRow] = useState(false);
   const { user } = useAuth();
+
+  // Get invoice subtotal and line items total for comparison
+  const { data: invoiceData } = useQuery({
+    queryKey: ['attachment-info-single', invoiceId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('Attachment_Info')
+        .select('Sub_Total')
+        .eq('id', invoiceId)
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: lineItemsTotal = 0 } = useQuery({
+    queryKey: ['line-items-total', invoiceId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('Line_Items')
+        .select('Total')
+        .eq('invoice_id', invoiceId);
+      
+      if (error) throw error;
+      return data.reduce((acc, item) => acc + (item.Total || 0), 0);
+    },
+  });
 
   const { data: costCodes = [], isLoading: isCostCodesLoading } = useQuery<string[]>({
     queryKey: ['cost-codes'],
@@ -76,6 +105,13 @@ export const InvoiceCodingTable = ({ invoiceId }: InvoiceCodingTableProps) => {
   const totalAmount = useMemo(() => {
     return codingData.reduce((acc, item) => acc + (item.total || 0), 0);
   }, [codingData]);
+
+  // Use subtotal comparison hook
+  const subtotalComparison = useSubtotalComparison({
+    invoiceSubtotal: invoiceData?.Sub_Total || null,
+    codingTotal: totalAmount,
+    lineItemsTotal
+  });
 
   const handleFieldUpdate = async (codingId: number, field: string, newValue: string) => {
     try {
@@ -277,7 +313,9 @@ export const InvoiceCodingTable = ({ invoiceId }: InvoiceCodingTableProps) => {
                 </Button>
               </TableCell>
               <TableCell className="text-right font-medium">Total</TableCell>
-              <TableCell className="text-left font-medium">{formatCurrency(totalAmount)}</TableCell>
+              <TableCell className={`text-left font-medium px-2 py-1 rounded ${subtotalComparison.highlightClass}`}>
+                {formatCurrency(totalAmount)}
+              </TableCell>
             </TableRow>
           </TableFooter>
         </Table>

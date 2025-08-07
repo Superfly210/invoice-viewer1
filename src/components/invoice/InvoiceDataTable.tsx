@@ -6,11 +6,11 @@ import { InvoiceCodingTable } from "./InvoiceCodingTable";
 import { AttachmentInfo } from "@/hooks/useInvoiceDataFetching";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { formatCurrency, parseCurrencyValue } from "@/lib/currencyFormatter";
+import { useSubtotalComparison } from "@/hooks/useSubtotalComparison";
 import { logAuditChange } from "@/utils/auditLogger";
 import { useAuth } from "@/components/AuthProvider";
-import { useQuery } from "@tanstack/react-query";
 import {
   Tooltip,
   TooltipContent,
@@ -27,6 +27,40 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { user } = useAuth();
+
+  // Fetch coding total and line items total for comparison
+  const { data: codingTotal = 0 } = useQuery({
+    queryKey: ['invoice-coding-total', currentInvoice.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('invoice_coding')
+        .select('total')
+        .eq('invoice_id', currentInvoice.id);
+      
+      if (error) throw error;
+      return data.reduce((acc, item) => acc + (item.total || 0), 0);
+    },
+  });
+
+  const { data: lineItemsTotal = 0 } = useQuery({
+    queryKey: ['line-items-total', currentInvoice.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('Line_Items')
+        .select('Total')
+        .eq('invoice_id', currentInvoice.id);
+      
+      if (error) throw error;
+      return data.reduce((acc, item) => acc + (item.Total || 0), 0);
+    },
+  });
+
+  // Use subtotal comparison hook
+  const subtotalComparison = useSubtotalComparison({
+    invoiceSubtotal: currentInvoice.Sub_Total,
+    codingTotal,
+    lineItemsTotal
+  });
 
   const { data: currentUserProfile } = useQuery({
     queryKey: ['current-user-profile', user?.id],
@@ -289,11 +323,13 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
           <TableRow className="h-16">
             <TableCell className="font-medium w-48 text-left py-3">Subtotal</TableCell>
             <TableCell className="text-left py-3">
-              <EditableTableCell
-                value={currentInvoice.Sub_Total ? formatCurrency(currentInvoice.Sub_Total) : null}
-                onSave={(newValue) => handleFieldUpdate('Sub_Total', newValue)}
-                type="text"
-              />
+              <div className={`inline-block px-2 py-1 rounded ${subtotalComparison.highlightClass}`}>
+                <EditableTableCell
+                  value={currentInvoice.Sub_Total ? formatCurrency(currentInvoice.Sub_Total) : null}
+                  onSave={(newValue) => handleFieldUpdate('Sub_Total', newValue)}
+                  type="text"
+                />
+              </div>
             </TableCell>
           </TableRow>
           <TableRow className="h-16">

@@ -6,7 +6,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { Loader2, AlertCircle, Plus, X } from "lucide-react";
 import { EditableLineItemCell } from "./invoice/EditableLineItemCell";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
+import { useSubtotalComparison } from "@/hooks/useSubtotalComparison";
 import { formatCurrency, parseCurrencyValue } from "@/lib/currencyFormatter";
 import { logLineItemChange } from "@/utils/auditLogger";
 import {
@@ -51,6 +52,38 @@ export const LineItemsPanel = ({
     toast
   } = useToast();
   const queryClient = useQueryClient();
+
+  // Get invoice subtotal and coding total for comparison
+  const { data: invoiceData } = useQuery({
+    queryKey: ['attachment-info-single', currentInvoiceId],
+    queryFn: async () => {
+      if (!currentInvoiceId) return null;
+      const { data, error } = await supabase
+        .from('Attachment_Info')
+        .select('Sub_Total')
+        .eq('id', currentInvoiceId)
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!currentInvoiceId,
+  });
+
+  const { data: codingTotal = 0 } = useQuery({
+    queryKey: ['invoice-coding-total', currentInvoiceId],
+    queryFn: async () => {
+      if (!currentInvoiceId) return 0;
+      const { data, error } = await supabase
+        .from('invoice_coding')
+        .select('total')
+        .eq('invoice_id', currentInvoiceId);
+      
+      if (error) throw error;
+      return data.reduce((acc, item) => acc + (item.total || 0), 0);
+    },
+    enabled: !!currentInvoiceId,
+  });
   
   useEffect(() => {
     console.log("LineItemsPanel - currentInvoiceId changed to:", currentInvoiceId);
@@ -309,6 +342,13 @@ export const LineItemsPanel = ({
     return sum + (item.Total || 0);
   }, 0);
 
+  // Use subtotal comparison hook
+  const subtotalComparison = useSubtotalComparison({
+    invoiceSubtotal: invoiceData?.Sub_Total || null,
+    codingTotal,
+    lineItemsTotal: totalSum
+  });
+
   return <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-4 h-full overflow-auto">
       <div className="mb-4">
         <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-200">
@@ -394,7 +434,7 @@ export const LineItemsPanel = ({
               <TableCell colSpan={10} className="text-right text-slate-800 dark:text-slate-200">
                 Total:
               </TableCell>
-              <TableCell className="text-right text-slate-800 dark:text-slate-200">
+              <TableCell className={`text-right text-slate-800 dark:text-slate-200 px-2 py-1 rounded ${subtotalComparison.highlightClass}`}>
                 {formatCurrency(totalSum)}
               </TableCell>
             </TableRow>

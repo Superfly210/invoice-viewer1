@@ -368,6 +368,57 @@ export type Database = {
           },
         ]
       }
+      invoice_submissions: {
+        Row: {
+          additional_comments: string | null
+          coding_details: Json
+          contact_emails: string[]
+          created_at: string
+          gst_total: number
+          id: string
+          invoice_date: string
+          invoice_file_path: string
+          invoice_total: number
+          invoicing_company: string
+          sub_total: number
+          submitted_at: string
+          submitted_by: string | null
+          supporting_docs_paths: string[] | null
+        }
+        Insert: {
+          additional_comments?: string | null
+          coding_details: Json
+          contact_emails: string[]
+          created_at?: string
+          gst_total: number
+          id?: string
+          invoice_date: string
+          invoice_file_path: string
+          invoice_total: number
+          invoicing_company: string
+          sub_total: number
+          submitted_at?: string
+          submitted_by?: string | null
+          supporting_docs_paths?: string[] | null
+        }
+        Update: {
+          additional_comments?: string | null
+          coding_details?: Json
+          contact_emails?: string[]
+          created_at?: string
+          gst_total?: number
+          id?: string
+          invoice_date?: string
+          invoice_file_path?: string
+          invoice_total?: number
+          invoicing_company?: string
+          sub_total?: number
+          submitted_at?: string
+          submitted_by?: string | null
+          supporting_docs_paths?: string[] | null
+        }
+        Relationships: []
+      }
       Line_Items: {
         Row: {
           AFE_number: string | null
