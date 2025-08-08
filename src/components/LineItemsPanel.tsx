@@ -342,7 +342,7 @@ export const LineItemsPanel = ({
     return sum + (item.Total || 0);
   }, 0);
 
-  // Use subtotal comparison hook
+  // Use subtotal comparison hook - called unconditionally for hooks rules
   const subtotalComparison = useSubtotalComparison({
     invoiceSubtotal: invoiceData?.Sub_Total || null,
     codingTotal,
