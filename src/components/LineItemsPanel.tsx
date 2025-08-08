@@ -48,9 +48,7 @@ export const LineItemsPanel = ({
   const [lineItems, setLineItems] = useState<LineItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
   const queryClient = useQueryClient();
 
   // Get invoice subtotal and coding total for comparison
@@ -83,6 +81,18 @@ export const LineItemsPanel = ({
       return data.reduce((acc, item) => acc + (item.total || 0), 0);
     },
     enabled: !!currentInvoiceId,
+  });
+
+  // Calculate the total sum of all line items
+  const totalSum = lineItems.reduce((sum, item) => {
+    return sum + (item.Total || 0);
+  }, 0);
+
+  // Use subtotal comparison hook - MUST be called before any early returns
+  const subtotalComparison = useSubtotalComparison({
+    invoiceSubtotal: invoiceData?.Sub_Total || null,
+    codingTotal,
+    lineItemsTotal: totalSum
   });
   
   useEffect(() => {
@@ -336,19 +346,7 @@ export const LineItemsPanel = ({
         </p>
       </div>;
   }
-  
-  // Calculate the total sum of all line items
-  const totalSum = lineItems.reduce((sum, item) => {
-    return sum + (item.Total || 0);
-  }, 0);
-
-  // Use subtotal comparison hook - called unconditionally for hooks rules
-  const subtotalComparison = useSubtotalComparison({
-    invoiceSubtotal: invoiceData?.Sub_Total || null,
-    codingTotal,
-    lineItemsTotal: totalSum
-  });
-
+   
   return <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-4 h-full overflow-auto">
       <div className="mb-4">
         <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-200">
