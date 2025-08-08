@@ -319,6 +319,7 @@ export const InvoiceCodingTable = ({ invoiceId }: InvoiceCodingTableProps) => {
               <TableCell className="text-left font-medium">
                 <EditableLineItemCell
                   value={formatCurrency(totalAmount)}
+                  onSave={() => {}} // Read-only total
                   highlightClass={subtotalComparison.highlightClass}
                 />
               </TableCell>

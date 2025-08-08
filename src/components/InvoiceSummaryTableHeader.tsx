@@ -19,31 +19,37 @@ export const InvoiceSummaryTableHeader = React.memo(
           <TableHead>
             Invoice Number
             <Input
+              id="invoice-number-filter"
               key="invoice-number-filter"
               placeholder="Filter by number..."
               value={invoiceNumberFilter}
               onChange={(e) => setInvoiceNumberFilter(e.target.value)}
               className="mt-1"
+              autoComplete="off"
             />
           </TableHead>
           <TableHead>
             Invoice Date
             <Input
+              id="invoice-date-filter"
               key="invoice-date-filter"
               placeholder="Filter by date..."
               value={invoiceDateFilter}
               onChange={(e) => setInvoiceDateFilter(e.target.value)}
               className="mt-1"
+              autoComplete="off"
             />
           </TableHead>
           <TableHead>
             Company Name
             <Input
+              id="company-name-filter"
               key="company-name-filter"
               placeholder="Filter by company..."
               value={companyNameFilter}
               onChange={(e) => setCompanyNameFilter(e.target.value)}
               className="mt-1"
+              autoComplete="off"
             />
           </TableHead>
           <TableHead className="text-right">Subtotal</TableHead>

@@ -435,6 +435,7 @@ export const LineItemsPanel = ({
               <TableCell className="text-right text-slate-800 dark:text-slate-200">
                 <EditableLineItemCell
                   value={formatCurrency(totalSum)}
+                  onSave={() => {}} // Read-only total
                   highlightClass={subtotalComparison.highlightClass}
                 />
               </TableCell>

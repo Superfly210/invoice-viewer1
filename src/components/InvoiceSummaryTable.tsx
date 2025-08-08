@@ -10,7 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatCurrency } from "@/lib/currencyFormatter";
-import { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useDebounce } from "@/hooks/use-debounce";
@@ -27,7 +27,7 @@ type AttachmentInfo = {
   created_at: string;
 };
 
-export const InvoiceSummaryTable = () => {
+export const InvoiceSummaryTable = React.memo(() => {
   const [invoiceNumberFilter, setInvoiceNumberFilter] = useState("");
   const [invoiceDateFilter, setInvoiceDateFilter] = useState("");
   const [companyNameFilter, setCompanyNameFilter] = useState("");
@@ -126,4 +126,4 @@ export const InvoiceSummaryTable = () => {
       </Table>
     </div>
   );
-};
+});
