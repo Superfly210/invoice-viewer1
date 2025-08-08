@@ -10,6 +10,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatCurrency } from "@/lib/currencyFormatter";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useDebounce } from "@/hooks/use-debounce";
+import { InvoiceSummaryTableHeader } from "./InvoiceSummaryTableHeader";
 
 type AttachmentInfo = {
   id: number;
@@ -23,13 +28,32 @@ type AttachmentInfo = {
 };
 
 export const InvoiceSummaryTable = () => {
+  const [invoiceNumberFilter, setInvoiceNumberFilter] = useState("");
+  const [invoiceDateFilter, setInvoiceDateFilter] = useState("");
+  const [companyNameFilter, setCompanyNameFilter] = useState("");
+
+  const debouncedInvoiceNumberFilter = useDebounce(invoiceNumberFilter, 500);
+  const debouncedInvoiceDateFilter = useDebounce(invoiceDateFilter, 500);
+  const debouncedCompanyNameFilter = useDebounce(companyNameFilter, 500);
+
   const { data: invoices, isLoading, error } = useQuery({
-    queryKey: ['attachment-info-summary'],
+    queryKey: ['attachment-info-summary', debouncedInvoiceNumberFilter, debouncedInvoiceDateFilter, debouncedCompanyNameFilter],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('Attachment_Info')
-        .select('id, Invoice_Number, Invoice_Date, Invoicing_Comp_Name, Sub_Total, GST_Total, Total, created_at')
-        .order('created_at', { ascending: false });
+        .select('id, Invoice_Number, Invoice_Date, Invoicing_Comp_Name, Sub_Total, GST_Total, Total, created_at');
+
+      if (debouncedInvoiceNumberFilter) {
+        query = query.ilike('Invoice_Number', `%${debouncedInvoiceNumberFilter}%`);
+      }
+      if (debouncedInvoiceDateFilter) {
+        query = query.ilike('Invoice_Date', `%${debouncedInvoiceDateFilter}%`);
+      }
+      if (debouncedCompanyNameFilter) {
+        query = query.ilike('Invoicing_Comp_Name', `%${debouncedCompanyNameFilter}%`);
+      }
+
+      const { data, error } = await query.order('created_at', { ascending: false });
       
       if (error) throw error;
       return data as AttachmentInfo[];
@@ -54,18 +78,24 @@ export const InvoiceSummaryTable = () => {
 
   return (
     <div className="h-[calc(100vh-250px)] overflow-auto rounded-md border">
+      <div className="p-4 flex justify-end">
+        <Button onClick={() => {
+          setInvoiceNumberFilter("");
+          setInvoiceDateFilter("");
+          setCompanyNameFilter("");
+        }}>
+          Clear Filters
+        </Button>
+      </div>
       <Table>
-        <TableHeader className="sticky top-0 z-10 bg-background">
-          <TableRow>
-            <TableHead>Invoice Number</TableHead>
-            <TableHead>Invoice Date</TableHead>
-            <TableHead>Company Name</TableHead>
-            <TableHead className="text-right">Subtotal</TableHead>
-            <TableHead className="text-right">GST Total</TableHead>
-            <TableHead className="text-right">Total</TableHead>
-            <TableHead>Created At</TableHead>
-          </TableRow>
-        </TableHeader>
+        <InvoiceSummaryTableHeader
+          invoiceNumberFilter={invoiceNumberFilter}
+          setInvoiceNumberFilter={setInvoiceNumberFilter}
+          invoiceDateFilter={invoiceDateFilter}
+          setInvoiceDateFilter={setInvoiceDateFilter}
+          companyNameFilter={companyNameFilter}
+          setCompanyNameFilter={setCompanyNameFilter}
+        />
         <TableBody>
           {invoices && invoices.length > 0 ? (
             invoices.map((invoice) => (
