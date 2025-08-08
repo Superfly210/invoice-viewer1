@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { formatCurrency, parseCurrencyValue } from "@/lib/currencyFormatter";
 import { useSubtotalComparison } from "@/hooks/useSubtotalComparison";
+import { useFinancialValidation } from "@/hooks/useFinancialValidation";
 import { logAuditChange } from "@/utils/auditLogger";
 import { useAuth } from "@/components/AuthProvider";
 import {
@@ -60,6 +61,13 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
     invoiceSubtotal: currentInvoice.Sub_Total,
     codingTotal,
     lineItemsTotal
+  });
+
+  // Use financial validation hook
+  const financialValidation = useFinancialValidation({
+    subTotal: currentInvoice.Sub_Total,
+    gstTotal: currentInvoice.GST_Total,
+    total: currentInvoice.Total
   });
 
   const { data: currentUserProfile } = useQuery({
@@ -335,21 +343,25 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
           <TableRow className="h-16">
             <TableCell className="font-medium w-48 text-left py-3">GST Total</TableCell>
             <TableCell className="text-left py-3">
-              <EditableTableCell
-                value={currentInvoice.GST_Total ? formatCurrency(currentInvoice.GST_Total) : null}
-                onSave={(newValue) => handleFieldUpdate('GST_Total', newValue)}
-                type="text"
-              />
+              <div className={`inline-block px-2 py-1 rounded ${financialValidation.gstValidationClass}`}>
+                <EditableTableCell
+                  value={currentInvoice.GST_Total ? formatCurrency(currentInvoice.GST_Total) : null}
+                  onSave={(newValue) => handleFieldUpdate('GST_Total', newValue)}
+                  type="text"
+                />
+              </div>
             </TableCell>
           </TableRow>
           <TableRow className="h-16">
             <TableCell className="font-medium w-48 text-left py-3">Total</TableCell>
             <TableCell className="text-left py-3">
-              <EditableTableCell
-                value={currentInvoice.Total ? formatCurrency(currentInvoice.Total) : null}
-                onSave={(newValue) => handleFieldUpdate('Total', newValue)}
-                type="text"
-              />
+              <div className={`inline-block px-2 py-1 rounded ${financialValidation.totalValidationClass}`}>
+                <EditableTableCell
+                  value={currentInvoice.Total ? formatCurrency(currentInvoice.Total) : null}
+                  onSave={(newValue) => handleFieldUpdate('Total', newValue)}
+                  type="text"
+                />
+              </div>
             </TableCell>
           </TableRow>
           

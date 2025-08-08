@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useState, useMemo } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import { useSubtotalComparison } from "@/hooks/useSubtotalComparison";
+import { useAfeValidation } from "@/hooks/useAfeValidation";
 import { logAuditChange } from "@/utils/auditLogger";
 
 interface InvoiceCodingTableProps {
@@ -27,6 +28,7 @@ export const InvoiceCodingTable = ({ invoiceId }: InvoiceCodingTableProps) => {
   const queryClient = useQueryClient();
   const [isAddingRow, setIsAddingRow] = useState(false);
   const { user } = useAuth();
+  const { getAfeCostCenterValidationClass } = useAfeValidation();
 
   // Get invoice subtotal and line items total for comparison
   const { data: invoiceData } = useQuery({
@@ -271,10 +273,12 @@ export const InvoiceCodingTable = ({ invoiceId }: InvoiceCodingTableProps) => {
                   </Button>
                 </TableCell>
                 <TableCell className="py-2">
-                  <EditableLineItemCell
-                    value={coding.afe_cost_center}
-                    onSave={(newValue) => handleFieldUpdate(coding.id, 'afe_cost_center', newValue)}
-                  />
+                  <div className={`px-2 py-1 rounded ${getAfeCostCenterValidationClass(coding.afe_cost_center)}`}>
+                    <EditableLineItemCell
+                      value={coding.afe_cost_center}
+                      onSave={(newValue) => handleFieldUpdate(coding.id, 'afe_cost_center', newValue)}
+                    />
+                  </div>
                 </TableCell>
                 <TableCell className="py-2">
                   <EditableLineItemCell
