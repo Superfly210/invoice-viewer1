@@ -331,37 +331,34 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
           <TableRow className="h-16">
             <TableCell className="font-medium w-48 text-left py-3">Subtotal</TableCell>
             <TableCell className="text-left py-3">
-              <div className={`inline-block px-2 py-1 rounded ${subtotalComparison.highlightClass}`}>
                 <EditableTableCell
                   value={currentInvoice.Sub_Total ? formatCurrency(currentInvoice.Sub_Total) : null}
                   onSave={(newValue) => handleFieldUpdate('Sub_Total', newValue)}
                   type="text"
+                  highlightClass={subtotalComparison.highlightClass}
                 />
-              </div>
             </TableCell>
           </TableRow>
           <TableRow className="h-16">
             <TableCell className="font-medium w-48 text-left py-3">GST Total</TableCell>
             <TableCell className="text-left py-3">
-              <div className={`inline-block px-2 py-1 rounded ${financialValidation.gstValidationClass}`}>
                 <EditableTableCell
                   value={currentInvoice.GST_Total ? formatCurrency(currentInvoice.GST_Total) : null}
                   onSave={(newValue) => handleFieldUpdate('GST_Total', newValue)}
                   type="text"
+                  highlightClass={financialValidation.gstValidationClass}
                 />
-              </div>
             </TableCell>
           </TableRow>
           <TableRow className="h-16">
             <TableCell className="font-medium w-48 text-left py-3">Total</TableCell>
             <TableCell className="text-left py-3">
-              <div className={`inline-block px-2 py-1 rounded ${financialValidation.totalValidationClass}`}>
                 <EditableTableCell
                   value={currentInvoice.Total ? formatCurrency(currentInvoice.Total) : null}
                   onSave={(newValue) => handleFieldUpdate('Total', newValue)}
                   type="text"
+                  highlightClass={financialValidation.totalValidationClass}
                 />
-              </div>
             </TableCell>
           </TableRow>
           

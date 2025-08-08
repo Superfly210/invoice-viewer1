@@ -9,9 +9,10 @@ interface EditableLineItemCellProps {
   onSave: (newValue: string) => void;
   type?: "text" | "number" | "date";
   isInvalid?: boolean;
+  highlightClass?: string;
 }
 
-export const EditableLineItemCell = ({ value, onSave, type = "text", isInvalid = false }: EditableLineItemCellProps) => {
+export const EditableLineItemCell = ({ value, onSave, type = "text", isInvalid = false, highlightClass }: EditableLineItemCellProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(value?.toString() || '');
 
@@ -63,7 +64,7 @@ export const EditableLineItemCell = ({ value, onSave, type = "text", isInvalid =
 
   return (
     <div className="flex items-center justify-between group min-h-[32px]">
-      <span className={`text-left flex-1 ${isInvalid ? 'bg-orange-200' : ''}`}>{displayValue}</span>
+      <span className={`text-left flex-1 ${isInvalid ? 'bg-orange-200' : ''} ${highlightClass || ''}`}>{displayValue}</span>
       <Button
         size="sm"
         variant="ghost"

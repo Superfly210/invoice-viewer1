@@ -432,8 +432,11 @@ export const LineItemsPanel = ({
               <TableCell colSpan={10} className="text-right text-slate-800 dark:text-slate-200">
                 Total:
               </TableCell>
-              <TableCell className={`text-right text-slate-800 dark:text-slate-200 px-2 py-1 rounded ${subtotalComparison.highlightClass}`}>
-                {formatCurrency(totalSum)}
+              <TableCell className="text-right text-slate-800 dark:text-slate-200">
+                <EditableLineItemCell
+                  value={formatCurrency(totalSum)}
+                  highlightClass={subtotalComparison.highlightClass}
+                />
               </TableCell>
             </TableRow>
           </TableBody>

@@ -273,12 +273,11 @@ export const InvoiceCodingTable = ({ invoiceId }: InvoiceCodingTableProps) => {
                   </Button>
                 </TableCell>
                 <TableCell className="py-2">
-                  <div className={`px-2 py-1 rounded ${getAfeCostCenterValidationClass(coding.afe_cost_center)}`}>
-                    <EditableLineItemCell
-                      value={coding.afe_cost_center}
-                      onSave={(newValue) => handleFieldUpdate(coding.id, 'afe_cost_center', newValue)}
-                    />
-                  </div>
+                  <EditableLineItemCell
+                    value={coding.afe_cost_center}
+                    onSave={(newValue) => handleFieldUpdate(coding.id, 'afe_cost_center', newValue)}
+                    highlightClass={getAfeCostCenterValidationClass(coding.afe_cost_center)}
+                  />
                 </TableCell>
                 <TableCell className="py-2">
                   <EditableLineItemCell
@@ -317,8 +316,11 @@ export const InvoiceCodingTable = ({ invoiceId }: InvoiceCodingTableProps) => {
                 </Button>
               </TableCell>
               <TableCell className="text-right font-medium">Total</TableCell>
-              <TableCell className={`text-left font-medium px-2 py-1 rounded ${subtotalComparison.highlightClass}`}>
-                {formatCurrency(totalAmount)}
+              <TableCell className="text-left font-medium">
+                <EditableLineItemCell
+                  value={formatCurrency(totalAmount)}
+                  highlightClass={subtotalComparison.highlightClass}
+                />
               </TableCell>
             </TableRow>
           </TableFooter>
