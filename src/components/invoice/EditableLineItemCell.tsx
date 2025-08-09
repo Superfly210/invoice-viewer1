@@ -10,9 +10,10 @@ interface EditableLineItemCellProps {
   type?: "text" | "number" | "date";
   isInvalid?: boolean;
   highlightClass?: string;
+  placeholder?: string;
 }
 
-export const EditableLineItemCell = ({ value, onSave, type = "text", isInvalid = false, highlightClass }: EditableLineItemCellProps) => {
+export const EditableLineItemCell = ({ value, onSave, type = "text", isInvalid = false, highlightClass, placeholder }: EditableLineItemCellProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(value?.toString() || '');
 
@@ -51,6 +52,7 @@ export const EditableLineItemCell = ({ value, onSave, type = "text", isInvalid =
           onKeyDown={handleKeyPress}
           className="flex-1 h-8 text-sm"
           autoFocus
+          placeholder={placeholder}
         />
         <Button size="sm" onClick={handleSave} className="h-8 w-8 p-0">
           <Check className="h-3 w-3" />
@@ -64,7 +66,11 @@ export const EditableLineItemCell = ({ value, onSave, type = "text", isInvalid =
 
   return (
     <div className="flex items-center justify-between group min-h-[32px]">
-      <span className={`text-left flex-1 ${isInvalid ? 'bg-orange-200' : ''} ${highlightClass || ''}`}>{displayValue}</span>
+      <span className="text-left flex-1">
+        <span className={`${isInvalid ? 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-100' : ''} ${highlightClass || ''}`}>
+          {displayValue}
+        </span>
+      </span>
       <Button
         size="sm"
         variant="ghost"

@@ -415,7 +415,7 @@ export default function SubmissionPortal() {
                   <Input
                     value={row.afeNumberCostCenter}
                     onChange={(e) => updateCodingRow(row.id, 'afeNumberCostCenter', e.target.value)}
-                    placeholder="AFE-123 or CC-001"
+                    placeholder="For AFEs: 'AB12345', For Cost Centers: '1'"
                   />
                 </div>
                 
@@ -424,7 +424,7 @@ export default function SubmissionPortal() {
                   <Input
                     value={row.costCode}
                     onChange={(e) => updateCodingRow(row.id, 'costCode', e.target.value)}
-                    placeholder="Code-001"
+                    placeholder="1234-1234"
                   />
                 </div>
                 

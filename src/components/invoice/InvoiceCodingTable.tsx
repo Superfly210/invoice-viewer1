@@ -277,6 +277,7 @@ export const InvoiceCodingTable = ({ invoiceId }: InvoiceCodingTableProps) => {
                     value={coding.afe_cost_center}
                     onSave={(newValue) => handleFieldUpdate(coding.id, 'afe_cost_center', newValue)}
                     highlightClass={getAfeCostCenterValidationClass(coding.afe_cost_center)}
+                    placeholder="For AFE Numbers XX#####, For Cost Centers, ##"
                   />
                 </TableCell>
                 <TableCell className="py-2">
@@ -284,6 +285,7 @@ export const InvoiceCodingTable = ({ invoiceId }: InvoiceCodingTableProps) => {
                     value={coding.cost_code}
                     onSave={(newValue) => handleFieldUpdate(coding.id, 'cost_code', newValue)}
                     isInvalid={isCostCodeInvalid(coding.cost_code)}
+                    placeholder="####-####"
                   />
                 </TableCell>
                 <TableCell className="py-2 text-left">
