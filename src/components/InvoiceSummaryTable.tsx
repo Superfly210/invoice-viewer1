@@ -10,10 +10,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatCurrency } from "@/lib/currencyFormatter";
-import React, { useState, useCallback } from "react";
+import React from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useDebounce } from "@/hooks/use-debounce";
+import { useInvoiceFilters } from "@/hooks/useInvoiceFilters";
 import { InvoiceSummaryTableHeader } from "./InvoiceSummaryTableHeader";
 
 type AttachmentInfo = {
@@ -28,13 +27,10 @@ type AttachmentInfo = {
 };
 
 export const InvoiceSummaryTable = React.memo(() => {
-  const [invoiceNumberFilter, setInvoiceNumberFilter] = useState("");
-  const [invoiceDateFilter, setInvoiceDateFilter] = useState("");
-  const [companyNameFilter, setCompanyNameFilter] = useState("");
-
-  const debouncedInvoiceNumberFilter = useDebounce(invoiceNumberFilter, 500);
-  const debouncedInvoiceDateFilter = useDebounce(invoiceDateFilter, 500);
-  const debouncedCompanyNameFilter = useDebounce(companyNameFilter, 500);
+  const { filterValues, debouncedFilterValues, filterSetters } = useInvoiceFilters();
+  const { invoiceNumberFilter, invoiceDateFilter, companyNameFilter } = filterValues;
+  const { debouncedInvoiceNumberFilter, debouncedInvoiceDateFilter, debouncedCompanyNameFilter } = debouncedFilterValues;
+  const { setInvoiceNumberFilter, setInvoiceDateFilter, setCompanyNameFilter, clearFilters } = filterSetters;
 
   const { data: invoices, isLoading, error } = useQuery({
     queryKey: ['attachment-info-summary', debouncedInvoiceNumberFilter, debouncedInvoiceDateFilter, debouncedCompanyNameFilter],
@@ -79,11 +75,7 @@ export const InvoiceSummaryTable = React.memo(() => {
   return (
     <div className="h-[calc(100vh-250px)] overflow-auto rounded-md border">
       <div className="p-4 flex justify-end">
-        <Button onClick={() => {
-          setInvoiceNumberFilter("");
-          setInvoiceDateFilter("");
-          setCompanyNameFilter("");
-        }}>
+        <Button onClick={clearFilters}>
           Clear Filters
         </Button>
       </div>
