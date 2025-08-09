@@ -1,5 +1,5 @@
-import { useState, useCallback, useMemo } from 'react';
-import { useDebounce } from './use-debounce';
+import { useState, useCallback, useMemo } from "react";
+import { useDebounce } from "./use-debounce";
 
 export const useInvoiceFilters = () => {
   const [invoiceNumberFilter, setInvoiceNumberFilter] = useState("");

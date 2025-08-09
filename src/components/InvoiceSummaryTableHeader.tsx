@@ -9,6 +9,10 @@ interface InvoiceSummaryTableHeaderProps {
   setInvoiceDateFilter: (value: string) => void;
   companyNameFilter: string;
   setCompanyNameFilter: (value: string) => void;
+  invoiceNumberRef?: React.RefObject<HTMLInputElement>;
+  invoiceDateRef?: React.RefObject<HTMLInputElement>;
+  companyNameRef?: React.RefObject<HTMLInputElement>;
+  setLastFocusedRef?: (ref: React.RefObject<HTMLInputElement> | null) => void; // New prop
 }
 
 // Custom comparison function for React.memo
@@ -24,51 +28,42 @@ const arePropsEqual = (prevProps: InvoiceSummaryTableHeaderProps, nextProps: Inv
 };
 
 export const InvoiceSummaryTableHeader = React.memo(
-  ({ invoiceNumberFilter, setInvoiceNumberFilter, invoiceDateFilter, setInvoiceDateFilter, companyNameFilter, setCompanyNameFilter }: InvoiceSummaryTableHeaderProps) => {
-    // Refs to maintain focus during re-renders
-    const invoiceNumberRef = useRef<HTMLInputElement>(null);
-    const invoiceDateRef = useRef<HTMLInputElement>(null);
-    const companyNameRef = useRef<HTMLInputElement>(null);
+  ({
+    invoiceNumberFilter,
+    setInvoiceNumberFilter,
+    invoiceDateFilter,
+    setInvoiceDateFilter,
+    companyNameFilter,
+    setCompanyNameFilter,
+    invoiceNumberRef,
+    invoiceDateRef,
+    companyNameRef,
+    setLastFocusedRef,
+  }: InvoiceSummaryTableHeaderProps) => {
+    // Use passed refs or local fallbacks
+    const localInvoiceNumberRef = invoiceNumberRef || useRef<HTMLInputElement>(null);
+    const localInvoiceDateRef = invoiceDateRef || useRef<HTMLInputElement>(null);
+    const localCompanyNameRef = companyNameRef || useRef<HTMLInputElement>(null);
 
-    // Track which input was focused
-    const lastFocusedRef = useRef<string | null>(null);
-
-    useEffect(() => {
-      // Restore focus after re-render if an input was previously focused
-      if (lastFocusedRef.current) {
-        const inputRef = lastFocusedRef.current === 'invoiceNumber' ? invoiceNumberRef :
-                        lastFocusedRef.current === 'invoiceDate' ? invoiceDateRef :
-                        lastFocusedRef.current === 'companyName' ? companyNameRef : null;
-        
-        if (inputRef?.current) {
-          const currentValue = inputRef.current.value;
-          inputRef.current.focus();
-          // Restore cursor position to the end
-          inputRef.current.setSelectionRange(currentValue.length, currentValue.length);
-        }
+    const handleFocus = (ref: React.RefObject<HTMLInputElement>) => {
+      console.log("Handle focus called for:", ref.current?.id);
+      if (setLastFocusedRef) {
+        setLastFocusedRef(ref);
       }
-    });
-
-    const handleFocus = (inputName: string) => {
-      lastFocusedRef.current = inputName;
     };
 
-    const handleBlur = () => {
-      lastFocusedRef.current = null;
-    };
     return (
       <TableHeader className="sticky top-0 z-10 bg-background">
         <TableRow>
           <TableHead>
             Invoice Number
             <Input
-              ref={invoiceNumberRef}
+              ref={localInvoiceNumberRef}
               id="invoice-number-filter"
               placeholder="Filter by number..."
               value={invoiceNumberFilter}
               onChange={(e) => setInvoiceNumberFilter(e.target.value)}
-              onFocus={() => handleFocus('invoiceNumber')}
-              onBlur={handleBlur}
+              onFocus={() => handleFocus(localInvoiceNumberRef)}
               className="mt-1"
               autoComplete="off"
             />
@@ -76,13 +71,12 @@ export const InvoiceSummaryTableHeader = React.memo(
           <TableHead>
             Invoice Date
             <Input
-              ref={invoiceDateRef}
+              ref={localInvoiceDateRef}
               id="invoice-date-filter"
               placeholder="Filter by date..."
               value={invoiceDateFilter}
               onChange={(e) => setInvoiceDateFilter(e.target.value)}
-              onFocus={() => handleFocus('invoiceDate')}
-              onBlur={handleBlur}
+              onFocus={() => handleFocus(localInvoiceDateRef)}
               className="mt-1"
               autoComplete="off"
             />
@@ -90,13 +84,12 @@ export const InvoiceSummaryTableHeader = React.memo(
           <TableHead>
             Company Name
             <Input
-              ref={companyNameRef}
+              ref={localCompanyNameRef}
               id="company-name-filter"
               placeholder="Filter by company..."
               value={companyNameFilter}
               onChange={(e) => setCompanyNameFilter(e.target.value)}
-              onFocus={() => handleFocus('companyName')}
-              onBlur={handleBlur}
+              onFocus={() => handleFocus(localCompanyNameRef)}
               className="mt-1"
               autoComplete="off"
             />

@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -10,7 +9,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatCurrency } from "@/lib/currencyFormatter";
-import React from "react";
+import React, { useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useInvoiceFilters } from "@/hooks/useInvoiceFilters";
 import { InvoiceSummaryTableHeader } from "./InvoiceSummaryTableHeader";
@@ -31,6 +30,12 @@ export const InvoiceSummaryTable = React.memo(() => {
   const { invoiceNumberFilter, invoiceDateFilter, companyNameFilter } = filterValues;
   const { debouncedInvoiceNumberFilter, debouncedInvoiceDateFilter, debouncedCompanyNameFilter } = debouncedFilterValues;
   const { setInvoiceNumberFilter, setInvoiceDateFilter, setCompanyNameFilter, clearFilters } = filterSetters;
+
+  // Refs for focus management
+  const invoiceNumberRef = useRef<HTMLInputElement>(null);
+  const invoiceDateRef = useRef<HTMLInputElement>(null);
+  const companyNameRef = useRef<HTMLInputElement>(null);
+  const lastFocusedRef = useRef<React.RefObject<HTMLInputElement> | null>(null);
 
   const { data: invoices, isLoading, error } = useQuery({
     queryKey: ['attachment-info-summary', debouncedInvoiceNumberFilter, debouncedInvoiceDateFilter, debouncedCompanyNameFilter],
@@ -55,6 +60,17 @@ export const InvoiceSummaryTable = React.memo(() => {
       return data as AttachmentInfo[];
     },
   });
+
+  // Restore focus after table data updates
+  useEffect(() => {
+    console.log("Restoration triggered", { lastFocusedRef: lastFocusedRef.current?.current?.id });
+    if (lastFocusedRef.current && lastFocusedRef.current.current) {
+      console.log("Restoring focus to:", lastFocusedRef.current.current.id);
+      lastFocusedRef.current.current.focus();
+      const currentValue = lastFocusedRef.current.current.value;
+      lastFocusedRef.current.current.setSelectionRange(currentValue.length, currentValue.length);
+    }
+  }, [invoices]);
 
   if (isLoading) {
     return (
@@ -87,6 +103,10 @@ export const InvoiceSummaryTable = React.memo(() => {
           setInvoiceDateFilter={setInvoiceDateFilter}
           companyNameFilter={companyNameFilter}
           setCompanyNameFilter={setCompanyNameFilter}
+          invoiceNumberRef={invoiceNumberRef}
+          invoiceDateRef={invoiceDateRef}
+          companyNameRef={companyNameRef}
+          setLastFocusedRef={(ref) => (lastFocusedRef.current = ref)} // Pass function to update lastFocusedRef
         />
         <TableBody>
           {invoices && invoices.length > 0 ? (
