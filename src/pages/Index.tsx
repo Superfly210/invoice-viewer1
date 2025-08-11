@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { InvoiceReviewer } from "@/components/InvoiceReviewer";
-import { InvoiceSigner } from "@/components/InvoiceSigner";
+import InvoiceSigner from "@/components/InvoiceSigner";
 import { SummarySection } from "@/components/SummarySection";
 import AFE from "@/pages/AFE";
 import CostCenters from "@/pages/CostCenters";

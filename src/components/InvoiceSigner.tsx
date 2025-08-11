@@ -1,169 +1,187 @@
+import { useState } from 'react';
+import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
+import { Document, Page } from 'react-pdf';
+import { supabase } from "@/integrations/supabase/client";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 
-import { useState, useCallback } from "react";
-import { Upload, FileUp, File } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
+import { Input } from "@/components/ui/input";
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 
-export const InvoiceSigner = () => {
-  const [isDragging, setIsDragging] = useState(false);
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const { toast } = useToast();
+const formSchema = z.object({
+  date: z.string().min(1, { message: "Date is required." }),
+  description: z.string(),
+  afe: z.string(),
+  amount: z.string(),
+});
 
-  const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setIsDragging(true);
-  }, []);
+export default function InvoiceSigner() {
+  const [files, setFiles] = useState<File[]>([]);
+  const [currentFile, setCurrentFile] = useState<File | null>(null);
+  const [pdfUrl, setPdfUrl] = useState<string>('');
+  const [clickPosition, setClickPosition] = useState<{ x: number; y: number; page: number } | null>(null);
+  const [numPages, setNumPages] = useState<number>(0);
+  const [currentPage, setCurrentPage] = useState<number>(1);
 
-  const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setIsDragging(false);
-  }, []);
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      date: "",
+      description: "",
+      afe: "",
+      amount: "",
+    },
+  });
 
-  const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setIsDragging(false);
-    
-    const files = Array.from(e.dataTransfer.files);
-    handleFiles(files);
-  }, []);
-
-  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const files = Array.from(e.target.files);
-      handleFiles(files);
+  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const uploadedFiles = Array.from(e.target.files || []);
+    setFiles((prev) => [...prev, ...uploadedFiles]);
+    if (!currentFile && uploadedFiles.length > 0) {
+      loadPdf(uploadedFiles[0]);
     }
   };
 
-  const handleFiles = (files: File[]) => {
-    // Filter for PDF files
-    const pdfFiles = files.filter(file => 
-      file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')
-    );
-    
-    if (pdfFiles.length === 0) {
-      toast({
-        title: "Invalid file type",
-        description: "Please select PDF files only",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    setSelectedFiles(prev => [...prev, ...pdfFiles]);
-    
-    toast({
-      title: "Files added",
-      description: `${pdfFiles.length} file(s) ready for processing`,
-    });
+  const loadPdf = (file: File) => {
+    setCurrentFile(file);
+    const url = URL.createObjectURL(file);
+    setPdfUrl(url);
+    form.reset();
+    setClickPosition(null);
   };
 
-  const removeFile = (index: number) => {
-    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+  const handlePdfClick = async (e: React.MouseEvent) => {
+    if (!currentFile) return;
+
+    const viewer = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - viewer.left;
+    const y = e.clientY - viewer.top;
+
+    const arrayBuffer = await currentFile.arrayBuffer();
+    const pdfDoc = await PDFDocument.load(arrayBuffer);
+    const page = pdfDoc.getPage(currentPage - 1);
+    const { width, height } = page.getSize();
+
+    const scale = width / viewer.width;
+    const pdfX = x * scale;
+    const pdfY = height - (y * scale);
+
+    setClickPosition({ x: pdfX, y: pdfY, page: currentPage });
   };
 
-  const processFiles = () => {
-    toast({
-      title: "Processing invoices",
-      description: `${selectedFiles.length} invoice(s) submitted for signing`,
+  const handleGenerate = async (values: z.infer<typeof formSchema>) => {
+    if (!currentFile || !clickPosition || !values.date) return;
+
+    const arrayBuffer = await currentFile.arrayBuffer();
+    const pdfDoc = await PDFDocument.load(arrayBuffer);
+    const page = pdfDoc.getPage(clickPosition.page - 1);
+    const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+
+    const stampText = `Date: ${values.date}\nDescription: ${values.description}\nAFE: ${values.afe}\nAmount: ${values.amount}`;
+    page.drawText(stampText, {
+      x: clickPosition.x,
+      y: clickPosition.y,
+      size: 12,
+      font,
+      color: rgb(0, 0, 0),
+      maxWidth: 200,
     });
-    // Reset after processing
-    setSelectedFiles([]);
+
+    const pdfBytes = await pdfDoc.save();
+    const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+    const signedUrl = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = signedUrl;
+    a.download = `signed_${currentFile.name}`;
+    a.click();
+
+    const { data, error } = await supabase.storage.from('signed-invoices').upload(`signed_${currentFile.name}`, blob);
+    if (error) console.error(error);
+    else console.log('Signed PDF uploaded:', data.path);
   };
-  
+
   return (
-    <div className="flex flex-col h-full p-6 space-y-6">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-semibold dark:text-white">Invoice Signer</h2>
+    <div className="flex h-screen">
+      <div className="w-1/4 p-4 border-r">
+        <Input type="file" multiple accept=".pdf" onChange={handleUpload} />
+        <ul>
+          {files.map((file, idx) => (
+            <li key={idx} onClick={() => loadPdf(file)} className="cursor-pointer">
+              {file.name}
+            </li>
+          ))}
+        </ul>
       </div>
-      
-      <div 
-        className={`border-2 border-dashed rounded-lg p-10 text-center flex flex-col items-center justify-center min-h-[300px] ${
-          isDragging 
-            ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
-            : 'border-slate-300 dark:border-slate-600'
-        }`}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-      >
-        <Upload 
-          className={`h-16 w-16 mb-4 ${
-            isDragging 
-              ? 'text-blue-500' 
-              : 'text-slate-400 dark:text-slate-500'
-          }`} 
-        />
-        <p className="text-lg mb-2 dark:text-white">
-          {isDragging 
-            ? 'Drop files here' 
-            : 'Drag and drop invoice files here'}
-        </p>
-        <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
-          or
-        </p>
-        <input
-          type="file"
-          id="fileInput"
-          multiple
-          accept=".pdf"
-          className="hidden"
-          onChange={handleFileInputChange}
-        />
-        <Button 
-          onClick={() => document.getElementById('fileInput')?.click()}
-          className="flex items-center"
-        >
-          <FileUp className="h-4 w-4 mr-2" />
-          Browse Files
-        </Button>
+
+      <div className="w-1/2 p-4" onClick={handlePdfClick}>
+        {pdfUrl && (
+          <Document file={pdfUrl} onLoadSuccess={({ numPages }) => setNumPages(numPages)}>
+            <Page pageNumber={currentPage} />
+          </Document>
+        )}
       </div>
-      
-      {selectedFiles.length > 0 && (
-        <div className="mt-8">
-          <h3 className="text-lg font-medium mb-4 dark:text-white">Selected Invoices</h3>
-          <div className="bg-white dark:bg-slate-800 rounded-lg shadow overflow-hidden">
-            <div className="max-h-[300px] overflow-y-auto">
-              <table className="w-full">
-                <thead className="bg-slate-50 dark:bg-slate-700">
-                  <tr>
-                    <th className="py-3 px-4 text-left text-sm text-slate-700 dark:text-slate-300">Filename</th>
-                    <th className="py-3 px-4 text-right text-sm text-slate-700 dark:text-slate-300">Size</th>
-                    <th className="py-3 px-4 text-right text-sm text-slate-700 dark:text-slate-300">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
-                  {selectedFiles.map((file, index) => (
-                    <tr key={index} className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
-                      <td className="py-3 px-4 text-sm flex items-center dark:text-white">
-                        <File className="h-4 w-4 mr-2 text-blue-500" />
-                        {file.name}
-                      </td>
-                      <td className="py-3 px-4 text-sm text-right text-slate-600 dark:text-slate-400">
-                        {(file.size / 1024).toFixed(1)} KB
-                      </td>
-                      <td className="py-3 px-4 text-right">
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          onClick={() => removeFile(index)}
-                          className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
-                        >
-                          Remove
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <div className="bg-slate-50 dark:bg-slate-700 p-4 flex justify-end">
-              <Button onClick={processFiles} className="bg-green-500 hover:bg-green-600 text-white">
-                Process {selectedFiles.length} Invoice{selectedFiles.length > 1 ? 's' : ''}
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+
+      <div className="w-1/4 p-4 border-l">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(handleGenerate)} className="space-y-8">
+            <FormField
+              control={form.control}
+              name="date"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Date</FormLabel>
+                  <FormControl>
+                    <Input placeholder="YYYY-MM-DD" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Description" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="afe"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>AFE Number/Cost Code</FormLabel>
+                  <FormControl>
+                    <Input placeholder="AFE or Cost Code" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="amount"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Amount</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Amount" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button type="submit">Stamp & Generate</Button>
+          </form>
+        </Form>
+      </div>
     </div>
   );
-};
+}
