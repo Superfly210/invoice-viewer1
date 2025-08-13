@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import axios from 'axios';
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -194,6 +195,40 @@ export default function SubmissionPortal() {
         });
 
       if (insertError) throw insertError;
+
+      // Send data to n8n webhook
+      const formData = new FormData();
+      formData.append("File", invoiceFile as Blob);
+      supportingDocs.forEach((doc, index) => {
+        formData.append(`supportingDoc_${index}`, doc);
+      });
+      formData.append("invoicingCompany", invoicingCompany);
+      formData.append("invoiceDate", invoiceDate!.toISOString().split('T')[0]);
+      formData.append("subTotal", parseCurrencyValue(subTotal)!.toString());
+      formData.append("gstTotal", parseCurrencyValue(gstTotal)!.toString());
+      formData.append("invoiceTotal", parseCurrencyValue(invoiceTotal)!.toString());
+      formData.append("codingRows", JSON.stringify(codingRows));
+      formData.append("emailFields", JSON.stringify(emailFields.filter(email => email.trim())));
+      formData.append("additionalComments", additionalComments.trim());
+
+      try {
+        await axios.post("http://localhost:5678/webhook-test/2fd42c79-e79a-4475-8057-2bd5be4c77c1", formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+        toast({
+          title: "Data sent to n8n webhook successfully",
+          description: "The invoice data has been sent to your n8n workflow.",
+        });
+      } catch (webhookError) {
+        console.error("n8n webhook error:", webhookError);
+        toast({
+          variant: "destructive",
+          title: "Webhook Error",
+          description: "Failed to send data to n8n webhook. Please check your n8n setup.",
+        });
+      }
       
       toast({
         title: "Invoice submitted successfully",
