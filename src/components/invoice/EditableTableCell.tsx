@@ -39,7 +39,7 @@ export const EditableTableCell = ({ value, onSave, type = "text", className, hig
     }
   };
 
-  const displayValue = value || 'N/A';
+  const displayValue = (value === null || value === undefined) ? 'N/A' : value;
 
   if (isEditing) {
     return (

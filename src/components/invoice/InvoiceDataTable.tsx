@@ -230,33 +230,8 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
       <Table>
         <TableBody>
           <TableRow className="h-16">
-            <TableCell className="font-medium w-48 text-left py-3">ID</TableCell>
+            <TableCell className="font-medium w-48 text-left py-3">Invoice ID</TableCell>
             <TableCell className="text-left py-3">{currentInvoice.id}</TableCell>
-          </TableRow>
-          <TableRow className="h-16">
-            <TableCell className="font-medium w-48 text-left py-3">Created At</TableCell>
-            <TableCell className="text-left py-3">{new Date(currentInvoice.created_at).toLocaleString()}</TableCell>
-          </TableRow>
-          <TableRow className="h-16">
-            <TableCell className="font-medium w-48 text-left py-3">Email ID</TableCell>
-            <TableCell className="text-left py-3">{currentInvoice.Email_ID || 'N/A'}</TableCell>
-          </TableRow>
-          <TableRow className="h-16">
-            <TableCell className="font-medium w-48 text-left py-3">Google Drive URL</TableCell>
-            <TableCell className="text-left py-3">
-              {currentInvoice.Google_Drive_URL ? (
-                <a 
-                  href={currentInvoice.Google_Drive_URL} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-blue-600 hover:text-blue-800 underline"
-                >
-                  View Document
-                </a>
-              ) : (
-                'N/A'
-              )}
-            </TableCell>
           </TableRow>
           <TableRow className="h-16">
             <TableCell className="font-medium w-48 text-left py-3">Responsible User</TableCell>
@@ -332,7 +307,7 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
             <TableCell className="font-medium w-48 text-left py-3">Subtotal</TableCell>
             <TableCell className="text-left py-3">
                 <EditableTableCell
-                  value={currentInvoice.Sub_Total ? formatCurrency(currentInvoice.Sub_Total) : null}
+                  value={currentInvoice.Sub_Total !== null && currentInvoice.Sub_Total !== undefined ? formatCurrency(currentInvoice.Sub_Total) : 'N/A'}
                   onSave={(newValue) => handleFieldUpdate('Sub_Total', newValue)}
                   type="text"
                   highlightClass={subtotalComparison.highlightClass}
@@ -343,7 +318,7 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
             <TableCell className="font-medium w-48 text-left py-3">GST Total</TableCell>
             <TableCell className="text-left py-3">
                 <EditableTableCell
-                  value={currentInvoice.GST_Total ? formatCurrency(currentInvoice.GST_Total) : null}
+                  value={currentInvoice.GST_Total !== null && currentInvoice.GST_Total !== undefined ? formatCurrency(currentInvoice.GST_Total) : 'N/A'}
                   onSave={(newValue) => handleFieldUpdate('GST_Total', newValue)}
                   type="text"
                   highlightClass={financialValidation.gstValidationClass}
@@ -354,7 +329,7 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
             <TableCell className="font-medium w-48 text-left py-3">Total</TableCell>
             <TableCell className="text-left py-3">
                 <EditableTableCell
-                  value={currentInvoice.Total ? formatCurrency(currentInvoice.Total) : null}
+                  value={currentInvoice.Total !== null && currentInvoice.Total !== undefined ? formatCurrency(currentInvoice.Total) : 'N/A'}
                   onSave={(newValue) => handleFieldUpdate('Total', newValue)}
                   type="text"
                   highlightClass={financialValidation.totalValidationClass}
