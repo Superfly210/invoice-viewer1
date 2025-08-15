@@ -22,7 +22,7 @@ RUN npm run build
 FROM nginx:1.25-alpine
 
 # Copy the build output from the 'build' stage
-COPY --from=build /app/build /usr/share/nginx/html
+COPY --from=build /app/dist/. /usr/share/nginx/html
 
 # We will use the nginx.conf from our main project directory,
 # so we don't need to copy a default one here.
