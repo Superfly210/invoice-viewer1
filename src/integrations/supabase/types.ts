@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -61,8 +61,8 @@ export type Database = {
       Attachment_Info: {
         Row: {
           AFE_Numbers: string | null
+          Attach_By_Page: Json | null
           Attach_Extract: string | null
-          Attach_Local_OCR: string | null
           Attach_Markdown: string | null
           Company_Routed: boolean | null
           "Cost Centers": string | null
@@ -99,8 +99,8 @@ export type Database = {
         }
         Insert: {
           AFE_Numbers?: string | null
+          Attach_By_Page?: Json | null
           Attach_Extract?: string | null
-          Attach_Local_OCR?: string | null
           Attach_Markdown?: string | null
           Company_Routed?: boolean | null
           "Cost Centers"?: string | null
@@ -137,8 +137,8 @@ export type Database = {
         }
         Update: {
           AFE_Numbers?: string | null
+          Attach_By_Page?: Json | null
           Attach_Extract?: string | null
-          Attach_Local_OCR?: string | null
           Attach_Markdown?: string | null
           Company_Routed?: boolean | null
           "Cost Centers"?: string | null
@@ -279,12 +279,16 @@ export type Database = {
           Email_Type_Invoice: boolean | null
           Email_Type_Other: boolean | null
           Email_Type_Requesting_Payment: boolean | null
+          file_exists: string | null
+          filename: string | null
           From: string | null
           id: string | null
           id_: number
           "message-id": string | null
           Subject: string | null
+          submission_type: string | null
           threadID: string | null
+          workflowID: string | null
           "x-recieved": string | null
         }
         Insert: {
@@ -298,12 +302,16 @@ export type Database = {
           Email_Type_Invoice?: boolean | null
           Email_Type_Other?: boolean | null
           Email_Type_Requesting_Payment?: boolean | null
+          file_exists?: string | null
+          filename?: string | null
           From?: string | null
           id?: string | null
           id_?: number
           "message-id"?: string | null
           Subject?: string | null
+          submission_type?: string | null
           threadID?: string | null
+          workflowID?: string | null
           "x-recieved"?: string | null
         }
         Update: {
@@ -317,12 +325,16 @@ export type Database = {
           Email_Type_Invoice?: boolean | null
           Email_Type_Other?: boolean | null
           Email_Type_Requesting_Payment?: boolean | null
+          file_exists?: string | null
+          filename?: string | null
           From?: string | null
           id?: string | null
           id_?: number
           "message-id"?: string | null
           Subject?: string | null
+          submission_type?: string | null
           threadID?: string | null
+          workflowID?: string | null
           "x-recieved"?: string | null
         }
         Relationships: []
@@ -427,11 +439,15 @@ export type Database = {
           created_at: string
           Date_of_Work: string | null
           Description: string | null
+          gst_exempt: boolean | null
           id: number
           invoice_id: number
+          "location-header0": Json | null
+          Quantities: Json[] | null
           Quantity: number | null
           Rate: number | null
           Ticket_Work_Order: string | null
+          Ticket_Work_Order2: string | null
           Total: number | null
           Unit_of_Measure: string | null
         }
@@ -442,11 +458,15 @@ export type Database = {
           created_at?: string
           Date_of_Work?: string | null
           Description?: string | null
+          gst_exempt?: boolean | null
           id?: number
           invoice_id: number
+          "location-header0"?: Json | null
+          Quantities?: Json[] | null
           Quantity?: number | null
           Rate?: number | null
           Ticket_Work_Order?: string | null
+          Ticket_Work_Order2?: string | null
           Total?: number | null
           Unit_of_Measure?: string | null
         }
@@ -455,19 +475,52 @@ export type Database = {
           Cost_Center?: string | null
           Cost_Code?: string | null
           created_at?: string
-          Date_of_WOrk?: string | null
+          Date_of_Work?: string | null
           Description?: string | null
+          gst_exempt?: boolean | null
           id?: number
           invoice_id?: number
+          "location-header0"?: Json | null
+          Quantities?: Json[] | null
           Quantity?: number | null
           Rate?: number | null
           Ticket_Work_Order?: string | null
+          Ticket_Work_Order2?: string | null
           Total?: number | null
           Unit_of_Measure?: string | null
         }
         Relationships: [
           {
             foreignKeyName: "Line Items_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "Attachment_Info"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      line_items_array: {
+        Row: {
+          created_at: string
+          id: number
+          invoice_id: number | null
+          line_items: Json | null
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          invoice_id?: number | null
+          line_items?: Json | null
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          invoice_id?: number | null
+          line_items?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "line_items_array_invoice_id_fkey"
             columns: ["invoice_id"]
             isOneToOne: false
             referencedRelation: "Attachment_Info"
@@ -502,6 +555,78 @@ export type Database = {
           updated_at?: string | null
           user_permission?: string
           username?: string | null
+        }
+        Relationships: []
+      }
+      Quantities: {
+        Row: {
+          calc_total: number | null
+          created_at: string
+          gst_exempt: boolean | null
+          gst_included: boolean | null
+          id: number
+          invoice_id: number
+          line_items_id: number | null
+          Quantity: number | null
+          Rate: number | null
+          Total: number | null
+          Unit_of_Measure: string | null
+        }
+        Insert: {
+          calc_total?: number | null
+          created_at?: string
+          gst_exempt?: boolean | null
+          gst_included?: boolean | null
+          id?: number
+          invoice_id: number
+          line_items_id?: number | null
+          Quantity?: number | null
+          Rate?: number | null
+          Total?: number | null
+          Unit_of_Measure?: string | null
+        }
+        Update: {
+          calc_total?: number | null
+          created_at?: string
+          gst_exempt?: boolean | null
+          gst_included?: boolean | null
+          id?: number
+          invoice_id?: number
+          line_items_id?: number | null
+          Quantity?: number | null
+          Rate?: number | null
+          Total?: number | null
+          Unit_of_Measure?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "Line_Items_duplicate_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "Attachment_Info"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "Quantities_line_items_id_fkey"
+            columns: ["line_items_id"]
+            isOneToOne: false
+            referencedRelation: "Line_Items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      Surface: {
+        Row: {
+          created_at: string
+          id: number
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+        }
+        Update: {
+          created_at?: string
+          id?: number
         }
         Relationships: []
       }
@@ -549,47 +674,36 @@ export type Database = {
           wcb_number?: string | null
         }
         Relationships: []
-      },
-      Quantities: {
+      }
+      Well: {
         Row: {
-          id: number
-          line_items_id: number
-          quantity: number | null
-          rate: number | null
-          unit_of_measure: string | null
-          total: number | null
-          gst_exempt: boolean | null
           created_at: string
+          id: number
         }
         Insert: {
-          id?: number
-          line_items_id: number
-          quantity?: number | null
-          rate?: number | null
-          unit_of_measure?: string | null
-          total?: number | null
-          gst_exempt?: boolean | null
           created_at?: string
+          id?: number
         }
         Update: {
-          id?: number
-          line_items_id?: number
-          quantity?: number | null
-          rate?: number | null
-          unit_of_measure?: string | null
-          total?: number | null
-          gst_exempt?: boolean | null
           created_at?: string
+          id?: number
         }
-        Relationships: [
-          {
-            foreignKeyName: "Quantities_line_items_id_fkey",
-            columns: ["line_items_id"],
-            isOneToOne: true,
-            referencedRelation: "Line_Items",
-            referencedColumns: ["id"],
-          },
-        ]
+        Relationships: []
+      }
+      workflow: {
+        Row: {
+          created_at: string
+          id: number
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+        }
+        Update: {
+          created_at?: string
+          id?: number
+        }
+        Relationships: []
       }
     }
     Views: {
@@ -653,10 +767,10 @@ export type Database = {
         Returns: string
       }
       match_documents: {
-        Args: { query_embedding: string; match_count?: number; filter?: Json }
+        Args: { filter?: Json; match_count?: number; query_embedding: string }
         Returns: {
-          id: number
           content: string
+          id: number
           metadata: Json
           similarity: number
         }[]

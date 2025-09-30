@@ -146,10 +146,21 @@ export const LineItemsPanel = ({
       const lineItemIds = lineItemsData.map(item => item.id);
       console.log("Querying Quantities for line item IDs:", lineItemIds);
 
-      // 2. Fetch Quantities
+      // 2. Fetch Quantities with type assertion for newly added column
+      type QuantityRow = {
+        id: number;
+        line_items_id: number | null;
+        Unit_of_Measure: string | null;
+        Quantity: number | null;
+        Rate: number | null;
+        calc_total: number | null;
+        gst_exempt: boolean | null;
+        gst_included: boolean | null;
+      };
+
       const { data: quantitiesData, error: quantitiesError } = await supabase
         .from('Quantities')
-        .select('*, line_items_id, gst_exempt, gst_included, calc_total') // Added calc_total here
+        .select('id, line_items_id, Unit_of_Measure, Quantity, Rate, calc_total, gst_exempt, gst_included')
         .in('line_items_id', lineItemIds);
       
       console.log("Quantities data received:", quantitiesData);
@@ -161,10 +172,13 @@ export const LineItemsPanel = ({
         throw quantitiesError;
       }
 
+      // Cast to our known type structure
+      const typedQuantities = quantitiesData as QuantityRow[] | null;
+
       // 3. Join and flatten data
       const newFlatLineItems: FlatLineItem[] = [];
       lineItemsData.forEach(lineItem => {
-        const relatedQuantities = quantitiesData?.filter(q => q.line_items_id === lineItem.id) || [];
+        const relatedQuantities = typedQuantities?.filter(q => q.line_items_id === lineItem.id) || [];
         if (relatedQuantities.length > 0) {
           relatedQuantities.forEach(quantity => {
             newFlatLineItems.push({
@@ -177,7 +191,7 @@ export const LineItemsPanel = ({
               Quantity: quantity.Quantity,
               Rate: quantity.Rate,
               Total: quantity.calc_total,
-              gst_exempt: quantity.gst_exempt, // Added gst_exempt here
+              gst_exempt: quantity.gst_exempt,
               gst_included: quantity.gst_included,
             });
           });
@@ -301,14 +315,17 @@ export const LineItemsPanel = ({
 
       if (lineItemError) throw lineItemError;
 
+      // Type assertion for insert with newly added columns
       const { error: quantityError } = await supabase.from('Quantities').insert({
         line_items_id: lineItemData.id,
+        invoice_id: currentInvoiceId,
         Unit_of_Measure: '',
         Rate: null,
         Quantity: null,
         Total: null,
         gst_exempt: false,
-      });
+        gst_included: false,
+      } as any);
 
       if (quantityError) throw quantityError;
 

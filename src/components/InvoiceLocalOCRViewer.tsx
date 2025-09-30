@@ -38,8 +38,11 @@ export const InvoiceLocalOCRViewer = ({ currentInvoiceId }: InvoiceLocalOCRViewe
         throw error;
       }
       
-      if (data && data.Attach_Local_OCR) {
-        setOcrContent(data.Attach_Local_OCR);
+      // Type assertion for column not yet in generated types
+      const typedData = data as { Attach_Local_OCR?: string } | null;
+      
+      if (typedData && typedData.Attach_Local_OCR) {
+        setOcrContent(typedData.Attach_Local_OCR);
       } else {
         setOcrContent(null);
         setError("No local OCR content available for this invoice");
