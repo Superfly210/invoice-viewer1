@@ -1,9 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { Document, Page, pdfjs } from 'react-pdf';
 import { Minus, Plus, Maximize, ChevronUp, ChevronDown, Loader2, RotateCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
-pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
 
 type PDFViewerProps = {
   pdfUrl?: string | null;
@@ -11,36 +8,45 @@ type PDFViewerProps = {
 };
 
 export const PDFViewer = ({ pdfUrl, onPageChange }: PDFViewerProps) => {
-  const [scale, setScale] = useState(1);
+  const [zoomLevel, setZoomLevel] = useState(100);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [processedUrl, setProcessedUrl] = useState<string | null>(null);
   const [rotation, setRotation] = useState(0);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [containerWidth, setContainerWidth] = useState<number>(0);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
-  // Measure container width for fit-to-width
   useEffect(() => {
-    if (!containerRef.current) return;
+    if (!pdfUrl) return;
     
-    const resizeObserver = new ResizeObserver((entries) => {
-      if (entries[0]) {
-        const width = entries[0].contentRect.width;
-        setContainerWidth(width);
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const fileIdMatch = pdfUrl.match(/\/file\/d\/([^\/]+)/);
+
+      if (fileIdMatch && fileIdMatch[1]) {
+        const fileId = fileIdMatch[1];
+        const driveUrl = `https://drive.google.com/uc?id=${fileId}&export=download`;
+        const viewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(driveUrl)}&embedded=true&zoom=fit`;
+        setProcessedUrl(viewerUrl);
+      } else if (pdfUrl.includes('drive.google.com')) {
+        const viewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(pdfUrl)}&embedded=true&zoom=fit`;
+        setProcessedUrl(viewerUrl);
+      } else {
+        setProcessedUrl(pdfUrl);
       }
-    });
-    
-    resizeObserver.observe(containerRef.current);
-    return () => resizeObserver.disconnect();
-  }, []);
-
-  // Reset state when PDF URL changes
-  useEffect(() => {
-    if (pdfUrl) {
+      
+      setZoomLevel(100);
       setCurrentPage(1);
-      setRotation(0);
-      setError(null);
+      setTotalPages(1);
+      
+    } catch (err) {
+      console.error("Error processing PDF URL:", err);
+      setError("Unable to process the PDF URL");
+    } finally {
+      setLoading(false);
     }
   }, [pdfUrl]);
 
@@ -53,30 +59,19 @@ export const PDFViewer = ({ pdfUrl, onPageChange }: PDFViewerProps) => {
   }, [currentPage, totalPages, onPageChange]);
 
   const zoomIn = () => {
-    setScale(prev => Math.min(prev + 0.2, 3));
+    setZoomLevel(prev => Math.min(prev + 10, 200));
   };
 
   const zoomOut = () => {
-    setScale(prev => Math.max(prev - 0.2, 0.5));
+    setZoomLevel(prev => Math.max(prev - 10, 50));
   };
 
   const fitToWidth = () => {
-    setScale(1);
+    setZoomLevel(100);
   };
 
   const rotateView = () => {
     setRotation(prev => (prev + 90) % 360);
-  };
-
-  const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
-    setTotalPages(numPages);
-    setLoading(false);
-  };
-
-  const onDocumentLoadError = (error: Error) => {
-    console.error("Error loading PDF:", error);
-    setError("Failed to load PDF. Please check the file.");
-    setLoading(false);
   };
 
   const previousPage = () => {
@@ -84,7 +79,7 @@ export const PDFViewer = ({ pdfUrl, onPageChange }: PDFViewerProps) => {
   };
 
   const nextPage = () => {
-    setCurrentPage(prev => Math.min(prev + 1, totalPages));
+    setCurrentPage(prev => prev + 1);
   };
 
   return (
@@ -100,7 +95,7 @@ export const PDFViewer = ({ pdfUrl, onPageChange }: PDFViewerProps) => {
           >
             <Minus className="h-4 w-4" />
           </Button>
-          <span className="text-sm">{Math.round(scale * 100)}%</span>
+          <span className="text-sm">{zoomLevel}%</span>
           <Button 
             onClick={zoomIn} 
             variant="outline" 
@@ -146,7 +141,7 @@ export const PDFViewer = ({ pdfUrl, onPageChange }: PDFViewerProps) => {
             onClick={nextPage} 
             variant="outline" 
             size="icon" 
-            disabled={currentPage >= totalPages}
+            disabled={false}
             className="h-8 w-8"
             title="Next Page"
           >
@@ -155,13 +150,11 @@ export const PDFViewer = ({ pdfUrl, onPageChange }: PDFViewerProps) => {
         </div>
       </div>
 
-      <div 
-        ref={containerRef}
-        className="flex-1 overflow-auto p-4 bg-slate-100 relative flex items-start justify-center"
-      >
-        {!pdfUrl ? (
+      <div className="flex-1 overflow-auto p-0 bg-slate-100 relative">
+        {loading ? (
           <div className="flex items-center justify-center h-full">
-            <p className="text-slate-600">No PDF URL available</p>
+            <Loader2 className="h-8 w-8 animate-spin text-slate-500" />
+            <span className="ml-2 text-slate-500">Loading PDF...</span>
           </div>
         ) : error ? (
           <div className="flex items-center justify-center h-full">
@@ -170,26 +163,30 @@ export const PDFViewer = ({ pdfUrl, onPageChange }: PDFViewerProps) => {
               <p className="mt-2">{error}</p>
             </div>
           </div>
+        ) : processedUrl ? (
+          <iframe
+            ref={iframeRef}
+            src={processedUrl}
+            className="w-full h-full border-0"
+            title="PDF Document"
+            sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
+            onLoad={() => {
+              console.log("PDF iframe loaded");
+              if (rotation !== 0 && iframeRef.current) {
+                iframeRef.current.style.transform = `rotate(${rotation}deg)`;
+                iframeRef.current.style.transformOrigin = 'center';
+              }
+            }}
+            style={{
+              userSelect: 'text',
+              WebkitUserSelect: 'text',
+              MozUserSelect: 'text',
+            }}
+          />
         ) : (
-          <Document
-            file={pdfUrl}
-            onLoadSuccess={onDocumentLoadSuccess}
-            onLoadError={onDocumentLoadError}
-            loading={
-              <div className="flex items-center justify-center h-full py-8">
-                <Loader2 className="h-8 w-8 animate-spin text-slate-500" />
-                <span className="ml-2 text-slate-500">Loading PDF...</span>
-              </div>
-            }
-          >
-            <Page
-              pageNumber={currentPage}
-              width={containerWidth ? containerWidth * scale * 0.9 : undefined}
-              rotate={rotation}
-              renderTextLayer={true}
-              renderAnnotationLayer={true}
-            />
-          </Document>
+          <div className="flex items-center justify-center h-full">
+            <p className="text-slate-600">No PDF URL available</p>
+          </div>
         )}
       </div>
     </div>
