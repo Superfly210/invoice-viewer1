@@ -28,16 +28,18 @@ export const PDFViewer = ({ pdfUrl, onPageChange }: PDFViewerProps) => {
       // Google Drive URLs can be in different formats
       // For sharing links like: https://drive.google.com/file/d/{fileId}/view?usp=sharing
       const fileIdMatch = pdfUrl.match(/\/file\/d\/([^\/]+)/);
-      
+
       if (fileIdMatch && fileIdMatch[1]) {
         const fileId = fileIdMatch[1];
-        // Direct link for embedding/viewing
-        setProcessedUrl(`https://drive.google.com/file/d/${fileId}/preview`);
+        const driveUrl = `https://drive.google.com/uc?id=${fileId}&export=download`;
+        const viewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(driveUrl)}&embedded=true&zoom=fit`;
+        setProcessedUrl(viewerUrl);
       } else if (pdfUrl.includes('drive.google.com')) {
-        // Try to handle other Google Drive URL formats
-        setProcessedUrl(pdfUrl);
+        // Fallback for other google drive urls, though less likely to work well
+        const viewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(pdfUrl)}&embedded=true&zoom=fit`;
+        setProcessedUrl(viewerUrl);
       } else {
-        // If it's already a direct URL, use it as is
+        // If it's not a google drive url, use it directly
         setProcessedUrl(pdfUrl);
       }
       

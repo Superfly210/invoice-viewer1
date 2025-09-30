@@ -19,6 +19,8 @@ type EmailInfo = {
   Email_Mark_Down: string | null;
   cc?: string | null;
   Email_Type: string | null;
+  submission_type?: string | null;
+  filename?: string | null;
 }
 
 interface MetadataPanelProps {
@@ -174,6 +176,26 @@ export const MetadataPanel = ({ currentInvoiceId }: MetadataPanelProps) => {
 
   const renderEventItem = (event: { type: 'email' | 'audit', data: any, timestamp: string }, index: number) => {
     if (event.type === 'email') {
+      if (event.data.submission_type === 'Submission') {
+        return (
+          <div key={`email-${event.data.id_}`} className="flex items-start space-x-3 p-3 bg-blue-50 rounded-md">
+            <div className="flex-shrink-0 mt-1">
+              <Send className="h-4 w-4 text-blue-600" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-sm font-medium text-slate-700">Direct Submission</span>
+                <span className="text-xs text-slate-500">
+                  {formatEmailDate(event.data.Date, event.data.created_at)}
+                </span>
+              </div>
+              <div className="text-xs text-slate-600">
+                <strong>Filename:</strong> {event.data.filename || "No filename"}
+              </div>
+            </div>
+          </div>
+        );
+      }
       return (
         <div key={`email-${event.data.id_}`} className="flex items-start space-x-3 p-3 bg-blue-50 rounded-md">
           <div className="flex-shrink-0 mt-1">
@@ -289,11 +311,11 @@ export const MetadataPanel = ({ currentInvoiceId }: MetadataPanelProps) => {
   const combinedEvents = getCombinedEventHistory();
 
   return (
-    <div className="rounded-lg shadow-sm flex flex-col h-full">
+    <div className="bg-slate-50 dark:bg-slate-800 rounded-lg shadow-sm flex flex-col h-full">
       <div className="p-4 flex-grow overflow-y-auto space-y-4">
         {/* Event History Section */}
         <div className="border border-slate-200 rounded-md overflow-hidden flex flex-col h-full">
-          <div className="w-full flex justify-between items-center p-3 bg-slate-50 text-left font-medium text-slate-700">
+          <div className="w-full flex justify-between items-center p-3 bg-white text-left font-medium text-slate-700">
             <div className="flex items-center space-x-2">
               <Clock className="h-4 w-4" />
               <span>Event History</span>
@@ -311,7 +333,7 @@ export const MetadataPanel = ({ currentInvoiceId }: MetadataPanelProps) => {
             </div>
           </div>
           
-          <div className="p-3 space-y-3 flex-grow overflow-y-auto">
+          <div className="p-3 space-y-3 flex-grow overflow-y-auto bg-white">
             {isLoading || auditLoading ? (
               <div className="text-center text-slate-500">Loading event history...</div>
             ) : combinedEvents.length > 0 ? (

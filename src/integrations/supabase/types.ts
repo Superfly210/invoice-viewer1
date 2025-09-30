@@ -455,7 +455,7 @@ export type Database = {
           Cost_Center?: string | null
           Cost_Code?: string | null
           created_at?: string
-          Date_of_Work?: string | null
+          Date_of_WOrk?: string | null
           Description?: string | null
           id?: number
           invoice_id?: number
@@ -549,6 +549,47 @@ export type Database = {
           wcb_number?: string | null
         }
         Relationships: []
+      },
+      Quantities: {
+        Row: {
+          id: number
+          line_items_id: number
+          quantity: number | null
+          rate: number | null
+          unit_of_measure: string | null
+          total: number | null
+          gst_exempt: boolean | null
+          created_at: string
+        }
+        Insert: {
+          id?: number
+          line_items_id: number
+          quantity?: number | null
+          rate?: number | null
+          unit_of_measure?: string | null
+          total?: number | null
+          gst_exempt?: boolean | null
+          created_at?: string
+        }
+        Update: {
+          id?: number
+          line_items_id?: number
+          quantity?: number | null
+          rate?: number | null
+          unit_of_measure?: string | null
+          total?: number | null
+          gst_exempt?: boolean | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "Quantities_line_items_id_fkey",
+            columns: ["line_items_id"],
+            isOneToOne: true,
+            referencedRelation: "Line_Items",
+            referencedColumns: ["id"],
+          },
+        ]
       }
     }
     Views: {

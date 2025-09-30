@@ -67,7 +67,7 @@ export const InvoiceDataPanel = ({ currentInvoice, isLoading }: InvoiceDataPanel
         collapsedSize={0}
       >
         <div className="h-full flex flex-col">
-          <div className="flex-1 overflow-auto p-4">
+          <div className="flex-1 overflow-auto">
             <MetadataPanel currentInvoiceId={currentInvoice?.id || null} />
           </div>
         </div>
