@@ -49,8 +49,11 @@ export const PDFViewer = ({ pdfUrl, onPageChange }: PDFViewerProps) => {
       setIsGoogleDrive(false);
     }
     
+    // Reset state when URL changes to force re-render
     setCurrentPage(1);
     setRotation(0);
+    setScale(1.0);
+    setPageWidth(0);
   }, [pdfUrl]);
 
   // Call the onPageChange callback when currentPage or totalPages changes
@@ -69,12 +72,14 @@ export const PDFViewer = ({ pdfUrl, onPageChange }: PDFViewerProps) => {
     const viewport = page.getViewport({ scale: 1 });
     setPageWidth(viewport.width);
     
-    // Auto-fit to width
-    if (containerRef.current) {
-      const containerWidth = containerRef.current.clientWidth - 32; // Account for padding
-      const calculatedScale = containerWidth / viewport.width;
-      setScale(calculatedScale);
-    }
+    // Auto-fit to width with a small delay to ensure container is properly sized
+    setTimeout(() => {
+      if (containerRef.current) {
+        const containerWidth = containerRef.current.clientWidth - 32; // Account for padding
+        const calculatedScale = containerWidth / viewport.width;
+        setScale(calculatedScale);
+      }
+    }, 50);
   };
 
   const zoomIn = () => {
@@ -189,6 +194,7 @@ export const PDFViewer = ({ pdfUrl, onPageChange }: PDFViewerProps) => {
           />
         ) : (
           <Document
+            key={processedUrl}
             file={processedUrl}
             onLoadSuccess={onDocumentLoadSuccess}
             options={{
