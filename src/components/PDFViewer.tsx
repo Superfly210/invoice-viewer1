@@ -19,22 +19,32 @@ export const PDFViewer = ({ pdfUrl, onPageChange }: PDFViewerProps) => {
   const [totalPages, setTotalPages] = useState(0);
   const [rotation, setRotation] = useState(0);
   const [processedUrl, setProcessedUrl] = useState<string | null>(null);
+  const [isGoogleDrive, setIsGoogleDrive] = useState(false);
 
   useEffect(() => {
     if (!pdfUrl) {
       setProcessedUrl(null);
+      setIsGoogleDrive(false);
       return;
     }
     
-    // Process Google Drive URLs
+    // Check if it's a Google Drive URL
     const fileIdMatch = pdfUrl.match(/\/file\/d\/([^\/]+)/);
     if (fileIdMatch && fileIdMatch[1]) {
       const fileId = fileIdMatch[1];
-      setProcessedUrl(`https://drive.google.com/uc?id=${fileId}&export=download`);
+      // Use Google Docs Viewer for Google Drive (avoids CORS issues)
+      const driveUrl = `https://drive.google.com/uc?id=${fileId}&export=download`;
+      const viewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(driveUrl)}&embedded=true`;
+      setProcessedUrl(viewerUrl);
+      setIsGoogleDrive(true);
     } else if (pdfUrl.includes('drive.google.com')) {
-      setProcessedUrl(pdfUrl);
+      const viewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(pdfUrl)}&embedded=true`;
+      setProcessedUrl(viewerUrl);
+      setIsGoogleDrive(true);
     } else {
+      // Use react-pdf for direct URLs
       setProcessedUrl(pdfUrl);
+      setIsGoogleDrive(false);
     }
     
     setCurrentPage(1);
@@ -150,10 +160,24 @@ export const PDFViewer = ({ pdfUrl, onPageChange }: PDFViewerProps) => {
           <div className="flex items-center justify-center h-full">
             <p className="text-muted-foreground">No PDF URL available</p>
           </div>
+        ) : isGoogleDrive ? (
+          <iframe
+            src={processedUrl}
+            className="w-full h-full border-0"
+            title="PDF Document"
+            style={{
+              minHeight: '600px',
+            }}
+          />
         ) : (
           <Document
             file={processedUrl}
             onLoadSuccess={onDocumentLoadSuccess}
+            options={{
+              cMapUrl: 'https://unpkg.com/pdfjs-dist@4.8.69/cmaps/',
+              cMapPacked: true,
+              standardFontDataUrl: 'https://unpkg.com/pdfjs-dist@4.8.69/standard_fonts/',
+            }}
             loading={
               <div className="flex items-center justify-center h-full">
                 <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -164,7 +188,7 @@ export const PDFViewer = ({ pdfUrl, onPageChange }: PDFViewerProps) => {
               <div className="flex items-center justify-center h-full">
                 <div className="text-destructive text-center p-4">
                   <p className="font-semibold">Error loading PDF</p>
-                  <p className="mt-2">Failed to load the document</p>
+                  <p className="mt-2 text-sm">Unable to load document from this source.</p>
                 </div>
               </div>
             }
