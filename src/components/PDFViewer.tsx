@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import { Minus, Plus, Maximize, ChevronUp, ChevronDown, Loader2, RotateCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,8 @@ export const PDFViewer = ({ pdfUrl, onPageChange }: PDFViewerProps) => {
   const [rotation, setRotation] = useState(0);
   const [processedUrl, setProcessedUrl] = useState<string | null>(null);
   const [isGoogleDrive, setIsGoogleDrive] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [pageWidth, setPageWidth] = useState<number>(0);
 
   useEffect(() => {
     if (!pdfUrl) {
@@ -63,6 +65,18 @@ export const PDFViewer = ({ pdfUrl, onPageChange }: PDFViewerProps) => {
     setCurrentPage(1);
   };
 
+  const onPageLoadSuccess = (page: any) => {
+    const viewport = page.getViewport({ scale: 1 });
+    setPageWidth(viewport.width);
+    
+    // Auto-fit to width
+    if (containerRef.current) {
+      const containerWidth = containerRef.current.clientWidth - 32; // Account for padding
+      const calculatedScale = containerWidth / viewport.width;
+      setScale(calculatedScale);
+    }
+  };
+
   const zoomIn = () => {
     setScale(prev => Math.min(prev + 0.2, 3.0));
   };
@@ -72,7 +86,11 @@ export const PDFViewer = ({ pdfUrl, onPageChange }: PDFViewerProps) => {
   };
 
   const fitToWidth = () => {
-    setScale(1.0);
+    if (containerRef.current && pageWidth > 0) {
+      const containerWidth = containerRef.current.clientWidth - 32;
+      const calculatedScale = containerWidth / pageWidth;
+      setScale(calculatedScale);
+    }
   };
 
   const rotateView = () => {
@@ -155,7 +173,7 @@ export const PDFViewer = ({ pdfUrl, onPageChange }: PDFViewerProps) => {
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto p-4 bg-muted/30 flex items-center justify-center">
+      <div ref={containerRef} className="flex-1 overflow-auto p-4 bg-muted/30 flex items-center justify-center">
         {!processedUrl ? (
           <div className="flex items-center justify-center h-full">
             <p className="text-muted-foreground">No PDF URL available</p>
@@ -199,6 +217,7 @@ export const PDFViewer = ({ pdfUrl, onPageChange }: PDFViewerProps) => {
               rotate={rotation}
               renderTextLayer={true}
               renderAnnotationLayer={true}
+              onLoadSuccess={onPageLoadSuccess}
             />
           </Document>
         )}
