@@ -13,7 +13,7 @@ type PDFViewerProps = {
   onPageChange?: (currentPage: number, totalPages: number) => void;
 };
 
-// Helper function to convert Google Drive URLs to direct download links
+// Helper function to convert Google Drive URLs to embedded preview links
 const convertGoogleDriveUrl = (url: string): string => {
   if (!url) return url;
   
@@ -21,7 +21,8 @@ const convertGoogleDriveUrl = (url: string): string => {
   const driveMatch = url.match(/drive\.google\.com\/file\/d\/([^\/]+)/);
   if (driveMatch) {
     const fileId = driveMatch[1];
-    return `https://drive.google.com/uc?export=download&id=${fileId}`;
+    // Use the embedded preview URL which has better CORS support
+    return `https://drive.google.com/uc?export=view&id=${fileId}`;
   }
   
   return url;
