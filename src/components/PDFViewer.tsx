@@ -13,18 +13,18 @@ type PDFViewerProps = {
   onPageChange?: (currentPage: number, totalPages: number) => void;
 };
 
-// Helper function to convert Google Drive URLs to embedded preview links
-const convertGoogleDriveUrl = (url: string): string => {
-  if (!url) return url;
-  
-  // Check if it's a Google Drive URL
+// Helper function to check if URL is from Google Drive
+const isGoogleDriveUrl = (url: string): boolean => {
+  return url?.includes('drive.google.com') || false;
+};
+
+// Helper function to convert Google Drive URLs to embedded viewer
+const getGoogleDriveEmbedUrl = (url: string): string => {
   const driveMatch = url.match(/drive\.google\.com\/file\/d\/([^\/]+)/);
   if (driveMatch) {
     const fileId = driveMatch[1];
-    // Use the embedded preview URL which has better CORS support
-    return `https://drive.google.com/uc?export=view&id=${fileId}`;
+    return `https://drive.google.com/file/d/${fileId}/preview`;
   }
-  
   return url;
 };
 
@@ -33,8 +33,9 @@ export const PDFViewer = ({ pdfUrl, onPageChange }: PDFViewerProps) => {
   const [totalPages, setTotalPages] = useState(0);
   const [rotation, setRotation] = useState(0);
   
-  // Convert Google Drive URLs to direct download links
-  const processedPdfUrl = pdfUrl ? convertGoogleDriveUrl(pdfUrl) : null;
+  // Check if this is a Google Drive URL
+  const isGoogleDrive = pdfUrl ? isGoogleDriveUrl(pdfUrl) : false;
+  const googleDriveEmbedUrl = isGoogleDrive && pdfUrl ? getGoogleDriveEmbedUrl(pdfUrl) : null;
 
   // Create plugin instances
   const zoomPluginInstance = zoomPlugin();
@@ -77,98 +78,107 @@ export const PDFViewer = ({ pdfUrl, onPageChange }: PDFViewerProps) => {
 
   return (
     <div className="flex flex-col h-full bg-background rounded-lg shadow-sm overflow-hidden">
-      <div className="flex justify-between items-center p-3 border-b border-border bg-muted">
-        <div className="flex items-center space-x-2">
-          <ZoomOut>
-            {(props) => (
-              <Button 
-                onClick={props.onClick} 
-                variant="outline" 
-                size="icon" 
-                className="h-8 w-8"
-                title="Zoom Out"
-              >
-                <Minus className="h-4 w-4" />
-              </Button>
-            )}
-          </ZoomOut>
+      {/* Only show controls for non-Google Drive PDFs */}
+      {!isGoogleDrive && (
+        <div className="flex justify-between items-center p-3 border-b border-border bg-muted">
+          <div className="flex items-center space-x-2">
+            <ZoomOut>
+              {(props) => (
+                <Button 
+                  onClick={props.onClick} 
+                  variant="outline" 
+                  size="icon" 
+                  className="h-8 w-8"
+                  title="Zoom Out"
+                >
+                  <Minus className="h-4 w-4" />
+                </Button>
+              )}
+            </ZoomOut>
+            
+            <Zoom>
+              {(props) => (
+                <span className="text-sm">{Math.round(props.scale * 100)}%</span>
+              )}
+            </Zoom>
+            
+            <ZoomIn>
+              {(props) => (
+                <Button 
+                  onClick={props.onClick} 
+                  variant="outline" 
+                  size="icon" 
+                  className="h-8 w-8"
+                  title="Zoom In"
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              )}
+            </ZoomIn>
+            
+            <Button 
+              onClick={() => zoomPluginInstance.zoomTo(SpecialZoomLevel.PageWidth)} 
+              variant="outline" 
+              className="text-xs h-8"
+              title="Fit to Width"
+            >
+              <Maximize className="h-3 w-3 mr-1" /> Fit Width
+            </Button>
+            
+            <Button 
+              onClick={rotateView} 
+              variant="outline" 
+              className="text-xs h-8"
+              title="Rotate Page"
+            >
+              <RotateCw className="h-3 w-3 mr-1" /> Rotate
+            </Button>
+          </div>
           
-          <Zoom>
-            {(props) => (
-              <span className="text-sm">{Math.round(props.scale * 100)}%</span>
-            )}
-          </Zoom>
-          
-          <ZoomIn>
-            {(props) => (
-              <Button 
-                onClick={props.onClick} 
-                variant="outline" 
-                size="icon" 
-                className="h-8 w-8"
-                title="Zoom In"
-              >
-                <Plus className="h-4 w-4" />
-              </Button>
-            )}
-          </ZoomIn>
-          
-          <Button 
-            onClick={() => zoomPluginInstance.zoomTo(SpecialZoomLevel.PageWidth)} 
-            variant="outline" 
-            className="text-xs h-8"
-            title="Fit to Width"
-          >
-            <Maximize className="h-3 w-3 mr-1" /> Fit Width
-          </Button>
-          
-          <Button 
-            onClick={rotateView} 
-            variant="outline" 
-            className="text-xs h-8"
-            title="Rotate Page"
-          >
-            <RotateCw className="h-3 w-3 mr-1" /> Rotate
-          </Button>
+          <div className="flex items-center space-x-2">
+            <Button 
+              onClick={previousPage} 
+              variant="outline" 
+              size="icon" 
+              disabled={currentPage === 1}
+              className="h-8 w-8"
+              title="Previous Page"
+            >
+              <ChevronUp className="h-4 w-4" />
+            </Button>
+            <span className="text-sm">
+              Page {currentPage} / {totalPages || 1}
+            </span>
+            <Button 
+              onClick={nextPage} 
+              variant="outline" 
+              size="icon" 
+              disabled={currentPage >= totalPages}
+              className="h-8 w-8"
+              title="Next Page"
+            >
+              <ChevronDown className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
-        
-        <div className="flex items-center space-x-2">
-          <Button 
-            onClick={previousPage} 
-            variant="outline" 
-            size="icon" 
-            disabled={currentPage === 1}
-            className="h-8 w-8"
-            title="Previous Page"
-          >
-            <ChevronUp className="h-4 w-4" />
-          </Button>
-          <span className="text-sm">
-            Page {currentPage} / {totalPages || 1}
-          </span>
-          <Button 
-            onClick={nextPage} 
-            variant="outline" 
-            size="icon" 
-            disabled={currentPage >= totalPages}
-            className="h-8 w-8"
-            title="Next Page"
-          >
-            <ChevronDown className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
+      )}
 
       <div className="flex-1 overflow-auto bg-muted/30">
-        {!processedPdfUrl ? (
+        {!pdfUrl ? (
           <div className="flex items-center justify-center h-full">
             <p className="text-muted-foreground">No PDF URL available</p>
           </div>
+        ) : isGoogleDrive && googleDriveEmbedUrl ? (
+          <iframe
+            src={googleDriveEmbedUrl}
+            className="w-full h-full border-0"
+            title="PDF Viewer"
+          />
         ) : (
           <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js">
             <div style={{ transform: `rotate(${rotation}deg)`, transformOrigin: 'center' }}>
               <Viewer
-                fileUrl={processedPdfUrl}
+                fileUrl={pdfUrl}
                 plugins={[zoomPluginInstance]}
                 defaultScale={SpecialZoomLevel.PageWidth}
                 onDocumentLoad={handleDocumentLoad}
