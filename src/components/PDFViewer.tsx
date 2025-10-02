@@ -13,10 +13,27 @@ type PDFViewerProps = {
   onPageChange?: (currentPage: number, totalPages: number) => void;
 };
 
+// Helper function to convert Google Drive URLs to direct download links
+const convertGoogleDriveUrl = (url: string): string => {
+  if (!url) return url;
+  
+  // Check if it's a Google Drive URL
+  const driveMatch = url.match(/drive\.google\.com\/file\/d\/([^\/]+)/);
+  if (driveMatch) {
+    const fileId = driveMatch[1];
+    return `https://drive.google.com/uc?export=download&id=${fileId}`;
+  }
+  
+  return url;
+};
+
 export const PDFViewer = ({ pdfUrl, onPageChange }: PDFViewerProps) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [rotation, setRotation] = useState(0);
+  
+  // Convert Google Drive URLs to direct download links
+  const processedPdfUrl = pdfUrl ? convertGoogleDriveUrl(pdfUrl) : null;
 
   // Create plugin instances
   const zoomPluginInstance = zoomPlugin();
@@ -142,7 +159,7 @@ export const PDFViewer = ({ pdfUrl, onPageChange }: PDFViewerProps) => {
       </div>
 
       <div className="flex-1 overflow-auto bg-muted/30">
-        {!pdfUrl ? (
+        {!processedPdfUrl ? (
           <div className="flex items-center justify-center h-full">
             <p className="text-muted-foreground">No PDF URL available</p>
           </div>
@@ -150,7 +167,7 @@ export const PDFViewer = ({ pdfUrl, onPageChange }: PDFViewerProps) => {
           <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js">
             <div style={{ transform: `rotate(${rotation}deg)`, transformOrigin: 'center' }}>
               <Viewer
-                fileUrl={pdfUrl}
+                fileUrl={processedPdfUrl}
                 plugins={[zoomPluginInstance]}
                 defaultScale={SpecialZoomLevel.PageWidth}
                 onDocumentLoad={handleDocumentLoad}
