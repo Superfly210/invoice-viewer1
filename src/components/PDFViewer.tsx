@@ -3,6 +3,7 @@ import { Viewer, Worker, SpecialZoomLevel } from "@react-pdf-viewer/core";
 import { zoomPlugin } from "@react-pdf-viewer/zoom";
 import { Minus, Plus, Maximize, ChevronUp, ChevronDown, RotateCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
 
 // Import styles
 import "@react-pdf-viewer/core/lib/styles/index.css";
@@ -13,38 +14,81 @@ type PDFViewerProps = {
   onPageChange?: (currentPage: number, totalPages: number) => void;
 };
 
-// Helper function to convert Google Drive URLs to embedded preview links
-const convertGoogleDriveUrl = (url: string): string => {
-  if (!url) return url;
-  
-  // Check if it's a Google Drive URL
-  const driveMatch = url.match(/drive\.google\.com\/file\/d\/([^\/]+)/);
-  if (driveMatch) {
-    const fileId = driveMatch[1];
-    // Use the embedded preview URL which has better CORS support
-    return `https://drive.google.com/uc?export=view&id=${fileId}`;
+// Helper function to check if URL is from Google Drive
+const isGoogleDriveUrl = (url: string): boolean => {
+  return url?.includes('drive.google.com') || false;
+};
+
+// Helper function to get proxied PDF URL via edge function
+const getProxiedPdfUrl = async (url: string): Promise<string> => {
+  try {
+    const { data, error } = await supabase.functions.invoke('pdf-proxy', {
+      body: { url },
+    });
+
+    if (error) throw error;
+
+    // Create a blob URL from the response
+    const blob = new Blob([data], { type: 'application/pdf' });
+    return URL.createObjectURL(blob);
+  } catch (error) {
+    console.error('Error proxying PDF:', error);
+    throw error;
   }
-  
-  return url;
 };
 
 export const PDFViewer = ({ pdfUrl, onPageChange }: PDFViewerProps) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [rotation, setRotation] = useState(0);
-  
-  // Convert Google Drive URLs to direct download links
-  const processedPdfUrl = pdfUrl ? convertGoogleDriveUrl(pdfUrl) : null;
+  const [processedPdfUrl, setProcessedPdfUrl] = useState<string | null>(null);
+  const [isLoadingProxy, setIsLoadingProxy] = useState(false);
+  const [proxyError, setProxyError] = useState<string | null>(null);
 
   // Create plugin instances
   const zoomPluginInstance = zoomPlugin();
   const { ZoomIn, ZoomOut, Zoom } = zoomPluginInstance;
 
-  // Reset state when PDF URL changes
+  // Process PDF URL (use proxy for Google Drive URLs)
   useEffect(() => {
-    setCurrentPage(1);
-    setTotalPages(0);
-    setRotation(0);
+    const processPdfUrl = async () => {
+      if (!pdfUrl) {
+        setProcessedPdfUrl(null);
+        return;
+      }
+
+      // Reset state
+      setCurrentPage(1);
+      setTotalPages(0);
+      setRotation(0);
+      setProxyError(null);
+
+      // If it's a Google Drive URL, use the proxy
+      if (isGoogleDriveUrl(pdfUrl)) {
+        setIsLoadingProxy(true);
+        try {
+          const proxiedUrl = await getProxiedPdfUrl(pdfUrl);
+          setProcessedPdfUrl(proxiedUrl);
+        } catch (error) {
+          console.error('Failed to proxy PDF:', error);
+          setProxyError('Failed to load PDF from Google Drive');
+        } finally {
+          setIsLoadingProxy(false);
+        }
+      } else {
+        // Use the URL directly for non-Google Drive URLs
+        setProcessedPdfUrl(pdfUrl);
+      }
+    };
+
+    processPdfUrl();
+
+    // Cleanup: revoke blob URLs when component unmounts or URL changes
+    return () => {
+      if (processedPdfUrl && processedPdfUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(processedPdfUrl);
+      }
+    };
   }, [pdfUrl]);
 
   // Call the onPageChange callback when currentPage or totalPages changes
@@ -160,7 +204,15 @@ export const PDFViewer = ({ pdfUrl, onPageChange }: PDFViewerProps) => {
       </div>
 
       <div className="flex-1 overflow-auto bg-muted/30">
-        {!processedPdfUrl ? (
+        {isLoadingProxy ? (
+          <div className="flex items-center justify-center h-full">
+            <p className="text-muted-foreground">Loading PDF...</p>
+          </div>
+        ) : proxyError ? (
+          <div className="flex items-center justify-center h-full">
+            <p className="text-destructive">{proxyError}</p>
+          </div>
+        ) : !processedPdfUrl ? (
           <div className="flex items-center justify-center h-full">
             <p className="text-muted-foreground">No PDF URL available</p>
           </div>
