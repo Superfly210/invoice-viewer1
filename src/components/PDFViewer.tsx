@@ -22,14 +22,33 @@ const isGoogleDriveUrl = (url: string): boolean => {
 // Helper function to get proxied PDF URL via edge function
 const getProxiedPdfUrl = async (url: string): Promise<string> => {
   try {
-    const { data, error } = await supabase.functions.invoke('pdf-proxy', {
-      body: { url },
-    });
+    // Trim any whitespace/newlines from the URL
+    const cleanUrl = url.trim();
+    
+    // Get the session token for authentication
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    // Make a direct fetch call to get binary response
+    const response = await fetch(
+      'https://bumyvuiywdnffhmayxcz.supabase.co/functions/v1/pdf-proxy',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.access_token || ''}`,
+          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ1bXl2dWl5d2RuZmZobWF5eGN6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE5Njc3MDgsImV4cCI6MjA1NzU0MzcwOH0.20yKpjbuWYIPNwc4SwqMoZNXZv4wUksa1xuGdXaGe78',
+        },
+        body: JSON.stringify({ url: cleanUrl }),
+      }
+    );
 
-    if (error) throw error;
+    if (!response.ok) {
+      throw new Error(`Failed to proxy PDF: ${response.status} ${response.statusText}`);
+    }
 
-    // Create a blob URL from the response
-    const blob = new Blob([data], { type: 'application/pdf' });
+    // Get the response as a blob
+    const blob = await response.blob();
+    
     return URL.createObjectURL(blob);
   } catch (error) {
     console.error('Error proxying PDF:', error);
