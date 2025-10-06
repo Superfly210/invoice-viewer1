@@ -560,6 +560,7 @@ export type Database = {
       }
       Quantities: {
         Row: {
+          calc_gst: number | null
           calc_total: number | null
           created_at: string
           gst_exempt: boolean | null
@@ -573,6 +574,7 @@ export type Database = {
           Unit_of_Measure: string | null
         }
         Insert: {
+          calc_gst?: number | null
           calc_total?: number | null
           created_at?: string
           gst_exempt?: boolean | null
@@ -586,6 +588,7 @@ export type Database = {
           Unit_of_Measure?: string | null
         }
         Update: {
+          calc_gst?: number | null
           calc_total?: number | null
           created_at?: string
           gst_exempt?: boolean | null
@@ -627,6 +630,30 @@ export type Database = {
         Update: {
           created_at?: string
           id?: number
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -730,6 +757,13 @@ export type Database = {
         Args: { "": unknown[] }
         Returns: number
       }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       hnsw_bit_support: {
         Args: { "": unknown }
         Returns: unknown
@@ -813,7 +847,7 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -940,6 +974,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const
