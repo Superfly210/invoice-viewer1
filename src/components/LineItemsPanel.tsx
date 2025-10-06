@@ -36,6 +36,7 @@ type FlatLineItem = {
     Quantity: number | null;
     Rate: number | null;
     Total: number | null;
+    calc_gst: number | null;
     gst_exempt: boolean | null;
     gst_included: boolean | null;
 };
@@ -88,6 +89,11 @@ export const LineItemsPanel = ({
   // Calculate the total sum of all line items
   const totalSum = flatLineItems.reduce((sum, item) => {
     return sum + (item.Total || 0);
+  }, 0);
+
+  // Calculate the GST sum
+  const gstSum = flatLineItems.reduce((sum, item) => {
+    return sum + (item.calc_gst || 0);
   }, 0);
 
   // Use subtotal comparison hook - MUST be called before any early returns
@@ -147,20 +153,21 @@ export const LineItemsPanel = ({
       console.log("Querying Quantities for line item IDs:", lineItemIds);
 
       // 2. Fetch Quantities with type assertion for newly added column
-      type QuantityRow = {
+type QuantityRow = {
         id: number;
         line_items_id: number | null;
         Unit_of_Measure: string | null;
         Quantity: number | null;
         Rate: number | null;
         calc_total: number | null;
+        calc_gst: number | null;
         gst_exempt: boolean | null;
         gst_included: boolean | null;
       };
 
       const { data: quantitiesData, error: quantitiesError } = await supabase
         .from('Quantities')
-        .select('id, line_items_id, Unit_of_Measure, Quantity, Rate, calc_total, gst_exempt, gst_included')
+        .select('id, line_items_id, Unit_of_Measure, Quantity, Rate, calc_total, calc_gst, gst_exempt, gst_included')
         .in('line_items_id', lineItemIds);
       
       console.log("Quantities data received:", quantitiesData);
@@ -191,6 +198,7 @@ export const LineItemsPanel = ({
               Quantity: quantity.Quantity,
               Rate: quantity.Rate,
               Total: quantity.calc_total,
+              calc_gst: quantity.calc_gst,
               gst_exempt: quantity.gst_exempt,
               gst_included: quantity.gst_included,
             });
@@ -206,7 +214,8 @@ export const LineItemsPanel = ({
             Quantity: null,
             Rate: null,
             Total: null,
-            gst_exempt: null, // Added gst_exempt here
+            calc_gst: null,
+            gst_exempt: null,
             gst_included: null,
           });
         }
@@ -438,9 +447,9 @@ export const LineItemsPanel = ({
               <TableHead>Work Date</TableHead>
               <TableHead>Ticket/Order</TableHead>
               <TableHead>Unit</TableHead>
-              <TableHead className="">Quantity</TableHead>
-              <TableHead className="">Rate</TableHead>
-              <TableHead className="">Total</TableHead>
+              <TableHead className="text-center">Quantity</TableHead>
+              <TableHead className="text-center">Rate</TableHead>
+              <TableHead className="text-center">Total</TableHead>
               <TableHead className="text-center">GST Exempt</TableHead>
               <TableHead className="text-center">GST Included</TableHead>
             </TableRow>
@@ -473,9 +482,9 @@ export const LineItemsPanel = ({
                       </>
                     )}
                     <TableCell>{item.Unit_of_Measure}</TableCell>
-                    <TableCell className="text-right">{item.Quantity}</TableCell>
-                    <TableCell className="text-right">{item.Rate ? formatCurrency(item.Rate) : null}</TableCell>
-                    <TableCell className="text-right">{item.Total ? formatCurrency(item.Total) : null}</TableCell>
+                    <TableCell className="text-center">{item.Quantity}</TableCell>
+                    <TableCell className="text-center">{item.Rate ? formatCurrency(item.Rate) : null}</TableCell>
+                    <TableCell className="text-center">{item.Total ? formatCurrency(item.Total) : null}</TableCell>
                     <TableCell className="text-center">
                       <input
                         type="checkbox"
@@ -496,14 +505,25 @@ export const LineItemsPanel = ({
                 );
               });
             })()}
-            {/* Total row */}
+            {/* Subtotal row */}
             <TableRow className="border-t-2 border-slate-300 dark:border-slate-600 font-semibold">
-              <TableCell colSpan={8} className="text-right text-slate-800 dark:text-slate-200">
-                Total:
+              <TableCell colSpan={7} className="text-right text-slate-800 dark:text-slate-200">
+                Subtotal:
               </TableCell>
-              <TableCell className="text-right text-slate-800 dark:text-slate-200">
+              <TableCell className="text-center text-slate-800 dark:text-slate-200">
                 {formatCurrency(totalSum)}
               </TableCell>
+              <TableCell colSpan={2}></TableCell>
+            </TableRow>
+            {/* GST row */}
+            <TableRow className="font-semibold">
+              <TableCell colSpan={7} className="text-right text-slate-800 dark:text-slate-200">
+                G.S.T:
+              </TableCell>
+              <TableCell className="text-center text-slate-800 dark:text-slate-200">
+                {formatCurrency(gstSum)}
+              </TableCell>
+              <TableCell colSpan={2}></TableCell>
             </TableRow>
           </TableBody>
         </Table>
