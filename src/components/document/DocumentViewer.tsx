@@ -24,7 +24,7 @@ export const DocumentViewer = ({
   const [activeDocTab, setActiveDocTab] = useState("pdf");
 
   return (
-    <div className="h-full overflow-auto">
+    <div className="h-full overflow-hidden">
       <Tabs value={activeDocTab} onValueChange={setActiveDocTab} className="w-full h-full">
         <TabsList className="grid w-full grid-cols-5 mx-4 mt-4">
           <TabsTrigger value="pdf" className="flex items-center">
