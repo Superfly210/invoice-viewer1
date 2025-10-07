@@ -443,15 +443,15 @@ type QuantityRow = {
           <TableHeader>
             <TableRow>
               <TableHead className="w-8"></TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead>Work Date</TableHead>
-              <TableHead>Ticket/Order</TableHead>
-              <TableHead>Unit</TableHead>
-              <TableHead className="text-center">Quantity</TableHead>
-              <TableHead className="text-center">Rate</TableHead>
-              <TableHead className="text-center">Total</TableHead>
-              <TableHead className="text-center">GST Exempt</TableHead>
-              <TableHead className="text-center">GST Included</TableHead>
+              <TableHead className="font-bold">Description</TableHead>
+              <TableHead className="font-bold">Work Date</TableHead>
+              <TableHead className="font-bold">Ticket/Order</TableHead>
+              <TableHead className="font-bold">Unit</TableHead>
+              <TableHead className="text-center font-bold">Quantity</TableHead>
+              <TableHead className="text-center font-bold">Rate</TableHead>
+              <TableHead className="text-center font-bold">Total</TableHead>
+              <TableHead className="text-center font-bold">GST Exempt</TableHead>
+              <TableHead className="text-center font-bold">GST Included</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
