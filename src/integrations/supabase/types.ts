@@ -499,35 +499,6 @@ export type Database = {
           },
         ]
       }
-      line_items_array: {
-        Row: {
-          created_at: string
-          id: number
-          invoice_id: number | null
-          line_items: Json | null
-        }
-        Insert: {
-          created_at?: string
-          id?: number
-          invoice_id?: number | null
-          line_items?: Json | null
-        }
-        Update: {
-          created_at?: string
-          id?: number
-          invoice_id?: number | null
-          line_items?: Json | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "line_items_array_invoice_id_fkey"
-            columns: ["invoice_id"]
-            isOneToOne: false
-            referencedRelation: "Attachment_Info"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -847,7 +818,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "user"
+      app_role: "admin" | "user" | "submitter"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -975,7 +946,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "user"],
+      app_role: ["admin", "user", "submitter"],
     },
   },
 } as const
