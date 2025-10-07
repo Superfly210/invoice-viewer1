@@ -712,6 +712,10 @@ export type Database = {
         Args: { "": string } | { "": unknown }
         Returns: unknown
       }
+      can_revoke_admin_role: {
+        Args: { _user_id: string }
+        Returns: boolean
+      }
       halfvec_avg: {
         Args: { "": number[] }
         Returns: unknown

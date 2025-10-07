@@ -29,6 +29,7 @@ export default function SubmissionAuth() {
           email,
           password,
           options: {
+            emailRedirectTo: `${window.location.origin}/submission-portal`,
             data: {
               first_name: firstName,
               last_name: lastName

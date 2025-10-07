@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "./components/ThemeProvider";
 import { AuthProvider, useAuth } from "./components/AuthProvider";
+import { useUserRole } from "@/hooks/useUserRole";
 import Landing from "./pages/Landing";
 import Auth from "./pages/Auth";
 import SubmissionAuth from "./pages/SubmissionAuth";
@@ -17,15 +18,25 @@ import CostCodes from "./pages/CostCodes";
 import Permissions from "./pages/Permissions";
 import Vendor from "./pages/Vendor";
 import NotFound from "./pages/NotFound";
+import NoViewerAccess from "./pages/NoViewerAccess";
 
 const queryClient = new QueryClient();
 
 // Protected Route component for viewer portal
 const ViewerProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { session } = useAuth();
+  const { hasViewerAccess, isLoading } = useUserRole();
   
   if (!session) {
     return <Navigate to="/viewer-auth" replace />;
+  }
+  
+  if (isLoading) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
+  
+  if (!hasViewerAccess) {
+    return <Navigate to="/no-viewer-access" replace />;
   }
   
   return <>{children}</>;
@@ -60,6 +71,7 @@ const App = () => (
               
               {/* Viewer Portal Routes */}
               <Route path="/viewer-auth" element={<Auth />} />
+              <Route path="/no-viewer-access" element={<NoViewerAccess />} />
               <Route path="/viewer" element={<ViewerProtectedRoute><Index /></ViewerProtectedRoute>} />
               <Route path="/afe" element={<ViewerProtectedRoute><AFE /></ViewerProtectedRoute>} />
               <Route path="/cost-centers" element={<ViewerProtectedRoute><CostCenters /></ViewerProtectedRoute>} />
