@@ -7,10 +7,13 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft } from "lucide-react";
+import { passwordSchema, passwordRequirements } from "@/lib/passwordValidation";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function SubmissionAuth() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [passwordError, setPasswordError] = useState<string | null>(null);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [loading, setLoading] = useState(false);
@@ -22,6 +25,18 @@ export default function SubmissionAuth() {
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate password on sign-up
+    if (isSignUp) {
+      try {
+        passwordSchema.parse(password);
+        setPasswordError(null);
+      } catch (error: any) {
+        setPasswordError(error.errors[0]?.message || "Invalid password");
+        return;
+      }
+    }
+    
     setLoading(true);
     try {
       if (isSignUp) {
@@ -176,9 +191,27 @@ export default function SubmissionAuth() {
                     type="password"
                     placeholder="Password"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      if (passwordError) setPasswordError(null);
+                    }}
                     required
                   />
+                  {isSignUp && (
+                    <div className="text-xs text-muted-foreground space-y-1 mt-2">
+                      <p className="font-medium">Password requirements:</p>
+                      <ul className="list-disc list-inside space-y-0.5">
+                        {passwordRequirements.map((req, idx) => (
+                          <li key={idx}>{req}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {passwordError && (
+                    <Alert variant="destructive" className="mt-2">
+                      <AlertDescription>{passwordError}</AlertDescription>
+                    </Alert>
+                  )}
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading
