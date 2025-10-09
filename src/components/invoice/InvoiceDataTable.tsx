@@ -10,6 +10,7 @@ import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { formatCurrency, parseCurrencyValue } from "@/lib/currencyFormatter";
 import { useSubtotalComparison } from "@/hooks/useSubtotalComparison";
 import { useFinancialValidation } from "@/hooks/useFinancialValidation";
+import { useGstComparison } from "@/hooks/useGstComparison";
 import { logAuditChange } from "@/utils/auditLogger";
 import { useAuth } from "@/components/AuthProvider";
 import {
@@ -43,18 +44,39 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
     },
   });
 
-  const { data: lineItemsTotal = 0 } = useQuery({
-    queryKey: ['line-items-total', currentInvoice.id],
+  // Fetch line items totals for GST comparison
+  const { data: lineItemsData } = useQuery({
+    queryKey: ['line-items-data', currentInvoice.id],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data: lineItemsRaw, error: lineItemsError } = await supabase
         .from('Line_Items')
-        .select('Total')
+        .select('id, Total')
         .eq('invoice_id', currentInvoice.id);
       
-      if (error) throw error;
-      return data.reduce((acc, item) => acc + (item.Total || 0), 0);
+      if (lineItemsError) throw lineItemsError;
+
+      const lineItemIds = lineItemsRaw?.map(item => item.id) || [];
+      
+      if (lineItemIds.length === 0) {
+        return { lineItemsTotal: 0, gstSum: 0 };
+      }
+
+      const { data: quantitiesData, error: quantitiesError } = await supabase
+        .from('Quantities')
+        .select('calc_total, calc_gst')
+        .in('line_items_id', lineItemIds);
+      
+      if (quantitiesError) throw quantitiesError;
+
+      const lineItemsTotal = quantitiesData?.reduce((acc, item) => acc + (item.calc_total || 0), 0) || 0;
+      const gstSum = quantitiesData?.reduce((acc, item) => acc + (item.calc_gst || 0), 0) || 0;
+
+      return { lineItemsTotal, gstSum };
     },
   });
+
+  const lineItemsTotal = lineItemsData?.lineItemsTotal || 0;
+  const lineItemsGstSum = lineItemsData?.gstSum || 0;
 
   // Use subtotal comparison hook
   const subtotalComparison = useSubtotalComparison({
@@ -63,11 +85,17 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
     lineItemsTotal
   });
 
-  // Use financial validation hook
+  // Use financial validation hook (only for total validation)
   const financialValidation = useFinancialValidation({
     subTotal: currentInvoice.Sub_Total,
     gstTotal: currentInvoice.GST_Total,
     total: currentInvoice.Total
+  });
+
+  // Use GST comparison hook
+  const gstComparison = useGstComparison({
+    invoiceGstTotal: currentInvoice.GST_Total,
+    lineItemsGstSum: lineItemsGstSum
   });
 
   const { data: currentUserProfile } = useQuery({
@@ -321,7 +349,7 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
                   value={currentInvoice.GST_Total !== null && currentInvoice.GST_Total !== undefined ? formatCurrency(currentInvoice.GST_Total) : 'N/A'}
                   onSave={(newValue) => handleFieldUpdate('GST_Total', newValue)}
                   type="text"
-                  highlightClass={financialValidation.gstValidationClass}
+                  highlightClass={gstComparison.highlightClass}
                 />
             </TableCell>
           </TableRow>

@@ -280,7 +280,7 @@ export const InvoiceCodingTable = ({ invoiceId }: InvoiceCodingTableProps) => {
                     placeholder="For AFE Numbers XX#####, For Cost Centers, ##"
                   />
                 </TableCell>
-                <TableCell className="py-2">
+                <TableCell className="py-2 whitespace-nowrap">
                   <EditableLineItemCell
                     value={coding.cost_code}
                     onSave={(newValue) => handleFieldUpdate(coding.id, 'cost_code', newValue)}

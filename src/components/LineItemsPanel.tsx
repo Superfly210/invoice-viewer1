@@ -8,6 +8,7 @@ import { Loader2, AlertCircle, Plus, X } from "lucide-react";
 // import { EditableLineItemCell } from "./invoice/EditableLineItemCell";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { useSubtotalComparison } from "@/hooks/useSubtotalComparison";
+import { useGstComparison } from "@/hooks/useGstComparison";
 import { formatCurrency, parseCurrencyValue } from "@/lib/currencyFormatter";
 import { logLineItemChange } from "@/utils/auditLogger";
 import {
@@ -54,14 +55,14 @@ export const LineItemsPanel = ({
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Get invoice subtotal and coding total for comparison
+  // Get invoice subtotal and GST for comparison
   const { data: invoiceData } = useQuery({
     queryKey: ['attachment-info-single', currentInvoiceId],
     queryFn: async () => {
       if (!currentInvoiceId) return null;
       const { data, error } = await supabase
         .from('Attachment_Info')
-        .select('Sub_Total')
+        .select('Sub_Total, GST_Total')
         .eq('id', currentInvoiceId)
         .single();
       
@@ -101,6 +102,12 @@ export const LineItemsPanel = ({
     invoiceSubtotal: invoiceData?.Sub_Total || null,
     codingTotal,
     lineItemsTotal: totalSum
+  });
+
+  // Use GST comparison hook
+  const gstComparison = useGstComparison({
+    invoiceGstTotal: invoiceData?.GST_Total || null,
+    lineItemsGstSum: gstSum
   });
   
   useEffect(() => {
@@ -477,7 +484,7 @@ type QuantityRow = {
                           {/* Delete button disabled for now */}
                         </TableCell>
                         <TableCell rowSpan={rowSpans[item.lineItemId]}>{item.Description}</TableCell>
-                        <TableCell rowSpan={rowSpans[item.lineItemId]}>{item.Date_of_Work}</TableCell>
+                        <TableCell rowSpan={rowSpans[item.lineItemId]} className="whitespace-nowrap">{item.Date_of_Work}</TableCell>
                         <TableCell rowSpan={rowSpans[item.lineItemId]}>{item.Ticket_Work_Order}</TableCell>
                       </>
                     )}
@@ -511,7 +518,9 @@ type QuantityRow = {
                 Subtotal:
               </TableCell>
               <TableCell className="text-center text-slate-800 dark:text-slate-200">
-                {formatCurrency(totalSum)}
+                <span className={subtotalComparison.highlightClass}>
+                  {formatCurrency(totalSum)}
+                </span>
               </TableCell>
               <TableCell colSpan={2}></TableCell>
             </TableRow>
@@ -521,7 +530,9 @@ type QuantityRow = {
                 G.S.T:
               </TableCell>
               <TableCell className="text-center text-slate-800 dark:text-slate-200">
-                {formatCurrency(gstSum)}
+                <span className={gstComparison.highlightClass}>
+                  {formatCurrency(gstSum)}
+                </span>
               </TableCell>
               <TableCell colSpan={2}></TableCell>
             </TableRow>
