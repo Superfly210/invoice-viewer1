@@ -292,7 +292,7 @@ type QuantityRow = {
           [field]: processedValue
         }).eq('id', quantityId); // This 'id' should be lineItemId, not quantityId
         if (error) throw error;
-        fetchLineItems(currentInvoiceId); // Re-fetch after successful update
+        fetchLineItems(currentInvoiceId); // Re-fetch after successful updatef
       }
     } catch (error) {
       console.error('Error updating field:', error);

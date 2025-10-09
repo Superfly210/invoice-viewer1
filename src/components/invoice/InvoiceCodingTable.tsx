@@ -256,7 +256,7 @@ export const InvoiceCodingTable = ({ invoiceId }: InvoiceCodingTableProps) => {
               <TableHead className="text-xs w-8"></TableHead>
               <TableHead className="text-xs">AFE/Cost Center</TableHead>
               <TableHead className="text-xs">Cost Code</TableHead>
-              <TableHead className="text-xs text-left">Total</TableHead>
+              <TableHead className="text-xs text-left">Subtotal</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -317,7 +317,7 @@ export const InvoiceCodingTable = ({ invoiceId }: InvoiceCodingTableProps) => {
                   {isAddingRow ? 'Adding...' : 'Add Row'}
                 </Button>
               </TableCell>
-              <TableCell className="text-right font-medium">Total</TableCell>
+              <TableCell className="text-right font-medium">Subtotal</TableCell>
               <TableCell className="text-left font-medium">
                 <EditableLineItemCell
                   value={formatCurrency(totalAmount)}

@@ -114,23 +114,27 @@ export const InvoiceReviewer = () => {
       />
       <ResizablePanelGroup direction="vertical" className="flex-1">
         <ResizablePanel defaultSize={70} minSize={30}>
-          <ResizablePanelGroup direction="horizontal" className="h-full">
-            <ResizablePanel defaultSize={60} minSize={30}>
-              <InvoiceDataPanel 
-                currentInvoice={currentInvoice}
-                isLoading={isLoading}
-              />
-            </ResizablePanel>
-            <ResizableHandle withHandle />
-            <ResizablePanel defaultSize={50} minSize={30}>
-              <DocumentViewer
-                currentPdfUrl={currentPdfUrl}
-                currentInvoiceId={currentInvoiceId}
-                emailInfoId={currentEmailInfoId}
-                onPdfPageChange={handlePdfPageChange}
-              />
-            </ResizablePanel>
-          </ResizablePanelGroup>
+          <div className="flex h-full">
+            <ResizablePanelGroup direction="horizontal">
+              <ResizablePanel defaultSize={50} minSize={30}>
+                <InvoiceDataPanel 
+                  currentInvoice={currentInvoice}
+                  isLoading={isLoading}
+                />
+              </ResizablePanel>
+              <ResizableHandle withHandle />
+              <ResizablePanel defaultSize={50} minSize={30}>
+                <div className="flex-1 overflow-auto">
+                  <DocumentViewer
+                    currentPdfUrl={currentPdfUrl}
+                    currentInvoiceId={currentInvoiceId}
+                    emailInfoId={currentEmailInfoId}
+                    onPdfPageChange={handlePdfPageChange}
+                  />
+                </div>
+              </ResizablePanel>
+            </ResizablePanelGroup>
+          </div>
         </ResizablePanel>
         <ResizableHandle withHandle>
           <div className="flex justify-center items-center w-full h-full">
