@@ -64,7 +64,7 @@ export const EditableTableCell = ({ value, onSave, type = "text", className, hig
 
   return (
     <div className="flex items-center justify-between group w-full">
-      <span className={`text-left ${className || ''} ${highlightClass || ''}`}>{displayValue}</span>
+    <span className={`text-left px-2 py-1 rounded ${highlightClass || ''} ${className || ''}`}>{displayValue}</span>
       <Button
         size="sm"
         variant="ghost"

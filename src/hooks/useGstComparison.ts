@@ -20,6 +20,7 @@ export const useGstComparison = ({ invoiceGstTotal, lineItemsGstSum }: GstCompar
       isEqual,
       invoice,
       lineItems,
+      difference: Math.abs(invoice - lineItems),
       // Return CSS classes for conditional formatting
       highlightClass: isEqual 
         ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100" 

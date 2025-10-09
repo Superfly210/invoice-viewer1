@@ -23,6 +23,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Tables } from "@/integrations/supabase/types";
+import { AttachmentInfo } from "@/hooks/useInvoiceDataFetching";
 
 type LineItem = Tables<'Line_Items'>;
 type Quantity = Tables<'Quantities'>;
@@ -44,10 +45,12 @@ type FlatLineItem = {
 
 interface LineItemsPanelProps {
   currentInvoiceId: number | null;
+  currentInvoice?: AttachmentInfo | null; // Add current invoice prop with proper typing
 }
 
 export const LineItemsPanel = ({
-  currentInvoiceId
+  currentInvoiceId,
+  currentInvoice
 }: LineItemsPanelProps) => {
   const [flatLineItems, setFlatLineItems] = useState<FlatLineItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -55,22 +58,9 @@ export const LineItemsPanel = ({
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Get invoice subtotal and GST for comparison
-  const { data: invoiceData } = useQuery({
-    queryKey: ['attachment-info-single', currentInvoiceId],
-    queryFn: async () => {
-      if (!currentInvoiceId) return null;
-      const { data, error } = await supabase
-        .from('Attachment_Info')
-        .select('Sub_Total, GST_Total')
-        .eq('id', currentInvoiceId)
-        .single();
-      
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!currentInvoiceId,
-  });
+  // Use currentInvoice prop for GST comparison instead of separate query
+  const invoiceGstTotal = currentInvoice?.GST_Total || null;
+  const invoiceSubtotal = currentInvoice?.Sub_Total || null;
 
   const { data: codingTotal = 0 } = useQuery({
     queryKey: ['invoice-coding-total', currentInvoiceId],
@@ -99,14 +89,14 @@ export const LineItemsPanel = ({
 
   // Use subtotal comparison hook - MUST be called before any early returns
   const subtotalComparison = useSubtotalComparison({
-    invoiceSubtotal: invoiceData?.Sub_Total || null,
+    invoiceSubtotal: invoiceSubtotal,
     codingTotal,
     lineItemsTotal: totalSum
   });
 
   // Use GST comparison hook
   const gstComparison = useGstComparison({
-    invoiceGstTotal: invoiceData?.GST_Total || null,
+    invoiceGstTotal: invoiceGstTotal,
     lineItemsGstSum: gstSum
   });
   
@@ -518,9 +508,9 @@ type QuantityRow = {
                 Subtotal:
               </TableCell>
               <TableCell className="text-center text-slate-800 dark:text-slate-200">
-                <span className={subtotalComparison.highlightClass}>
-                  {formatCurrency(totalSum)}
-                </span>
+              <span className={`px-2 py-1 rounded inline-block ${subtotalComparison.highlightClass}`}>
+                {formatCurrency(totalSum)}
+              </span>
               </TableCell>
               <TableCell colSpan={2}></TableCell>
             </TableRow>
@@ -530,7 +520,7 @@ type QuantityRow = {
                 G.S.T:
               </TableCell>
               <TableCell className="text-center text-slate-800 dark:text-slate-200">
-                <span className={gstComparison.highlightClass}>
+                <span className={`px-2 py-1 rounded inline-block ${gstComparison.highlightClass}`}>
                   {formatCurrency(gstSum)}
                 </span>
               </TableCell>

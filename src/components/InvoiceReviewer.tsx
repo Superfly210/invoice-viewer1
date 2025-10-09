@@ -142,7 +142,7 @@ export const InvoiceReviewer = () => {
           </div>
         </ResizableHandle>
         <ResizablePanel defaultSize={30} minSize={15}>
-          <LineItemsPanel currentInvoiceId={currentInvoiceId} />
+          <LineItemsPanel currentInvoiceId={currentInvoiceId} currentInvoice={currentInvoice} />
         </ResizablePanel>
       </ResizablePanelGroup>
     </>
