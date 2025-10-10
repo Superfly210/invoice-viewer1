@@ -367,7 +367,7 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
           
           <TableRow>
             <TableCell colSpan={2} className="p-0">
-              <InvoiceCodingTable invoiceId={currentInvoice.id} />
+              <InvoiceCodingTable invoiceId={currentInvoice.id} currentInvoice={currentInvoice} lineItemsTotal={lineItemsTotal} />
             </TableCell>
           </TableRow>
         </TableBody>

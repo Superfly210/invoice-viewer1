@@ -11,9 +11,12 @@ import { useAuth } from "@/components/AuthProvider";
 import { useSubtotalComparison } from "@/hooks/useSubtotalComparison";
 import { useAfeValidation } from "@/hooks/useAfeValidation";
 import { logAuditChange } from "@/utils/auditLogger";
+import { AttachmentInfo } from "@/hooks/useInvoiceDataFetching";
 
 interface InvoiceCodingTableProps {
   invoiceId: number;
+  currentInvoice?: AttachmentInfo | null;
+  lineItemsTotal?: number;
 }
 
 type InvoiceCoding = {
@@ -23,40 +26,16 @@ type InvoiceCoding = {
   total: number | null;
 };
 
-export const InvoiceCodingTable = ({ invoiceId }: InvoiceCodingTableProps) => {
+export const InvoiceCodingTable = ({ invoiceId, currentInvoice, lineItemsTotal }: InvoiceCodingTableProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isAddingRow, setIsAddingRow] = useState(false);
   const { user } = useAuth();
   const { getAfeCostCenterValidationClass } = useAfeValidation();
 
-  // Get invoice subtotal and line items total for comparison
-  const { data: invoiceData } = useQuery({
-    queryKey: ['attachment-info-single', invoiceId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('Attachment_Info')
-        .select('Sub_Total')
-        .eq('id', invoiceId)
-        .single();
-      
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  const { data: lineItemsTotal = 0 } = useQuery({
-    queryKey: ['line-items-total', invoiceId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('Line_Items')
-        .select('Total')
-        .eq('invoice_id', invoiceId);
-      
-      if (error) throw error;
-      return data.reduce((acc, item) => acc + (item.Total || 0), 0);
-    },
-  });
+  // Use props for subtotal comparison instead of separate queries
+  const invoiceSubtotal = currentInvoice?.Sub_Total || null;
+  const lineItemsTotalValue = lineItemsTotal || 0;
 
   const { data: costCodes = [], isLoading: isCostCodesLoading } = useQuery<string[]>({
     queryKey: ['cost-codes'],
@@ -110,9 +89,9 @@ export const InvoiceCodingTable = ({ invoiceId }: InvoiceCodingTableProps) => {
 
   // Use subtotal comparison hook
   const subtotalComparison = useSubtotalComparison({
-    invoiceSubtotal: invoiceData?.Sub_Total || null,
+    invoiceSubtotal: invoiceSubtotal,
     codingTotal: totalAmount,
-    lineItemsTotal
+    lineItemsTotal: lineItemsTotalValue
   });
 
   const handleFieldUpdate = async (codingId: number, field: string, newValue: string) => {
@@ -254,7 +233,7 @@ export const InvoiceCodingTable = ({ invoiceId }: InvoiceCodingTableProps) => {
           <TableHeader>
             <TableRow>
               <TableHead className="text-xs w-8"></TableHead>
-              <TableHead className="text-xs">AFE/Cost Center</TableHead>
+              <TableHead className="text-xs">AFE/CC</TableHead>
               <TableHead className="text-xs">Cost Code</TableHead>
               <TableHead className="text-xs text-left">Subtotal</TableHead>
             </TableRow>
