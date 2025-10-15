@@ -19,4 +19,19 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    // Generate sourcemaps for production debugging (set to true if needed)
+    sourcemap: false,
+    // Ensure content-based hashing for cache busting
+    rollupOptions: {
+      output: {
+        // Add hash to all asset filenames
+        assetFileNames: 'assets/[name]-[hash][extname]',
+        chunkFileNames: 'assets/[name]-[hash].js',
+        entryFileNames: 'assets/[name]-[hash].js',
+      },
+    },
+    // Customize chunk size warning limit
+    chunkSizeWarningLimit: 1000,
+  },
 }));
