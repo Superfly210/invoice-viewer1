@@ -3,6 +3,7 @@ import { useState } from "react";
 import axios from 'axios';
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { mergePDFs } from "@/lib/pdfMerger";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -51,6 +52,7 @@ export default function SubmissionPortal() {
   // Final submission
   const [confirmationChecked, setConfirmationChecked] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [mergingPDFs, setMergingPDFs] = useState(false);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -157,25 +159,37 @@ export default function SubmissionPortal() {
 
       const userId = user.id;
       
-      // Upload invoice file
-      const invoiceFileName = `${userId}/${Date.now()}-${invoiceFile!.name}`;
-      const { error: invoiceUploadError } = await supabase.storage
-        .from('submission-files')
-        .upload(invoiceFileName, invoiceFile!);
+      // IMPORTANT: PDFs are merged with invoice FIRST, followed by supporting documents in the order they were uploaded
+      // This maintains a consistent document structure for processing
+      setMergingPDFs(true);
+      toast({
+        title: "Merging PDFs",
+        description: "Combining invoice and supporting documents...",
+      });
 
-      if (invoiceUploadError) throw invoiceUploadError;
-
-      // Upload supporting documents
-      const supportingDocPaths: string[] = [];
-      for (const doc of supportingDocs) {
-        const docFileName = `${userId}/${Date.now()}-${doc.name}`;
-        const { error: docUploadError } = await supabase.storage
-          .from('submission-files')
-          .upload(docFileName, doc);
-        
-        if (docUploadError) throw docUploadError;
-        supportingDocPaths.push(docFileName);
+      let mergedPdfBlob: Blob;
+      try {
+        mergedPdfBlob = await mergePDFs(invoiceFile!, supportingDocs);
+      } catch (mergeError) {
+        setMergingPDFs(false);
+        throw new Error(`PDF merge failed: ${mergeError instanceof Error ? mergeError.message : 'Unknown error'}`);
       }
+      setMergingPDFs(false);
+
+      // Convert Blob to File for upload
+      const mergedPdfFile = new File(
+        [mergedPdfBlob], 
+        `merged-invoice-${Date.now()}.pdf`,
+        { type: 'application/pdf' }
+      );
+
+      // Upload merged PDF (contains invoice first, then supporting docs)
+      const mergedFileName = `${userId}/${Date.now()}-merged-invoice.pdf`;
+      const { error: uploadError } = await supabase.storage
+        .from('submission-files')
+        .upload(mergedFileName, mergedPdfFile);
+
+      if (uploadError) throw uploadError;
 
       // Save submission data to database
       const { error: insertError } = await supabase
@@ -186,53 +200,20 @@ export default function SubmissionPortal() {
           sub_total: parseCurrencyValue(subTotal),
           gst_total: parseCurrencyValue(gstTotal),
           invoice_total: parseCurrencyValue(invoiceTotal),
-          invoice_file_path: invoiceFileName,
-          supporting_docs_paths: supportingDocPaths,
+          invoice_file_path: mergedFileName,
+          supporting_docs_paths: supportingDocs.map(doc => doc.name),
           coding_details: JSON.parse(JSON.stringify(codingRows)),
           contact_emails: emailFields.filter(email => email.trim()),
           additional_comments: additionalComments.trim() || null,
-          submitted_by: userId
+          submitted_by: userId,
+          status: 'pending'
         });
 
       if (insertError) throw insertError;
 
-      // Send data to n8n webhook
-      const formData = new FormData();
-      formData.append("File", invoiceFile as Blob);
-      supportingDocs.forEach((doc, index) => {
-        formData.append(`supportingDoc_${index}`, doc);
-      });
-      formData.append("invoicingCompany", invoicingCompany);
-      formData.append("invoiceDate", invoiceDate!.toISOString().split('T')[0]);
-      formData.append("subTotal", parseCurrencyValue(subTotal)!.toString());
-      formData.append("gstTotal", parseCurrencyValue(gstTotal)!.toString());
-      formData.append("invoiceTotal", parseCurrencyValue(invoiceTotal)!.toString());
-      formData.append("codingRows", JSON.stringify(codingRows));
-      formData.append("emailFields", JSON.stringify(emailFields.filter(email => email.trim())));
-      formData.append("additionalComments", additionalComments.trim());
-
-      try {
-        await axios.post("http://localhost:5678/webhook-test/2fd42c79-e79a-4475-8057-2bd5be4c77c1", formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
-        });
-        toast({
-          title: "Data sent to n8n webhook successfully",
-          description: "The invoice data has been sent to your n8n workflow.",
-        });
-      } catch (webhookError) {
-        console.error("n8n webhook error:", webhookError);
-        toast({
-          variant: "destructive",
-          title: "Webhook Error",
-          description: "Failed to send data to n8n webhook. Please check your n8n setup.",
-        });
-      }
-      
       toast({
         title: "Invoice submitted successfully",
-        description: "Your invoice has been received and will be processed.",
+        description: "Your invoice is queued for processing. You'll be notified once complete.",
       });
       
       // Clear all fields
@@ -556,11 +537,11 @@ export default function SubmissionPortal() {
               
               <Button
                 onClick={handleSubmit}
-                disabled={submitting}
+                disabled={submitting || mergingPDFs}
                 className="w-full"
                 size="lg"
               >
-                {submitting ? "Submitting..." : "Submit Invoice"}
+                {mergingPDFs ? "Merging PDFs..." : submitting ? "Submitting..." : "Submit Invoice"}
               </Button>
             </div>
           </CardContent>
