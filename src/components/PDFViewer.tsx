@@ -1,13 +1,18 @@
 import { useState, useEffect } from "react";
-import { Viewer, Worker, SpecialZoomLevel } from "@react-pdf-viewer/core";
+import { Viewer, Worker, SpecialZoomLevel, ScrollMode } from "@react-pdf-viewer/core";
 import { zoomPlugin } from "@react-pdf-viewer/zoom";
+import { pageNavigationPlugin } from "@react-pdf-viewer/page-navigation";
+import { rotatePlugin } from "@react-pdf-viewer/rotate";
+import { scrollModePlugin } from "@react-pdf-viewer/scroll-mode";
 import { Minus, Plus, Maximize, ChevronUp, ChevronDown, RotateCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 
 // Import styles
 import "@react-pdf-viewer/core/lib/styles/index.css";
 import "@react-pdf-viewer/zoom/lib/styles/index.css";
+import "@react-pdf-viewer/page-navigation/lib/styles/index.css";
 
 type PDFViewerProps = {
   pdfUrl?: string | null;
@@ -67,14 +72,19 @@ const getProxiedPdfUrl = async (url: string): Promise<string> => {
 export const PDFViewer = ({ pdfUrl, onPageChange }: PDFViewerProps) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
-  const [rotation, setRotation] = useState(0);
   const [processedPdfUrl, setProcessedPdfUrl] = useState<string | null>(null);
   const [isLoadingProxy, setIsLoadingProxy] = useState(false);
   const [proxyError, setProxyError] = useState<string | null>(null);
+  const [pageInput, setPageInput] = useState("");
 
   // Create plugin instances
   const zoomPluginInstance = zoomPlugin();
   const { ZoomIn, ZoomOut, Zoom } = zoomPluginInstance;
+  const pageNavigationPluginInstance = pageNavigationPlugin();
+  const { jumpToPage: jumpToPageInternal, GoToNextPage, GoToPreviousPage } = pageNavigationPluginInstance as any;
+  const rotatePluginInstance = rotatePlugin();
+  const { RotateForwardButton } = rotatePluginInstance as any;
+  const scrollModePluginInstance = scrollModePlugin();
 
   // Process PDF URL (use proxy for Google Drive URLs)
   useEffect(() => {
@@ -87,7 +97,6 @@ export const PDFViewer = ({ pdfUrl, onPageChange }: PDFViewerProps) => {
       // Reset state
       setCurrentPage(1);
       setTotalPages(0);
-      setRotation(0);
       setProxyError(null);
 
       // If it's a Google Drive URL, use the proxy
@@ -128,22 +137,49 @@ export const PDFViewer = ({ pdfUrl, onPageChange }: PDFViewerProps) => {
   const handleDocumentLoad = (e: any) => {
     setTotalPages(e.doc.numPages);
     setCurrentPage(1);
+    // Ensure vertical scroll for natural mouse wheel behavior, then re-fit width
+    // Use rAF to ensure layout is ready before switching and zooming
+    requestAnimationFrame(() => {
+      scrollModePluginInstance.switchScrollMode(ScrollMode.Vertical);
+      requestAnimationFrame(() => {
+        zoomPluginInstance.zoomTo(SpecialZoomLevel.PageWidth);
+      });
+    });
   };
 
   const handlePageChange = (e: any) => {
     setCurrentPage(e.currentPage + 1); // react-pdf-viewer uses 0-based index
   };
 
-  const rotateView = () => {
-    setRotation((prev) => (prev + 90) % 360);
-  };
+  // Rotation handled via RotateForwardButton; we wrap to re-fit width after rotation
 
   const previousPage = () => {
-    setCurrentPage(prev => Math.max(prev - 1, 1));
+    const newPage = Math.max(currentPage - 1, 1);
+    setCurrentPage(newPage);
+    setTimeout(() => jumpToPageInternal(newPage - 1), 0);
   };
 
   const nextPage = () => {
-    setCurrentPage(prev => Math.min(prev + 1, totalPages));
+    const newPage = Math.min(currentPage + 1, totalPages);
+    setCurrentPage(newPage);
+    setTimeout(() => jumpToPageInternal(newPage - 1), 0);
+  };
+
+  // Use jumpToPageInternal from pageNavigationPlugin for direct page jumps
+
+  const handlePageInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPageInput(e.target.value);
+  };
+
+  const handlePageInputSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      const page = parseInt(pageInput);
+      if (!isNaN(page)) {
+        setTimeout(() => jumpToPageInternal(page - 1), 0);
+        setCurrentPage(Math.max(1, Math.min(page, totalPages)));
+        setPageInput("");
+      }
+    }
   };
 
   return (
@@ -193,44 +229,67 @@ export const PDFViewer = ({ pdfUrl, onPageChange }: PDFViewerProps) => {
             <Maximize className="h-3 w-3 mr-1" /> Fit Width
           </Button>
           
-          <Button 
-            onClick={rotateView} 
-            variant="outline" 
-            className="text-xs h-8"
-            title="Rotate Page"
-          >
-            <RotateCw className="h-3 w-3 mr-1" /> Rotate
-          </Button>
+          <RotateForwardButton>
+            {(props: { onClick: () => void }) => (
+              <Button 
+                onClick={() => { props.onClick(); zoomPluginInstance.zoomTo(SpecialZoomLevel.PageWidth); }} 
+                variant="outline" 
+                className="text-xs h-8"
+                title="Rotate Page"
+              >
+                <RotateCw className="h-3 w-3 mr-1" /> Rotate
+              </Button>
+            )}
+          </RotateForwardButton>
         </div>
         
         <div className="flex items-center space-x-2">
-          <Button 
-            onClick={previousPage} 
-            variant="outline" 
-            size="icon" 
-            disabled={currentPage === 1}
-            className="h-8 w-8"
-            title="Previous Page"
-          >
-            <ChevronUp className="h-4 w-4" />
-          </Button>
-          <span className="text-sm">
-            Page {currentPage} / {totalPages || 1}
-          </span>
-          <Button 
-            onClick={nextPage} 
-            variant="outline" 
-            size="icon" 
-            disabled={currentPage >= totalPages}
-            className="h-8 w-8"
-            title="Next Page"
-          >
-            <ChevronDown className="h-4 w-4" />
-          </Button>
+          <GoToPreviousPage>
+            {(props: { onClick: () => void, isDisabled?: boolean }) => (
+              <Button 
+                onClick={() => { props.onClick(); }} 
+                variant="outline" 
+                size="icon" 
+                disabled={props.isDisabled}
+                className="h-8 w-8"
+                title="Previous Page"
+              >
+                <ChevronUp className="h-4 w-4" />
+              </Button>
+            )}
+          </GoToPreviousPage>
+          <div className="flex items-center space-x-1">
+            <Input
+              type="number"
+              min={1}
+              max={totalPages}
+              value={pageInput}
+              onChange={handlePageInputChange}
+              onKeyDown={handlePageInputSubmit}
+              placeholder={String(currentPage)}
+              className="h-8 w-12 text-center text-sm p-1"
+              title="Enter page number and press Enter"
+            />
+            <span className="text-sm">/ {totalPages || 1}</span>
+          </div>
+          <GoToNextPage>
+            {(props: { onClick: () => void, isDisabled?: boolean }) => (
+              <Button 
+                onClick={() => { props.onClick(); }} 
+                variant="outline" 
+                size="icon" 
+                disabled={props.isDisabled}
+                className="h-8 w-8"
+                title="Next Page"
+              >
+                <ChevronDown className="h-4 w-4" />
+              </Button>
+            )}
+          </GoToNextPage>
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto bg-muted/30">
+      <div className="flex-1 overflow-hidden bg-muted/30 h-full">
         {isLoadingProxy ? (
           <div className="flex items-center justify-center h-full">
             <p className="text-muted-foreground">Loading PDF...</p>
@@ -245,14 +304,13 @@ export const PDFViewer = ({ pdfUrl, onPageChange }: PDFViewerProps) => {
           </div>
         ) : (
           <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js">
-            <div style={{ transform: `rotate(${rotation}deg)`, transformOrigin: 'center' }}>
+            <div style={{ height: '100%' }}>
               <Viewer
                 fileUrl={processedPdfUrl}
-                plugins={[zoomPluginInstance]}
+                plugins={[zoomPluginInstance, pageNavigationPluginInstance, rotatePluginInstance, scrollModePluginInstance]}
                 defaultScale={SpecialZoomLevel.PageWidth}
                 onDocumentLoad={handleDocumentLoad}
                 onPageChange={handlePageChange}
-                initialPage={currentPage - 1}
               />
             </div>
           </Worker>

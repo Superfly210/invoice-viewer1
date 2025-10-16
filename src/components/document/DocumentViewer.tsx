@@ -48,7 +48,7 @@ export const DocumentViewer = ({
             Email Message
           </TabsTrigger>
         </TabsList>
-        <TabsContent value="pdf" className="mt-0 h-[calc(100%-60px)]">
+        <TabsContent value="pdf" className="mt-0 h-full">
           <PDFViewer 
             pdfUrl={currentPdfUrl} 
             onPageChange={onPdfPageChange}

@@ -124,7 +124,7 @@ export const InvoiceReviewer = () => {
               </ResizablePanel>
               <ResizableHandle withHandle />
               <ResizablePanel defaultSize={50} minSize={30}>
-                <div className="flex-1 overflow-auto">
+                <div className="flex-1 overflow-hidden h-full">
                   <DocumentViewer
                     currentPdfUrl={currentPdfUrl}
                     currentInvoiceId={currentInvoiceId}
