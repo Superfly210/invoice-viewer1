@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef } from "react";
 import { TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 
@@ -55,6 +55,7 @@ export const InvoiceSummaryTableHeader = React.memo(
     return (
       <TableHeader className="sticky top-0 z-10 bg-background">
         <TableRow>
+          <TableHead>Invoice ID</TableHead>
           <TableHead>
             Invoice Number
             <Input
@@ -94,6 +95,8 @@ export const InvoiceSummaryTableHeader = React.memo(
               autoComplete="off"
             />
           </TableHead>
+          <TableHead>Responsible User</TableHead>
+          <TableHead>Status</TableHead>
           <TableHead className="text-right">Subtotal</TableHead>
           <TableHead className="text-right">GST Total</TableHead>
           <TableHead className="text-right">Total</TableHead>

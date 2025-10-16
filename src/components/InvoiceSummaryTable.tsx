@@ -19,6 +19,8 @@ type AttachmentInfo = {
   Invoice_Number: string | null;
   Invoice_Date: string | null;
   Invoicing_Comp_Name: string | null;
+  "Responsible User": string | null;
+  Status: string | null;
   Sub_Total: number | null;
   GST_Total: number | null;
   Total: number | null;
@@ -42,7 +44,7 @@ export const InvoiceSummaryTable = React.memo(() => {
     queryFn: async () => {
       let query = supabase
         .from('Attachment_Info')
-        .select('id, Invoice_Number, Invoice_Date, Invoicing_Comp_Name, Sub_Total, GST_Total, Total, created_at');
+        .select('id, Invoice_Number, Invoice_Date, Invoicing_Comp_Name, "Responsible User", Status, Sub_Total, GST_Total, Total, created_at');
 
       if (debouncedInvoiceNumberFilter) {
         query = query.ilike('Invoice_Number', `%${debouncedInvoiceNumberFilter}%`);
@@ -112,9 +114,12 @@ export const InvoiceSummaryTable = React.memo(() => {
           {invoices && invoices.length > 0 ? (
             invoices.map((invoice) => (
               <TableRow key={invoice.id}>
+                <TableCell>{invoice.id}</TableCell>
                 <TableCell>{invoice.Invoice_Number || 'N/A'}</TableCell>
                 <TableCell>{invoice.Invoice_Date || 'N/A'}</TableCell>
                 <TableCell>{invoice.Invoicing_Comp_Name || 'N/A'}</TableCell>
+                <TableCell>{invoice["Responsible User"] || 'N/A'}</TableCell>
+                <TableCell>{invoice.Status || 'N/A'}</TableCell>
                 <TableCell className="text-right">
                   {invoice.Sub_Total ? formatCurrency(invoice.Sub_Total) : 'N/A'}
                 </TableCell>
@@ -129,7 +134,7 @@ export const InvoiceSummaryTable = React.memo(() => {
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={7} className="text-center text-gray-500">
+              <TableCell colSpan={10} className="text-center text-gray-500">
                 No invoice data found
               </TableCell>
             </TableRow>

@@ -24,19 +24,27 @@ const getProxiedPdfUrl = async (url: string): Promise<string> => {
   try {
     // Trim any whitespace/newlines from the URL
     const cleanUrl = url.trim();
-    
+
     // Get the session token for authentication
     const { data: { session } } = await supabase.auth.getSession();
-    
+
+    // Get Supabase URL and API key from environment variables
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error('Missing required Supabase environment variables');
+    }
+
     // Make a direct fetch call to get binary response
     const response = await fetch(
-      'https://bumyvuiywdnffhmayxcz.supabase.co/functions/v1/pdf-proxy',
+      `${supabaseUrl}/functions/v1/pdf-proxy`,
       {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session?.access_token || ''}`,
-          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ1bXl2dWl5d2RuZmZobWF5eGN6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE5Njc3MDgsImV4cCI6MjA1NzU0MzcwOH0.20yKpjbuWYIPNwc4SwqMoZNXZv4wUksa1xuGdXaGe78',
+          'apikey': supabaseKey,
         },
         body: JSON.stringify({ url: cleanUrl }),
       }
@@ -48,7 +56,7 @@ const getProxiedPdfUrl = async (url: string): Promise<string> => {
 
     // Get the response as a blob
     const blob = await response.blob();
-    
+
     return URL.createObjectURL(blob);
   } catch (error) {
     console.error('Error proxying PDF:', error);
