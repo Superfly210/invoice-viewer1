@@ -323,7 +323,7 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
                   onClick={handleAddToVendorTable}
                   className="ml-2 bg-orange-100 text-orange-800 border-orange-300 hover:bg-orange-200 rounded-full text-xs px-3 py-1"
                 >
-                  Add to Vendor Table
+                  Add Vendor
                 </Button>
               )}
             </TableCell>
