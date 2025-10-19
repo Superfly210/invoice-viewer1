@@ -8,6 +8,7 @@ import { Minus, Plus, Maximize, ChevronUp, ChevronDown, RotateCw } from "lucide-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
+import { pdfCache } from "@/utils/pdfCache";
 
 // Import styles
 import "@react-pdf-viewer/core/lib/styles/index.css";
@@ -29,6 +30,15 @@ const getProxiedPdfUrl = async (url: string): Promise<string> => {
   try {
     // Trim any whitespace/newlines from the URL
     const cleanUrl = url.trim();
+
+    // ✅ Check IndexedDB cache FIRST
+    const cachedBlob = await pdfCache.get(cleanUrl);
+    if (cachedBlob) {
+      console.log('📦 Loading from cache (instant!)');
+      return URL.createObjectURL(cachedBlob);
+    }
+    
+    console.log('🌐 Cache miss - fetching from server...');
 
     // Get the session token for authentication
     const { data: { session } } = await supabase.auth.getSession();
@@ -61,6 +71,10 @@ const getProxiedPdfUrl = async (url: string): Promise<string> => {
 
     // Get the response as a blob
     const blob = await response.blob();
+
+    // Cache for next time
+    await pdfCache.set(cleanUrl, blob);
+    console.log('💾 PDF cached for future use');
 
     return URL.createObjectURL(blob);
   } catch (error) {

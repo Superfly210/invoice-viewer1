@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { ActionBarWithThemeToggle } from "@/components/ActionBarWithThemeToggle";
 import { LineItemsPanel } from "@/components/LineItemsPanel";
 import { 
@@ -13,6 +13,7 @@ import { DocumentViewer } from "@/components/document/DocumentViewer";
 import { useToastNotifications } from "@/hooks/useToastNotifications";
 import { useInvoiceFiltering } from "@/hooks/useInvoiceFiltering";
 import { useToast } from "@/hooks/use-toast";
+import { usePdfPreloader } from "@/hooks/usePdfPreloader";
 
 export const InvoiceReviewer = () => {
   const [currentFilteredIndex, setCurrentFilteredIndex] = useState(0);
@@ -37,6 +38,19 @@ export const InvoiceReviewer = () => {
   const currentInvoiceId = currentInvoice?.id || null;
   const currentEmailInfoId = currentInvoice?.Email_Info_ID || null;
   const currentPdfUrl = currentInvoice?.Google_Drive_URL || null;
+  
+  // 🎯 Extract PDF URLs from filtered invoices for preloading
+  const filteredPdfUrls = useMemo(() => {
+    return filteredInvoices.map(inv => inv.Google_Drive_URL);
+  }, [filteredInvoices]);
+
+  // 🎯 Preload adjacent PDFs based on current filter
+  usePdfPreloader({
+    currentIndex: currentFilteredIndex,
+    pdfUrls: filteredPdfUrls,
+    preloadCount: 2, // Preload 2 ahead and 2 behind
+    enabled: filteredInvoices.length > 0,
+  });
   
   const {
     handleApprove,
