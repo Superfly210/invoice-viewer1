@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Loader2, AlertCircle, Plus, X } from "lucide-react";
 // import { EditableLineItemCell } from "./invoice/EditableLineItemCell";
@@ -428,30 +427,24 @@ type QuantityRow = {
   }
    
     return (
-    <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-4 h-full overflow-auto">
-      <div className="mb-4">
-        <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-200">
-          Line Items for Invoice #{currentInvoiceId} ({flatLineItems.length} items)
-        </h2>
-      </div>
-      
-      <div className="overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-8"></TableHead>
-              <TableHead className="font-bold">Description</TableHead>
-              <TableHead className="font-bold">Work Date</TableHead>
-              <TableHead className="font-bold">Ticket/Order</TableHead>
-              <TableHead className="font-bold">Unit</TableHead>
-              <TableHead className="text-center font-bold">Quantity</TableHead>
-              <TableHead className="text-center font-bold">Rate</TableHead>
-              <TableHead className="text-center font-bold">Total</TableHead>
-              <TableHead className="text-center font-bold">GST Exempt</TableHead>
-              <TableHead className="text-center font-bold">GST Included</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
+    <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-4 h-full flex flex-col">
+      <div className="flex-1 overflow-auto relative">
+        <table className="w-full caption-bottom text-sm">
+          <thead className="sticky top-0 bg-white dark:bg-slate-800 z-10 shadow-sm [&_tr]:border-b">
+            <tr className="border-b transition-colors hover:bg-muted/50">
+              <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground w-8"></th>
+              <th className="h-12 px-4 text-left align-middle font-bold text-muted-foreground">Description</th>
+              <th className="h-12 px-4 text-left align-middle font-bold text-muted-foreground">Work Date</th>
+              <th className="h-12 px-4 text-left align-middle font-bold text-muted-foreground">Ticket/Order</th>
+              <th className="h-12 px-4 text-left align-middle font-bold text-muted-foreground">Unit</th>
+              <th className="h-12 px-4 text-center align-middle font-bold text-muted-foreground">Quantity</th>
+              <th className="h-12 px-4 text-center align-middle font-bold text-muted-foreground">Rate</th>
+              <th className="h-12 px-4 text-center align-middle font-bold text-muted-foreground">Total</th>
+              <th className="h-12 px-4 text-center align-middle font-bold text-muted-foreground">GST Exempt</th>
+              <th className="h-12 px-4 text-center align-middle font-bold text-muted-foreground">GST Included</th>
+            </tr>
+          </thead>
+          <tbody className="[&_tr:last-child]:border-0">
             {(() => {
               const rowSpans: Record<number, number> = flatLineItems.reduce((acc, item) => {
                 acc[item.lineItemId] = (acc[item.lineItemId] || 0) + 1;
@@ -467,67 +460,67 @@ type QuantityRow = {
                 }
 
                 return (
-                  <TableRow key={`${item.lineItemId}-${item.quantityId || index}`}>
+                  <tr key={`${item.lineItemId}-${item.quantityId || index}`} className="border-b transition-colors hover:bg-muted/50">
                     {isFirst && (
                       <>
-                        <TableCell rowSpan={rowSpans[item.lineItemId]}>
+                        <td className="p-4 align-middle" rowSpan={rowSpans[item.lineItemId]}>
                           {/* Delete button disabled for now */}
-                        </TableCell>
-                        <TableCell rowSpan={rowSpans[item.lineItemId]}>{item.Description}</TableCell>
-                        <TableCell rowSpan={rowSpans[item.lineItemId]} className="whitespace-nowrap">{item.Date_of_Work}</TableCell>
-                        <TableCell rowSpan={rowSpans[item.lineItemId]}>{item.Ticket_Work_Order}</TableCell>
+                        </td>
+                        <td className="p-4 align-middle" rowSpan={rowSpans[item.lineItemId]}>{item.Description}</td>
+                        <td className="p-4 align-middle whitespace-nowrap" rowSpan={rowSpans[item.lineItemId]}>{item.Date_of_Work}</td>
+                        <td className="p-4 align-middle" rowSpan={rowSpans[item.lineItemId]}>{item.Ticket_Work_Order}</td>
                       </>
                     )}
-                    <TableCell>{item.Unit_of_Measure}</TableCell>
-                    <TableCell className="text-center">{item.Quantity}</TableCell>
-                    <TableCell className="text-center">{item.Rate ? formatCurrency(item.Rate) : null}</TableCell>
-                    <TableCell className="text-center">{item.Total ? formatCurrency(item.Total) : null}</TableCell>
-                    <TableCell className="text-center">
+                    <td className="p-4 align-middle">{item.Unit_of_Measure}</td>
+                    <td className="p-4 align-middle text-center">{item.Quantity}</td>
+                    <td className="p-4 align-middle text-center">{item.Rate ? formatCurrency(item.Rate) : null}</td>
+                    <td className="p-4 align-middle text-center">{item.Total ? formatCurrency(item.Total) : null}</td>
+                    <td className="p-4 align-middle text-center">
                       <input
                         type="checkbox"
                         checked={item.gst_exempt || false}
                         onChange={(e) => handleFieldUpdate(item.quantityId, 'gst_exempt', String(e.target.checked))}
                         className="form-checkbox h-5 w-5 text-blue-600"
                       />
-                    </TableCell>
-                    <TableCell className="text-center">
+                    </td>
+                    <td className="p-4 align-middle text-center">
                       <input
                         type="checkbox"
                         checked={item.gst_included || false}
                         onChange={(e) => handleFieldUpdate(item.quantityId, 'gst_included', String(e.target.checked))}
                         className="form-checkbox h-5 w-5 text-blue-600"
                       />
-                    </TableCell>
-                  </TableRow>
+                    </td>
+                  </tr>
                 );
               });
             })()}
             {/* Subtotal row */}
-            <TableRow className="border-t-2 border-slate-300 dark:border-slate-600 font-semibold">
-              <TableCell colSpan={7} className="text-right text-slate-800 dark:text-slate-200">
+            <tr className="border-b border-t-2 border-slate-300 dark:border-slate-600 font-semibold transition-colors hover:bg-muted/50">
+              <td colSpan={7} className="p-4 align-middle text-right text-slate-800 dark:text-slate-200">
                 Subtotal:
-              </TableCell>
-              <TableCell className="text-center text-slate-800 dark:text-slate-200">
+              </td>
+              <td className="p-4 align-middle text-center text-slate-800 dark:text-slate-200">
               <span className={`px-2 py-1 rounded inline-block ${subtotalComparison.highlightClass}`}>
                 {formatCurrency(totalSum)}
               </span>
-              </TableCell>
-              <TableCell colSpan={2}></TableCell>
-            </TableRow>
+              </td>
+              <td colSpan={2}></td>
+            </tr>
             {/* GST row */}
-            <TableRow className="font-semibold">
-              <TableCell colSpan={7} className="text-right text-slate-800 dark:text-slate-200">
+            <tr className="border-b font-semibold transition-colors hover:bg-muted/50">
+              <td colSpan={7} className="p-4 align-middle text-right text-slate-800 dark:text-slate-200">
                 G.S.T:
-              </TableCell>
-              <TableCell className="text-center text-slate-800 dark:text-slate-200">
+              </td>
+              <td className="p-4 align-middle text-center text-slate-800 dark:text-slate-200">
                 <span className={`px-2 py-1 rounded inline-block ${gstComparison.highlightClass}`}>
                   {formatCurrency(gstSum)}
                 </span>
-              </TableCell>
-              <TableCell colSpan={2}></TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
+              </td>
+              <td colSpan={2}></td>
+            </tr>
+          </tbody>
+        </table>
       </div>
       
       {/* Add button disabled for now */}
