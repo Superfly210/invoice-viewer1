@@ -1,5 +1,5 @@
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { ActionBarWithThemeToggle } from "@/components/ActionBarWithThemeToggle";
 import { LineItemsPanel } from "@/components/LineItemsPanel";
 import { 
@@ -15,7 +15,11 @@ import { useInvoiceFiltering } from "@/hooks/useInvoiceFiltering";
 import { useToast } from "@/hooks/use-toast";
 import { usePdfPreloader } from "@/hooks/usePdfPreloader";
 
-export const InvoiceReviewer = () => {
+export const InvoiceReviewer = ({ 
+  initialInvoiceId 
+}: { 
+  initialInvoiceId?: number 
+} = {}) => {
   const [currentFilteredIndex, setCurrentFilteredIndex] = useState(0);
   const [pdfCurrentPage, setPdfCurrentPage] = useState(1);
   const [pdfTotalPages, setPdfTotalPages] = useState(3);
@@ -51,6 +55,17 @@ export const InvoiceReviewer = () => {
     preloadCount: 2, // Preload 2 ahead and 2 behind
     enabled: filteredInvoices.length > 0,
   });
+
+  // Set initial invoice index when initialInvoiceId is provided
+  useEffect(() => {
+    if (initialInvoiceId && filteredInvoices.length > 0) {
+      const index = filteredInvoices.findIndex(inv => inv.id === initialInvoiceId);
+      if (index !== -1) {
+        setCurrentFilteredIndex(index);
+        setPdfCurrentPage(1);
+      }
+    }
+  }, [initialInvoiceId, filteredInvoices]);
   
   const {
     handleApprove,

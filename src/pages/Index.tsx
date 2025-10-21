@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { InvoiceReviewer } from "@/components/InvoiceReviewer";
@@ -13,9 +12,19 @@ import Vendor from "@/pages/Vendor";
 const Index = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [activeSection, setActiveSection] = useState("reviewer");
+  const [selectedInvoiceId, setSelectedInvoiceId] = useState<number | undefined>(undefined);
 
   const handleSectionChange = (section: string) => {
     setActiveSection(section);
+    // Clear selected invoice when changing sections
+    if (section !== "reviewer") {
+      setSelectedInvoiceId(undefined);
+    }
+  };
+
+  const handleNavigateToReviewer = (invoiceId: number) => {
+    setSelectedInvoiceId(invoiceId);
+    setActiveSection("reviewer");
   };
 
   const renderPlaceholder = (title: string) => (
@@ -40,9 +49,9 @@ const Index = () => {
         activeSection={activeSection}
       />
       <main className="flex flex-col flex-1 overflow-hidden">
-        {activeSection === "reviewer" && <InvoiceReviewer />}
+        {activeSection === "reviewer" && <InvoiceReviewer initialInvoiceId={selectedInvoiceId} />}
         {activeSection === "signer" && <InvoiceSigner />}
-        {activeSection === "summary" && <SummarySection />}
+        {activeSection === "summary" && <SummarySection onNavigateToReviewer={handleNavigateToReviewer} />}
         {activeSection === "afe" && <AFE />}
         {activeSection === "cost-centers" && <CostCenters />}
         {activeSection === "cost-codes" && <CostCodes />}
