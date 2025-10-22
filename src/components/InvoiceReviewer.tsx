@@ -57,15 +57,32 @@ export const InvoiceReviewer = ({
   });
 
   // Set initial invoice index when initialInvoiceId is provided
+  // Clear filters first to ensure the invoice is visible
+  useEffect(() => {
+    if (initialInvoiceId) {
+      // Clear filters to show all invoices
+      setUserFilter("all");
+      setStatusFilter("all");
+    }
+  }, [initialInvoiceId, setUserFilter, setStatusFilter]);
+
+  // Find and navigate to the specific invoice after filters are cleared
   useEffect(() => {
     if (initialInvoiceId && filteredInvoices.length > 0) {
       const index = filteredInvoices.findIndex(inv => inv.id === initialInvoiceId);
       if (index !== -1) {
         setCurrentFilteredIndex(index);
         setPdfCurrentPage(1);
+      } else {
+        // If invoice not found, show a toast notification
+        toast({
+          variant: "destructive",
+          title: "Invoice Not Found",
+          description: `Invoice ID ${initialInvoiceId} could not be found in the current view.`,
+        });
       }
     }
-  }, [initialInvoiceId, filteredInvoices]);
+  }, [initialInvoiceId, filteredInvoices, toast]);
   
   const {
     handleApprove,
