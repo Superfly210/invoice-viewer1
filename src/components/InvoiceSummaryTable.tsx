@@ -23,6 +23,14 @@ import {
 import { ExternalLink, Pencil, X, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { logInvoiceChange } from "@/utils/auditLogger";
+import { InvoiceIssuesCell } from "./InvoiceIssuesCell";
+
+type InvoiceIssue = {
+  type: string;
+  message: string;
+  severity: "warning" | "error" | "info";
+  duplicate_ids?: number[];
+};
 
 type AttachmentInfo = {
   id: number;
@@ -35,6 +43,7 @@ type AttachmentInfo = {
   GST_Total: number | null;
   Total: number | null;
   created_at: string;
+  issues?: InvoiceIssue[];
 };
 
 type UserProfile = {
@@ -100,7 +109,21 @@ export const InvoiceSummaryTable = React.memo(({
       const { data, error } = await query.order('created_at', { ascending: false });
       
       if (error) throw error;
-      return data as AttachmentInfo[];
+
+      // Fetch issues for each invoice
+      const invoicesWithIssues = await Promise.all(
+        (data || []).map(async (invoice) => {
+          const { data: issuesData, error: issuesError } = await supabase
+            .rpc('get_invoice_issues', { invoice_id_param: invoice.id });
+          
+          return {
+            ...invoice,
+            issues: issuesError ? [] : (issuesData || [])
+          };
+        })
+      );
+
+      return invoicesWithIssues as AttachmentInfo[];
     },
   });
 
@@ -375,6 +398,14 @@ export const InvoiceSummaryTable = React.memo(({
                   )}
                 </TableCell>
                 
+                {/* Issues column */}
+                <TableCell>
+                  <InvoiceIssuesCell 
+                    issues={invoice.issues || []} 
+                    onNavigateToInvoice={onNavigateToReviewer}
+                  />
+                </TableCell>
+                
                 <TableCell className="text-right">
                   {invoice.Sub_Total ? formatCurrency(invoice.Sub_Total) : 'N/A'}
                 </TableCell>
@@ -389,7 +420,7 @@ export const InvoiceSummaryTable = React.memo(({
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={10} className="text-center text-gray-500">
+              <TableCell colSpan={11} className="text-center text-gray-500">
                 No invoice data found
               </TableCell>
             </TableRow>

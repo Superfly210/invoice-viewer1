@@ -97,6 +97,7 @@ export const InvoiceSummaryTableHeader = React.memo(
           </TableHead>
           <TableHead>Responsible User</TableHead>
           <TableHead>Status</TableHead>
+          <TableHead>Issues</TableHead>
           <TableHead className="text-right">Subtotal</TableHead>
           <TableHead className="text-right">GST Total</TableHead>
           <TableHead className="text-right">Total</TableHead>
