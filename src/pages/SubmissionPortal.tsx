@@ -31,6 +31,7 @@ interface CodingRow {
 
 interface Submission {
   id: string;
+  invoice_number: string | null;
   invoicing_company: string;
   invoice_date: string;
   sub_total: number;
@@ -76,6 +77,7 @@ export default function SubmissionPortal() {
   
   // Form fields
   const [invoicingCompany, setInvoicingCompany] = useState("");
+  const [invoiceNumber, setInvoiceNumber] = useState("");
   const [invoiceDate, setInvoiceDate] = useState<Date>();
   const [subTotal, setSubTotal] = useState("");
   const [gstTotal, setGstTotal] = useState("");
@@ -142,7 +144,7 @@ export default function SubmissionPortal() {
 
   const filteredSubmissions = submissions
     .filter(sub => {
-      if (searchTerm && !sub.invoicing_company.toLowerCase().includes(searchTerm.toLowerCase())) {
+      if (searchTerm && !sub.invoice_number?.toLowerCase().includes(searchTerm.toLowerCase())) {
         return false;
       }
       if (statusFilter !== "all" && sub.status !== statusFilter) {
@@ -180,6 +182,7 @@ export default function SubmissionPortal() {
   const openEditSheet = (submission: Submission) => {
     setEditingSubmission(submission);
     setInvoicingCompany(submission.invoicing_company);
+    setInvoiceNumber(submission.invoice_number || "");
     setInvoiceDate(new Date(submission.invoice_date));
     setSubTotal(formatCurrency(submission.sub_total));
     setGstTotal(formatCurrency(submission.gst_total));
@@ -199,6 +202,7 @@ export default function SubmissionPortal() {
     setInvoiceFile(null);
     setSupportingDocs([]);
     setInvoicingCompany("");
+    setInvoiceNumber("");
     setInvoiceDate(undefined);
     setSubTotal("");
     setGstTotal("");
@@ -383,6 +387,7 @@ export default function SubmissionPortal() {
 
       const submissionData = {
         invoicing_company: invoicingCompany,
+        invoice_number: invoiceNumber.trim() || null,
         invoice_date: invoiceDate!.toISOString().split('T')[0],
         sub_total: parseCurrencyValue(subTotal),
         gst_total: parseCurrencyValue(gstTotal),
@@ -458,7 +463,7 @@ export default function SubmissionPortal() {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
               <Input
-                placeholder="Search by company name..."
+                placeholder="Search by invoice number..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -507,11 +512,8 @@ export default function SubmissionPortal() {
                     >
                       Invoice Date {sortBy === "date" && (sortOrder === "asc" ? "↑" : "↓")}
                     </TableHead>
-                    <TableHead 
-                      className="cursor-pointer hover:bg-muted/50"
-                      onClick={() => handleSort("company")}
-                    >
-                      Company {sortBy === "company" && (sortOrder === "asc" ? "↑" : "↓")}
+                    <TableHead>
+                      Invoice Number
                     </TableHead>
                     <TableHead 
                       className="cursor-pointer hover:bg-muted/50"
@@ -528,7 +530,7 @@ export default function SubmissionPortal() {
                   {filteredSubmissions.map((submission) => (
                     <TableRow key={submission.id} className="cursor-pointer hover:bg-muted/50" onClick={() => openViewDetails(submission)}>
                       <TableCell>{format(new Date(submission.invoice_date), "MMM d, yyyy")}</TableCell>
-                      <TableCell className="font-medium">{submission.invoicing_company}</TableCell>
+                      <TableCell className="font-medium">{submission.invoice_number || "—"}</TableCell>
                       <TableCell>{formatCurrency(submission.invoice_total)}</TableCell>
                       <TableCell>{getStatusBadge(submission.status)}</TableCell>
                       <TableCell className="text-muted-foreground">
@@ -603,6 +605,10 @@ export default function SubmissionPortal() {
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Company</label>
                   <p className="text-base">{viewingSubmission.invoicing_company}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Invoice Number</label>
+                  <p className="text-base">{viewingSubmission.invoice_number || "—"}</p>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Invoice Date</label>
@@ -801,6 +807,15 @@ export default function SubmissionPortal() {
                     value={invoicingCompany}
                     onChange={(e) => setInvoicingCompany(e.target.value)}
                     placeholder="Enter company name"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium mb-2">Invoice Number</label>
+                  <Input
+                    value={invoiceNumber}
+                    onChange={(e) => setInvoiceNumber(e.target.value)}
+                    placeholder="Enter invoice number (optional)"
                   />
                 </div>
                 
