@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft } from "lucide-react";
+import { rateLimiter, RateLimitPresets, formatResetTime } from "@/utils/rateLimiter";
 
 export default function Auth() {
   const [email, setEmail] = useState("");
@@ -17,6 +18,20 @@ export default function Auth() {
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // SECURITY: Rate limiting to prevent brute-force attacks
+    const rateLimitKey = `login:${email}`;
+    const rateLimit = rateLimiter.check(rateLimitKey, RateLimitPresets.LOGIN);
+    
+    if (!rateLimit.allowed) {
+      toast({
+        variant: "destructive",
+        title: "Too Many Attempts",
+        description: `Please wait ${formatResetTime(rateLimit.resetIn || 0)} before trying again.`,
+      });
+      return;
+    }
+    
     setLoading(true);
     try {
       const { error } = await supabase.auth.signInWithPassword({
@@ -24,13 +39,25 @@ export default function Auth() {
         password,
       });
       if (error) throw error;
+      
+      // Success - reset rate limit
+      rateLimiter.reset(rateLimitKey);
       navigate("/viewer");
     } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error.message,
-      });
+      // Show remaining attempts if getting close to limit
+      if (rateLimit.remaining <= 2) {
+        toast({
+          variant: "destructive",
+          title: "Login Failed",
+          description: `${error.message}. ${rateLimit.remaining} attempt${rateLimit.remaining === 1 ? '' : 's'} remaining.`,
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: error.message,
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -43,6 +70,19 @@ export default function Auth() {
         variant: "destructive",
         title: "Error",
         description: "Please enter your email address.",
+      });
+      return;
+    }
+
+    // SECURITY: Rate limiting for password reset to prevent abuse
+    const rateLimitKey = `password-reset:${email}`;
+    const rateLimit = rateLimiter.check(rateLimitKey, RateLimitPresets.PASSWORD_RESET);
+    
+    if (!rateLimit.allowed) {
+      toast({
+        variant: "destructive",
+        title: "Too Many Requests",
+        description: `Please wait ${formatResetTime(rateLimit.resetIn || 0)} before requesting another password reset.`,
       });
       return;
     }

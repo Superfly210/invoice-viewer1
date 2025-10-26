@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft } from "lucide-react";
 import { passwordSchema, passwordRequirements } from "@/lib/passwordValidation";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { rateLimiter, RateLimitPresets, formatResetTime } from "@/utils/rateLimiter";
 
 export default function SubmissionAuth() {
   const [email, setEmail] = useState("");
@@ -37,6 +38,21 @@ export default function SubmissionAuth() {
       }
     }
     
+    // SECURITY: Rate limiting for login (not sign-up)
+    if (!isSignUp) {
+      const rateLimitKey = `submission-login:${email}`;
+      const rateLimit = rateLimiter.check(rateLimitKey, RateLimitPresets.LOGIN);
+      
+      if (!rateLimit.allowed) {
+        toast({
+          variant: "destructive",
+          title: "Too Many Attempts",
+          description: `Please wait ${formatResetTime(rateLimit.resetIn || 0)} before trying again.`,
+        });
+        return;
+      }
+    }
+    
     setLoading(true);
     try {
       if (isSignUp) {
@@ -59,6 +75,9 @@ export default function SubmissionAuth() {
           password,
         });
         if (error) throw error;
+        
+        // Success - reset rate limit
+        rateLimiter.reset(`submission-login:${email}`);
         navigate("/submission-portal");
       }
     } catch (error: any) {
@@ -79,6 +98,19 @@ export default function SubmissionAuth() {
         variant: "destructive",
         title: "Error",
         description: "Please enter your email address.",
+      });
+      return;
+    }
+
+    // SECURITY: Rate limiting for password reset
+    const rateLimitKey = `submission-password-reset:${email}`;
+    const rateLimit = rateLimiter.check(rateLimitKey, RateLimitPresets.PASSWORD_RESET);
+    
+    if (!rateLimit.allowed) {
+      toast({
+        variant: "destructive",
+        title: "Too Many Requests",
+        description: `Please wait ${formatResetTime(rateLimit.resetIn || 0)} before requesting another password reset.`,
       });
       return;
     }
