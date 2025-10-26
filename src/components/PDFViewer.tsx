@@ -39,16 +39,23 @@ const getProxiedPdfUrl = async (url: string): Promise<string> => {
     }
     
     console.log('🌐 Cache miss - fetching from server...');
+    console.log('📄 PDF URL:', cleanUrl);
 
     // Get the session token for authentication
     const { data: { session } } = await supabase.auth.getSession();
+    console.log('🔐 Session:', session ? 'Valid' : 'None');
 
-    // Get Supabase URL and API key from environment variables
+    // SECURITY: Using environment variables for Edge Function endpoint
+    // VITE_SUPABASE_PUBLISHABLE_KEY is the "anon" key - safe for client-side use
+    // This key is protected by Row Level Security (RLS) policies
     const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
     const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
     if (!supabaseUrl || !supabaseKey) {
-      throw new Error('Missing required Supabase environment variables');
+      throw new Error(
+        'Missing required Supabase environment variables. ' +
+        'Please check your .env file matches .env.example'
+      );
     }
 
     // Make a direct fetch call to get binary response
@@ -66,11 +73,21 @@ const getProxiedPdfUrl = async (url: string): Promise<string> => {
     );
 
     if (!response.ok) {
-      throw new Error(`Failed to proxy PDF: ${response.status} ${response.statusText}`);
+      // Try to get error details from response
+      const errorText = await response.text();
+      console.error('PDF Proxy Error Response:', errorText);
+      throw new Error(`Failed to proxy PDF: ${response.status} ${response.statusText} - ${errorText}`);
     }
 
     // Get the response as a blob
     const blob = await response.blob();
+    
+    // Validate the blob
+    if (blob.size === 0) {
+      throw new Error('Received empty PDF blob from proxy');
+    }
+    
+    console.log('✅ PDF fetched successfully, size:', blob.size, 'bytes');
 
     // Cache for next time
     await pdfCache.set(cleanUrl, blob);

@@ -5,6 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Invoice Viewer</title>
     <meta name="description" content="Invoice Viewer Application" />
+    
+    <!-- SECURITY: Content Security Policy -->
+    <meta http-equiv="Content-Security-Policy" content="
+      default-src 'self';
+      script-src 'self' 'unsafe-inline' https://cdn.gpteng.co https://unpkg.com blob:;
+      style-src 'self' 'unsafe-inline';
+      img-src 'self' data: https: blob:;
+      font-src 'self' data:;
+      connect-src 'self' https://*.supabase.co https://drive.google.com https://drive.usercontent.google.com blob:;
+      worker-src 'self' blob:;
+      base-uri 'self';
+      form-action 'self';
+    ">
+    
+    <!-- SECURITY: Additional security headers -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     <link rel="icon" href="/favicon.ico" type="image/x-icon">
   </head>
@@ -13,7 +32,10 @@
     <!-- This script points to your actual source code, not the compiled output -->
     <script type="module" src="/src/main.tsx"></script>
     
-    <!-- IMPORTANT: You can keep this if you still need it for development -->
-    <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
+    <!-- SECURITY WARNING: Third-party script from cdn.gpteng.co
+         This script should be removed in production or protected with SRI.
+         For development only - remove before deploying to production.
+         TODO: Remove this script or add integrity attribute with proper hash -->
+    <!-- <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script> -->
   </body>
 </html>

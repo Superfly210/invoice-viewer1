@@ -32,7 +32,13 @@ cd <YOUR_PROJECT_NAME>
 # Step 3: Install the necessary dependencies.
 npm i
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Step 4: Set up environment variables (REQUIRED)
+# Copy the example file and fill in your Supabase credentials
+cp .env.example .env
+# Edit .env with your actual Supabase URL, Project ID, and Publishable Key
+# See SECURITY.md for detailed setup instructions and security best practices
+
+# Step 5: Start the development server with auto-reloading and an instant preview.
 npm run dev
 ```
 
@@ -59,6 +65,24 @@ This project is built with:
 - React
 - shadcn-ui
 - Tailwind CSS
+- Supabase (Backend & Authentication)
+
+## Security
+
+This project uses environment variables for Supabase configuration. All environment variables are client-side (prefixed with `VITE_`) and embedded in the browser bundle.
+
+**Important:** See [SECURITY.md](./SECURITY.md) for:
+- Understanding client-side environment variables
+- Why `VITE_SUPABASE_PUBLISHABLE_KEY` is safe to expose
+- Row Level Security (RLS) best practices
+- Environment setup instructions
+- Security checklist
+
+Quick setup:
+```bash
+cp .env.example .env
+# Edit .env with your Supabase credentials
+```
 
 ## How can I deploy this project?
 
@@ -71,3 +95,35 @@ Yes it is!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+
+## Security & Deployment Documentation
+
+This project includes comprehensive security and deployment documentation:
+
+- **[SECURITY.md](./SECURITY.md)** - Detailed security guide covering:
+  - Environment variables and why they're safe to expose
+  - Row Level Security (RLS) best practices
+  - Setup instructions and security checklist
+  
+- **[SECURITY_CHECKLIST.md](./SECURITY_CHECKLIST.md)** - Quick reference checklist for:
+  - Pre-deployment security verification
+  - Regular maintenance tasks
+  - Incident response procedures
+  
+- **[DEPLOYMENT.md](./DEPLOYMENT.md)** - Platform-specific deployment guides for:
+  - Vercel, Netlify, Docker
+  - Manual VPS/Server deployment
+  - Environment variable configuration
+  - Troubleshooting common issues
+
+**Quick Start:**
+```bash
+# 1. Copy environment template
+cp .env.example .env
+
+# 2. Edit .env with your Supabase credentials
+# (Get them from https://app.supabase.com > Settings > API)
+
+# 3. Start development
+npm run dev
+```
