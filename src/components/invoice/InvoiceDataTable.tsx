@@ -1,8 +1,10 @@
 
+import { useState } from "react";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { CompanyDetails } from "./CompanyDetails";
 import { EditableTableCell } from "./EditableTableCell";
 import { InvoiceCodingTable } from "./InvoiceCodingTable";
+import { VendorCombobox } from "./VendorCombobox";
 import { AttachmentInfo } from "@/hooks/useInvoiceDataFetching";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -19,16 +21,41 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface InvoiceDataTableProps {
   currentInvoice: AttachmentInfo;
 }
 
+type VendorInfo = {
+  id: number;
+  invoicing_company_name: string | null;
+  invoicing_company_street: string | null;
+  invoicing_company_city: string | null;
+  invoicing_company_province_state: string | null;
+  invoicing_company_post_zip_code: string | null;
+  gst_number: string | null;
+  wcb_number: string | null;
+  Prompt_Line_Items: string | null;
+  match_criteria_1: string | null;
+  match_criteria_2: string | null;
+};
+
 export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const [pendingVendor, setPendingVendor] = useState<VendorInfo | null>(null);
+  const [showVendorConfirmDialog, setShowVendorConfirmDialog] = useState(false);
 
   // Fetch coding total and line items total for comparison
   const { data: codingTotal = 0 } = useQuery({
@@ -172,40 +199,44 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
     }
   };
 
-  const handleAddToVendorTable = async () => {
+  const handleVendorSelect = (vendor: VendorInfo) => {
+    setPendingVendor(vendor);
+    setShowVendorConfirmDialog(true);
+  };
+
+  const handleConfirmVendorSelection = async () => {
+    if (!pendingVendor) return;
+
     try {
       const { error } = await supabase
-        .from('vendor_info')
-        .insert({
-          invoicing_company_name: currentInvoice.Invoicing_Comp_Name,
-          invoicing_company_street: currentInvoice.Invoicing_Comp_Street,
-          invoicing_company_city: currentInvoice.Invoicing_Comp_City,
-          invoicing_company_province_state: currentInvoice.Invoicing_Comp_State_Prov,
-          invoicing_company_post_zip_code: currentInvoice.Invoicing_Comp_Postal_Code,
-          gst_number: currentInvoice.GST_Number,
-          wcb_number: currentInvoice.WCB_Number,
-        });
+        .from('Attachment_Info')
+        .update({
+          Invoicing_Comp_Name: pendingVendor.invoicing_company_name,
+          Invoicing_Comp_Street: pendingVendor.invoicing_company_street,
+          Invoicing_Comp_City: pendingVendor.invoicing_company_city,
+          Invoicing_Comp_State_Prov: pendingVendor.invoicing_company_province_state,
+          Invoicing_Comp_Postal_Code: pendingVendor.invoicing_company_post_zip_code,
+          GST_Number: pendingVendor.gst_number,
+          WCB_Number: pendingVendor.wcb_number,
+          Company_Routed: true,
+        })
+        .eq('id', currentInvoice.id);
 
       if (error) throw error;
 
-      const { error: updateError } = await supabase
-        .from('Attachment_Info')
-        .update({ Company_Routed: true })
-        .eq('id', currentInvoice.id);
-
-      if (updateError) throw updateError;
-
       toast({
         title: "Success",
-        description: "Vendor information added to vendor table successfully",
+        description: "Vendor information applied successfully",
       });
 
       queryClient.invalidateQueries({ queryKey: ['attachment-info'] });
+      setShowVendorConfirmDialog(false);
+      setPendingVendor(null);
     } catch (error) {
-      console.error('Error adding vendor info:', error);
+      console.error('Error applying vendor info:', error);
       toast({
         title: "Error",
-        description: "Failed to add vendor information",
+        description: "Failed to apply vendor information",
         variant: "destructive",
       });
     }
@@ -257,38 +288,38 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
     <div className="overflow-x-auto">
       <Table>
         <TableBody>
-          <TableRow className="h-16">
-            <TableCell className="font-medium w-48 text-left py-3">Invoice ID</TableCell>
-            <TableCell className="text-left py-3">{currentInvoice.id}</TableCell>
+          <TableRow className="h-12">
+            <TableCell className="font-medium w-40 text-left py-2">Invoice ID</TableCell>
+            <TableCell className="text-left py-2">{currentInvoice.id}</TableCell>
           </TableRow>
-          <TableRow className="h-16">
-            <TableCell className="font-medium w-48 text-left py-3">Responsible User</TableCell>
-            <TableCell className="text-left py-3">
+          <TableRow className="h-12">
+            <TableCell className="font-medium w-40 text-left py-2">Responsible User</TableCell>
+            <TableCell className="text-left py-2">
               <span className={`px-2 py-1 rounded ${getResponsibleUserHighlighting(currentInvoice["Responsible User"])}`}>
                 {currentInvoice["Responsible User"] || 'N/A'}
               </span>
             </TableCell>
           </TableRow>
-          <TableRow className="h-16">
-            <TableCell className="font-medium w-48 text-left py-3">Status</TableCell>
-            <TableCell className="text-left py-3">
+          <TableRow className="h-12">
+            <TableCell className="font-medium w-40 text-left py-2">Status</TableCell>
+            <TableCell className="text-left py-2">
               <span className={`px-2 py-1 rounded ${getStatusHighlighting(currentInvoice.Status)}`}>
                 {currentInvoice.Status || 'N/A'}
               </span>
             </TableCell>
           </TableRow>
-          <TableRow className="h-16">
-            <TableCell className="font-medium w-48 text-left py-3">Invoice Number</TableCell>
-            <TableCell className="text-left py-3">
+          <TableRow className="h-12">
+            <TableCell className="font-medium w-40 text-left py-2">Invoice Number</TableCell>
+            <TableCell className="text-left py-2">
               <EditableTableCell
                 value={currentInvoice.Invoice_Number}
                 onSave={(newValue) => handleFieldUpdate('Invoice_Number', newValue)}
               />
             </TableCell>
           </TableRow>
-          <TableRow className="h-16">
-            <TableCell className="font-medium w-48 text-left py-3">Invoice Date</TableCell>
-            <TableCell className="text-left py-3">
+          <TableRow className="h-12">
+            <TableCell className="font-medium w-40 text-left py-2">Invoice Date</TableCell>
+            <TableCell className="text-left py-2">
               <EditableTableCell
                 value={currentInvoice.Invoice_Date}
                 onSave={(newValue) => handleFieldUpdate('Invoice_Date', newValue)}
@@ -298,16 +329,20 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
           </TableRow>
           
           <TableRow>
-            <TableCell className="font-medium w-48 text-left align-middle">Company Name</TableCell>
-            <TableCell className="text-left py-3 flex items-center">
+            <TableCell className="font-medium w-40 text-left align-middle">Company Name</TableCell>
+            <TableCell className="text-left py-2">
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <div className="flex-grow">
+                    <div className="flex items-center group w-full gap-1">
                       <EditableTableCell
                         value={currentInvoice.Invoicing_Comp_Name}
                         onSave={(newValue) => handleFieldUpdate('Invoicing_Comp_Name', newValue)}
-                        className={`px-2 py-1 rounded ${getCompanyNameHighlighting()}`}
+                        highlightClass={getCompanyNameHighlighting()}
+                      />
+                      <VendorCombobox
+                        value={currentInvoice.Invoicing_Comp_Name}
+                        onVendorSelect={handleVendorSelect}
                       />
                     </div>
                   </TooltipTrigger>
@@ -316,24 +351,37 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-              {!currentInvoice.Company_Routed && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={handleAddToVendorTable}
-                  className="ml-2 bg-orange-100 text-orange-800 border-orange-300 hover:bg-orange-200 rounded-full text-xs px-3 py-1"
-                >
-                  Add Vendor
-                </Button>
-              )}
             </TableCell>
           </TableRow>
           
+          <AlertDialog open={showVendorConfirmDialog} onOpenChange={setShowVendorConfirmDialog}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Confirm Vendor Selection</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will overwrite the current company information with:
+                  <br /><br />
+                  <strong>Company:</strong> {pendingVendor?.invoicing_company_name}<br />
+                  <strong>Street:</strong> {pendingVendor?.invoicing_company_street}<br />
+                  <strong>City:</strong> {pendingVendor?.invoicing_company_city}<br />
+                  <strong>Province:</strong> {pendingVendor?.invoicing_company_province_state}<br />
+                  <strong>Postal:</strong> {pendingVendor?.invoicing_company_post_zip_code}<br />
+                  <strong>GST:</strong> {pendingVendor?.gst_number}<br />
+                  <strong>WCB:</strong> {pendingVendor?.wcb_number}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel onClick={() => setPendingVendor(null)}>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleConfirmVendorSelection}>Confirm</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+          
           <CompanyDetails currentInvoice={currentInvoice} />
           
-          <TableRow className="h-16">
-            <TableCell className="font-medium w-48 text-left py-3">Subtotal</TableCell>
-            <TableCell className="text-left py-3">
+          <TableRow className="h-12">
+            <TableCell className="font-medium w-40 text-left py-2">Subtotal</TableCell>
+            <TableCell className="text-left py-2">
                 <EditableTableCell
                   value={currentInvoice.Sub_Total !== null && currentInvoice.Sub_Total !== undefined ? formatCurrency(currentInvoice.Sub_Total) : 'N/A'}
                   onSave={(newValue) => handleFieldUpdate('Sub_Total', newValue)}
@@ -342,9 +390,9 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
                 />
             </TableCell>
           </TableRow>
-          <TableRow className="h-16">
-            <TableCell className="font-medium w-48 text-left py-3">GST Total</TableCell>
-            <TableCell className="text-left py-3">
+          <TableRow className="h-12">
+            <TableCell className="font-medium w-40 text-left py-2">GST Total</TableCell>
+            <TableCell className="text-left py-2">
                 <EditableTableCell
                   value={currentInvoice.GST_Total !== null && currentInvoice.GST_Total !== undefined ? formatCurrency(currentInvoice.GST_Total) : 'N/A'}
                   onSave={(newValue) => handleFieldUpdate('GST_Total', newValue)}
@@ -353,9 +401,9 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
                 />
             </TableCell>
           </TableRow>
-          <TableRow className="h-16">
-            <TableCell className="font-medium w-48 text-left py-3">Total</TableCell>
-            <TableCell className="text-left py-3">
+          <TableRow className="h-12">
+            <TableCell className="font-medium w-40 text-left py-2">Total</TableCell>
+            <TableCell className="text-left py-2">
                 <EditableTableCell
                   value={currentInvoice.Total !== null && currentInvoice.Total !== undefined ? formatCurrency(currentInvoice.Total) : 'N/A'}
                   onSave={(newValue) => handleFieldUpdate('Total', newValue)}

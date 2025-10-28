@@ -1,5 +1,5 @@
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { ActionBarWithThemeToggle } from "@/components/ActionBarWithThemeToggle";
 import { LineItemsPanel } from "@/components/LineItemsPanel";
 import { 
@@ -7,13 +7,16 @@ import {
   ResizablePanel, 
   ResizableHandle 
 } from "@/components/ui/resizable";
-import { PanelBottomIcon } from "lucide-react";
+import { PanelBottomIcon, ChevronRight, ChevronLeft } from "lucide-react";
 import { InvoiceDataPanel } from "@/components/invoice/InvoiceDataPanel";
 import { DocumentViewer } from "@/components/document/DocumentViewer";
+import { MetadataPanel } from "@/components/MetadataPanel";
 import { useToastNotifications } from "@/hooks/useToastNotifications";
 import { useInvoiceFiltering } from "@/hooks/useInvoiceFiltering";
 import { useToast } from "@/hooks/use-toast";
 import { usePdfPreloader } from "@/hooks/usePdfPreloader";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export const InvoiceReviewer = ({ 
   initialInvoiceId 
@@ -23,6 +26,8 @@ export const InvoiceReviewer = ({
   const [currentFilteredIndex, setCurrentFilteredIndex] = useState(0);
   const [pdfCurrentPage, setPdfCurrentPage] = useState(1);
   const [pdfTotalPages, setPdfTotalPages] = useState(3);
+  const [isMetadataPanelOpen, setIsMetadataPanelOpen] = useState(true);
+  const metadataPanelRef = useRef<any>(null);
   const { toast } = useToast();
   
   const {
@@ -136,6 +141,17 @@ export const InvoiceReviewer = ({
     });
   };
 
+  const toggleMetadataPanel = () => {
+    if (metadataPanelRef.current) {
+      if (isMetadataPanelOpen) {
+        metadataPanelRef.current.collapse();
+      } else {
+        metadataPanelRef.current.expand();
+      }
+    }
+    setIsMetadataPanelOpen(prev => !prev);
+  };
+
   return (
     <>
       <ActionBarWithThemeToggle 
@@ -162,22 +178,57 @@ export const InvoiceReviewer = ({
         <ResizablePanel defaultSize={70} minSize={30}>
           <div className="flex h-full">
             <ResizablePanelGroup direction="horizontal">
-              <ResizablePanel defaultSize={50} minSize={30}>
+              <ResizablePanel defaultSize={25} minSize={20}>
                 <InvoiceDataPanel 
                   currentInvoice={currentInvoice}
                   isLoading={isLoading}
                 />
               </ResizablePanel>
               <ResizableHandle withHandle />
-              <ResizablePanel defaultSize={50} minSize={30}>
-                <div className="flex-1 overflow-hidden h-full">
-                  <DocumentViewer
-                    currentPdfUrl={currentPdfUrl}
-                    currentInvoiceId={currentInvoiceId}
-                    emailInfoId={currentEmailInfoId}
-                    onPdfPageChange={handlePdfPageChange}
-                  />
-                </div>
+              <ResizablePanel defaultSize={75} minSize={30}>
+                <ResizablePanelGroup direction="horizontal">
+                  <ResizablePanel
+                    ref={metadataPanelRef}
+                    defaultSize={33}
+                    minSize={isMetadataPanelOpen ? 20 : 0}
+                    collapsible={true}
+                    collapsedSize={0}
+                  >
+                    <div className="h-full flex flex-col">
+                      <div className="flex-1 overflow-auto">
+                        <MetadataPanel currentInvoiceId={currentInvoice?.id || null} />
+                      </div>
+                    </div>
+                  </ResizablePanel>
+                  <ResizableHandle withHandle>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={toggleMetadataPanel}
+                      className={cn(
+                        "h-8 w-8 p-0 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700",
+                        "absolute top-1/2 -translate-y-1/2 z-10",
+                        "flex items-center justify-center"
+                      )}
+                    >
+                      {isMetadataPanelOpen ? (
+                        <ChevronLeft className="h-4 w-4 text-slate-500" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4 text-slate-500" />
+                      )}
+                    </Button>
+                  </ResizableHandle>
+                  <ResizablePanel defaultSize={67} minSize={30}>
+                    <div className="flex-1 overflow-hidden h-full">
+                      <DocumentViewer
+                        currentPdfUrl={currentPdfUrl}
+                        currentInvoiceId={currentInvoiceId}
+                        emailInfoId={currentEmailInfoId}
+                        onPdfPageChange={handlePdfPageChange}
+                      />
+                    </div>
+                  </ResizablePanel>
+                </ResizablePanelGroup>
               </ResizablePanel>
             </ResizablePanelGroup>
           </div>

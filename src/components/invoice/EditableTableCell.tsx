@@ -63,13 +63,13 @@ export const EditableTableCell = ({ value, onSave, type = "text", className, hig
   }
 
   return (
-    <div className="flex items-center justify-between group w-full">
-    <span className={`text-left px-2 py-1 rounded ${highlightClass || ''} ${className || ''}`}>{displayValue}</span>
+    <div className="flex items-center gap-1 flex-1">
+      <span className={`text-left px-1 py-1 rounded ${highlightClass || ''} ${className || ''}`}>{displayValue}</span>
       <Button
         size="sm"
         variant="ghost"
         onClick={handleEdit}
-        className="opacity-0 group-hover:opacity-100 transition-opacity"
+        className="opacity-0 group-hover:opacity-100 transition-opacity ml-auto"
       >
         <Edit className="h-4 w-4" />
       </Button>
