@@ -310,7 +310,7 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
           </TableRow>
           <TableRow className="h-12">
             <TableCell className="font-medium w-40 text-left py-2">Invoice Number</TableCell>
-            <TableCell className="text-left py-2">
+            <TableCell className="text-left py-2 group">
               <EditableTableCell
                 value={currentInvoice.Invoice_Number}
                 onSave={(newValue) => handleFieldUpdate('Invoice_Number', newValue)}
@@ -319,7 +319,7 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
           </TableRow>
           <TableRow className="h-12">
             <TableCell className="font-medium w-40 text-left py-2">Invoice Date</TableCell>
-            <TableCell className="text-left py-2">
+            <TableCell className="text-left py-2 group">
               <EditableTableCell
                 value={currentInvoice.Invoice_Date}
                 onSave={(newValue) => handleFieldUpdate('Invoice_Date', newValue)}
@@ -381,7 +381,7 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
           
           <TableRow className="h-12">
             <TableCell className="font-medium w-40 text-left py-2">Subtotal</TableCell>
-            <TableCell className="text-left py-2">
+            <TableCell className="text-left py-2 group">
                 <EditableTableCell
                   value={currentInvoice.Sub_Total !== null && currentInvoice.Sub_Total !== undefined ? formatCurrency(currentInvoice.Sub_Total) : 'N/A'}
                   onSave={(newValue) => handleFieldUpdate('Sub_Total', newValue)}
@@ -392,7 +392,7 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
           </TableRow>
           <TableRow className="h-12">
             <TableCell className="font-medium w-40 text-left py-2">GST Total</TableCell>
-            <TableCell className="text-left py-2">
+            <TableCell className="text-left py-2 group">
                 <EditableTableCell
                   value={currentInvoice.GST_Total !== null && currentInvoice.GST_Total !== undefined ? formatCurrency(currentInvoice.GST_Total) : 'N/A'}
                   onSave={(newValue) => handleFieldUpdate('GST_Total', newValue)}
@@ -403,7 +403,7 @@ export const InvoiceDataTable = ({ currentInvoice }: InvoiceDataTableProps) => {
           </TableRow>
           <TableRow className="h-12">
             <TableCell className="font-medium w-40 text-left py-2">Total</TableCell>
-            <TableCell className="text-left py-2">
+            <TableCell className="text-left py-2 group">
                 <EditableTableCell
                   value={currentInvoice.Total !== null && currentInvoice.Total !== undefined ? formatCurrency(currentInvoice.Total) : 'N/A'}
                   onSave={(newValue) => handleFieldUpdate('Total', newValue)}

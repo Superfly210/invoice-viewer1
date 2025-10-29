@@ -100,7 +100,7 @@ export const CompanyDetails = ({
                 <TableBody>
                   <TableRow className="h-10">
                     <TableCell className="font-medium w-40 text-left py-2">Street</TableCell>
-                  <TableCell className="text-left py-2">
+                  <TableCell className="text-left py-2 group">
                     <EditableTableCell 
                       value={cleanValue(currentInvoice.Invoicing_Comp_Street)} 
                       onSave={newValue => handleFieldUpdate('Invoicing_Comp_Street', newValue)} 
@@ -109,7 +109,7 @@ export const CompanyDetails = ({
                 </TableRow>
                 <TableRow className="h-10">
                   <TableCell className="font-medium w-40 text-left py-2">City</TableCell>
-                  <TableCell className="text-left py-2">
+                  <TableCell className="text-left py-2 group">
                     <EditableTableCell 
                       value={currentInvoice.Invoicing_Comp_City} 
                       onSave={newValue => handleFieldUpdate('Invoicing_Comp_City', newValue)} 
@@ -118,7 +118,7 @@ export const CompanyDetails = ({
                 </TableRow>
                 <TableRow className="h-10">
                   <TableCell className="font-medium w-40 text-left py-2">State/Prov.</TableCell>
-                  <TableCell className="text-left py-2">
+                  <TableCell className="text-left py-2 group">
                     <EditableTableCell 
                       value={currentInvoice.Invoicing_Comp_State_Prov} 
                       onSave={newValue => handleFieldUpdate('Invoicing_Comp_State_Province', newValue)} 
@@ -127,7 +127,7 @@ export const CompanyDetails = ({
                 </TableRow>
                 <TableRow className="h-10">
                   <TableCell className="font-medium w-40 text-left py-2">Postal/ZIP</TableCell>
-                  <TableCell className="text-left py-2">
+                  <TableCell className="text-left py-2 group">
                     <EditableTableCell 
                       value={currentInvoice.Invoicing_Comp_Postal_Code} 
                       onSave={newValue => handleFieldUpdate('Invoicing_Comp_Postal_Code', newValue)} 
@@ -136,7 +136,7 @@ export const CompanyDetails = ({
                 </TableRow>
                 <TableRow className="h-10">
                   <TableCell className="font-medium w-40 text-left py-2">GST Number</TableCell>
-                  <TableCell className="text-left py-2">
+                  <TableCell className="text-left py-2 group">
                     <EditableTableCell 
                       value={cleanValue(currentInvoice.GST_Number)} 
                       onSave={newValue => handleFieldUpdate('GST_Number', newValue)} 
@@ -145,7 +145,7 @@ export const CompanyDetails = ({
                 </TableRow>
                 <TableRow className="h-10">
                   <TableCell className="font-medium w-40 text-left py-2">WCB Number</TableCell>
-                  <TableCell className="text-left py-2">
+                  <TableCell className="text-left py-2 group">
                     <EditableTableCell 
                       value={cleanValue(currentInvoice.WCB_Number)} 
                       onSave={newValue => handleFieldUpdate('WCB_Number', newValue)} 
